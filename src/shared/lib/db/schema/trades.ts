@@ -10,7 +10,7 @@ import { user } from './auth';
 import { accounts } from './profiles';
 import { strategies, symbols } from './symbols';
 import { baseColumns } from './_base';
-import { tradeResultEnum, tradeSideEnum, tradeStatusEnum } from './enums';
+import { tradeResultEnum, tradeSessionEnum, tradeSideEnum, tradeStatusEnum } from './enums';
 
 /**
  * trades N:1 user, account, symbol; optional N:1 strategy
@@ -33,6 +33,7 @@ export const trades = pgTable(
 		side: tradeSideEnum('side').notNull(),
 		status: tradeStatusEnum('status').notNull().default('planned'),
 		result: tradeResultEnum('result'),
+		session: tradeSessionEnum('session'),
 		entryPrice: numeric('entry_price', { precision: 18, scale: 8 }),
 		exitPrice: numeric('exit_price', { precision: 18, scale: 8 }),
 		stopLoss: numeric('stop_loss', { precision: 18, scale: 8 }),

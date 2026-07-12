@@ -8,7 +8,7 @@ import {
 	TrendingUp,
 } from 'lucide-react';
 import { cn } from '@shared/utils/cn';
-import type { NavItem } from '../types/dashboard.types';
+import type { NavItem } from '@shared/types';
 
 const ICONS: Record<NavItem['icon'], typeof LayoutDashboard> = {
 	dashboard: LayoutDashboard,

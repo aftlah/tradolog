@@ -1,24 +1,24 @@
 import { Check, ChevronsUpDown, Wallet } from 'lucide-react';
+import { Badge } from '../ui/badge';
 import {
-	Badge,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '@shared/components';
+} from '../ui/dropdown-menu';
 import { formatCurrency } from '@shared/utils/format';
-import type { DashboardAccountOption } from '../types/dashboard.types';
+import type { AccountOption } from '@shared/types';
 
 interface AccountSwitcherProps {
-	accounts: DashboardAccountOption[];
+	accounts: AccountOption[];
 	activeAccountId: string | null;
 	onChange: (accountId: string) => void;
 	disabled?: boolean;
 }
 
-const ACCOUNT_TYPE_LABEL: Record<DashboardAccountOption['accountType'], string> = {
+const ACCOUNT_TYPE_LABEL: Record<AccountOption['accountType'], string> = {
 	live: 'Live',
 	demo: 'Demo',
 	paper: 'Paper',

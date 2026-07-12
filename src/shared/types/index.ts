@@ -7,12 +7,16 @@ export type Timestamps = {
 	updatedAt: Date;
 };
 
+export type { NavItem } from './nav.types';
+export type { AccountOption } from './account-option.types';
+
 export type {
 	AccountType,
 	MarketType,
 	TradeSide,
 	TradeStatus,
 	TradeResult,
+	TradeSession,
 	ReviewGrade,
 	GoalStatus,
 	Profile,

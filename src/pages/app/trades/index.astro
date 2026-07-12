@@ -1,0 +1,30 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { TradeJournalShell, tradeJournalService, parseTradeListQuery } from '@features/trade';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const userId = session.user.id;
+const query = parseTradeListQuery(Astro.url.searchParams);
+const options = await tradeJournalService.getFormOptions(userId);
+
+if (!query.accountId) {
+	const defaultAccount = options.accounts.find((account) => account.isDefault) ?? options.accounts[0];
+	if (defaultAccount) {
+		query.accountId = defaultAccount.id;
+	}
+}
+
+const initialData = await tradeJournalService.listPaginated(userId, query);
+
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title="Trade Journal — Tradolog">
+	<TradeJournalShell client:load initialData={initialData} initialQuery={query} options={options} userName={userName} userEmail={userEmail} />
+</RootLayout>

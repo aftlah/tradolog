@@ -1,16 +1,5 @@
 import type { DrawdownSummary, PerformanceSummary, StreakSummary, TradeDirection } from '@shared/services';
-import type { AccountType, TradeResult, TradeStatus } from '@shared/types';
-
-export interface DashboardAccountOption {
-	id: string;
-	name: string;
-	broker: string | null;
-	accountType: AccountType;
-	currency: string;
-	isDefault: boolean;
-	startingBalance: number;
-	currentBalance: number;
-}
+import type { AccountOption, TradeResult, TradeStatus } from '@shared/types';
 
 /** JSON-serializable mirror of `EquityPoint` (dates as ISO strings, not `Date` instances). */
 export interface DashboardEquityPoint {
@@ -45,7 +34,7 @@ export interface DashboardRecentTrade {
  */
 export interface DashboardData {
 	hasAccounts: boolean;
-	accounts: DashboardAccountOption[];
+	accounts: AccountOption[];
 	activeAccountId: string | null;
 	currency: string;
 	startingBalance: number;
@@ -55,12 +44,4 @@ export interface DashboardData {
 	drawdown: DashboardDrawdownSummary;
 	equityCurve: DashboardEquityPoint[];
 	recentTrades: DashboardRecentTrade[];
-}
-
-export interface NavItem {
-	id: string;
-	label: string;
-	href: string;
-	icon: 'dashboard' | 'trades' | 'analytics' | 'calendar' | 'goals' | 'notes' | 'settings';
-	enabled: boolean;
 }

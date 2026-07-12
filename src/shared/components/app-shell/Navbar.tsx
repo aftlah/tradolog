@@ -1,28 +1,30 @@
+import type { ReactNode } from 'react';
 import { Menu } from 'lucide-react';
-import { LogoutButton } from '@features/auth';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Button } from '../ui/button';
 import {
-	Avatar,
-	AvatarFallback,
-	Button,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '@shared/components';
+} from '../ui/dropdown-menu';
+import type { AccountOption } from '@shared/types';
 import { AccountSwitcher } from './AccountSwitcher';
 import { QuickAddTradeButton } from './QuickAddTradeButton';
-import type { DashboardAccountOption } from '../types/dashboard.types';
 
 interface NavbarProps {
 	title: string;
 	userName: string;
 	userEmail: string;
-	accounts: DashboardAccountOption[];
+	accounts: AccountOption[];
 	activeAccountId: string | null;
 	onAccountChange: (accountId: string) => void;
 	onOpenMobileNav: () => void;
 	isLoadingAccount?: boolean;
+	showQuickAdd?: boolean;
+	/** Feature-owned logout control, injected by the caller so shared UI never depends on the auth feature. */
+	userMenuFooter: ReactNode;
 }
 
 function initialsFor(name: string): string {
@@ -45,6 +47,8 @@ export function Navbar({
 	onAccountChange,
 	onOpenMobileNav,
 	isLoadingAccount,
+	showQuickAdd = true,
+	userMenuFooter,
 }: NavbarProps) {
 	return (
 		<header className="glass-panel sticky top-4 z-30 flex items-center justify-between gap-3 px-4 py-3">
@@ -73,7 +77,7 @@ export function Navbar({
 						disabled={isLoadingAccount}
 					/>
 				) : null}
-				<QuickAddTradeButton />
+				{showQuickAdd ? <QuickAddTradeButton /> : null}
 
 				<DropdownMenu>
 					<DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
@@ -85,9 +89,7 @@ export function Navbar({
 						<DropdownMenuLabel className="truncate">{userName}</DropdownMenuLabel>
 						{userEmail ? <p className="truncate px-2.5 pb-2 text-xs text-muted">{userEmail}</p> : null}
 						<DropdownMenuSeparator />
-						<div className="p-1">
-							<LogoutButton className="w-full" />
-						</div>
+						<div className="p-1">{userMenuFooter}</div>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>

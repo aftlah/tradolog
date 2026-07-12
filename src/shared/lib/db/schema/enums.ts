@@ -23,6 +23,9 @@ export const tradeStatusEnum = pgEnum('trade_status', [
 
 export const tradeResultEnum = pgEnum('trade_result', ['win', 'loss', 'breakeven']);
 
+/** Trading session at time of entry — distinct from Better Auth's `session` table. */
+export const tradeSessionEnum = pgEnum('trade_session', ['asian', 'london', 'new_york', 'overlap']);
+
 export const reviewGradeEnum = pgEnum('review_grade', ['A', 'B', 'C', 'D', 'F']);
 
 export const goalStatusEnum = pgEnum('goal_status', ['active', 'completed', 'missed', 'cancelled']);
@@ -32,5 +35,6 @@ export const MARKET_TYPES = marketTypeEnum.enumValues;
 export const TRADE_SIDES = tradeSideEnum.enumValues;
 export const TRADE_STATUSES = tradeStatusEnum.enumValues;
 export const TRADE_RESULTS = tradeResultEnum.enumValues;
+export const TRADE_SESSIONS = tradeSessionEnum.enumValues;
 export const REVIEW_GRADES = reviewGradeEnum.enumValues;
 export const GOAL_STATUSES = goalStatusEnum.enumValues;

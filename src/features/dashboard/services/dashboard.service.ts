@@ -17,28 +17,15 @@ import {
 	type ClosedTradeResult,
 	type EquityPoint,
 } from '@shared/services';
-import type { Trade, TradeSymbol, TradingAccount } from '@shared/types';
+import type { Trade, TradeSymbol } from '@shared/types';
+import { toAccountOption } from '@shared/utils/account-option';
 import { EQUITY_CURVE_LOOKBACK_DAYS, RECENT_TRADES_LIMIT } from '../constants/dashboard.constants';
 import type {
-	DashboardAccountOption,
 	DashboardData,
 	DashboardDrawdownSummary,
 	DashboardEquityPoint,
 	DashboardRecentTrade,
 } from '../types/dashboard.types';
-
-function toAccountOption(account: TradingAccount): DashboardAccountOption {
-	return {
-		id: account.id,
-		name: account.name,
-		broker: account.broker,
-		accountType: account.accountType,
-		currency: account.currency,
-		isDefault: account.isDefault,
-		startingBalance: toFiniteNumber(account.startingBalance),
-		currentBalance: toFiniteNumber(account.currentBalance),
-	};
-}
 
 function toClosedTradeResult(trade: Trade): ClosedTradeResult {
 	return {

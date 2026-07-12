@@ -1,0 +1,36 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { TradeEditShell, tradeJournalService } from '@features/trade';
+import { NotFoundError } from '@shared/lib/errors';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const { id } = Astro.params;
+if (!id) {
+	return Astro.redirect('/app/trades');
+}
+
+const userId = session.user.id;
+
+let trade;
+try {
+	trade = await tradeJournalService.getDetail(id, userId);
+} catch (error) {
+	if (error instanceof NotFoundError) {
+		return Astro.redirect('/app/trades');
+	}
+	throw error;
+}
+
+const options = await tradeJournalService.getFormOptions(userId);
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title={`Edit ${trade.symbol} — Tradolog`}>
+	<TradeEditShell client:load trade={trade} options={options} userName={userName} userEmail={userEmail} />
+</RootLayout>

@@ -80,6 +80,25 @@ export function formatDate(value: string | Date, options?: Intl.DateTimeFormatOp
 	).format(date);
 }
 
+/** Formats a holding-time duration in seconds as e.g. `2d 4h`, `3h 15m`, or `42m`. `null` renders as `"—"`. */
+export function formatHoldingTime(seconds: number | null): string {
+	if (seconds === null || !Number.isFinite(seconds) || seconds < 0) {
+		return '—';
+	}
+	const totalMinutes = Math.round(seconds / 60);
+	const days = Math.floor(totalMinutes / (60 * 24));
+	const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+	const minutes = totalMinutes % 60;
+
+	if (days > 0) {
+		return `${days}d ${hours}h`;
+	}
+	if (hours > 0) {
+		return `${hours}h ${minutes}m`;
+	}
+	return `${minutes}m`;
+}
+
 export function formatDateTime(value: string | Date): string {
 	return formatDate(value, {
 		month: 'short',

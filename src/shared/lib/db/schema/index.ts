@@ -6,6 +6,7 @@ export {
 	tradeSideEnum,
 	tradeStatusEnum,
 	tradeResultEnum,
+	tradeSessionEnum,
 	reviewGradeEnum,
 	goalStatusEnum,
 	ACCOUNT_TYPES,
@@ -13,6 +14,7 @@ export {
 	TRADE_SIDES,
 	TRADE_STATUSES,
 	TRADE_RESULTS,
+	TRADE_SESSIONS,
 	REVIEW_GRADES,
 	GOAL_STATUSES,
 } from './enums';

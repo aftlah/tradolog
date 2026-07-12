@@ -4,6 +4,7 @@ export {
 	tradeSideSchema,
 	tradeStatusSchema,
 	tradeResultSchema,
+	tradeSessionSchema,
 	reviewGradeSchema,
 	goalStatusSchema,
 	profileInsertSchema,

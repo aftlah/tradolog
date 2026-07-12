@@ -1,7 +1,7 @@
-import { Dialog, DialogContent } from '@shared/components';
+import { Dialog, DialogContent } from '../ui/dialog';
+import type { NavItem } from '@shared/types';
 import { VisuallyHiddenTitle } from './VisuallyHiddenTitle';
 import { SidebarContent } from './SidebarContent';
-import type { NavItem } from '../types/dashboard.types';
 
 interface SidebarProps {
 	navItems: NavItem[];

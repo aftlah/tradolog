@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { DialogTitle } from '@shared/components';
+import { DialogTitle } from '../ui/dialog';
 
 /**
  * Radix `Dialog`/`AlertDialog` content requires a `Title` for screen-reader users. Some of our

@@ -5,6 +5,7 @@ import {
 	MARKET_TYPES,
 	REVIEW_GRADES,
 	TRADE_RESULTS,
+	TRADE_SESSIONS,
 	TRADE_SIDES,
 	TRADE_STATUSES,
 } from '@shared/lib/db/schema';
@@ -22,7 +23,9 @@ export const marketTypeSchema = z.enum(MARKET_TYPES);
 export const tradeSideSchema = z.enum(TRADE_SIDES);
 export const tradeStatusSchema = z.enum(TRADE_STATUSES);
 export const tradeResultSchema = z.enum(TRADE_RESULTS);
+export const tradeSessionSchema = z.enum(TRADE_SESSIONS);
 export const reviewGradeSchema = z.enum(REVIEW_GRADES);
+
 export const goalStatusSchema = z.enum(GOAL_STATUSES);
 
 export const profileInsertSchema = z.object({
@@ -89,6 +92,7 @@ export const tradeInsertSchema = z.object({
 	side: tradeSideSchema,
 	status: tradeStatusSchema.default('planned'),
 	result: tradeResultSchema.optional().nullable(),
+	session: tradeSessionSchema.optional().nullable(),
 	entryPrice: numericStringSchema,
 	exitPrice: numericStringSchema,
 	stopLoss: numericStringSchema,

@@ -73,6 +73,7 @@ async function ensureSymbols(userId: string) {
 		quoteAsset: 'USD',
 		pipSize: '0.0001',
 		pricePrecision: 5,
+		isActive: true,
 	});
 	await symbolService.create({
 		userId,
@@ -83,6 +84,7 @@ async function ensureSymbols(userId: string) {
 		quoteAsset: 'USD',
 		pipSize: '0.01',
 		pricePrecision: 2,
+		isActive: true,
 	});
 	return symbolService.listForUser(userId);
 }
@@ -97,12 +99,14 @@ async function ensureStrategies(userId: string) {
 		name: 'Breakout Continuity',
 		description: 'Trade session breakouts with confirmation candle.',
 		color: '#2563EB',
+		isActive: true,
 	});
 	await strategyService.create({
 		userId,
 		name: 'Mean Reversion',
 		description: 'Fade extended moves into key levels.',
 		color: '#22C55E',
+		isActive: true,
 	});
 	return strategyService.list(userId);
 }

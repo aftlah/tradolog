@@ -16,6 +16,7 @@ import type {
 	MARKET_TYPES,
 	REVIEW_GRADES,
 	TRADE_RESULTS,
+	TRADE_SESSIONS,
 	TRADE_SIDES,
 	TRADE_STATUSES,
 } from '@shared/lib/db/schema';
@@ -25,6 +26,7 @@ export type MarketType = (typeof MARKET_TYPES)[number];
 export type TradeSide = (typeof TRADE_SIDES)[number];
 export type TradeStatus = (typeof TRADE_STATUSES)[number];
 export type TradeResult = (typeof TRADE_RESULTS)[number];
+export type TradeSession = (typeof TRADE_SESSIONS)[number];
 export type ReviewGrade = (typeof REVIEW_GRADES)[number];
 export type GoalStatus = (typeof GOAL_STATUSES)[number];
 

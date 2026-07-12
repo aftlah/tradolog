@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { NotFoundError, ValidationError } from '@shared/lib/errors';
+import { NotFoundError } from '@shared/lib/errors';
+import { parseOrThrow } from '@shared/lib/validation';
 import {
 	monthlyGoalRepository,
 	profileRepository,
@@ -35,14 +35,6 @@ import {
 	type TradingAccountInsertInput,
 	type WatchlistInsertInput,
 } from '@shared/validators';
-
-function parseOrThrow<T>(schema: z.ZodType<T>, input: unknown): T {
-	const result = schema.safeParse(input);
-	if (!result.success) {
-		throw new ValidationError(result.error.issues[0]?.message ?? 'Invalid input.');
-	}
-	return result.data;
-}
 
 export class ProfileService {
 	async getByUserId(userId: string) {

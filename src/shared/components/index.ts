@@ -37,3 +37,25 @@ export {
 	DialogTitle,
 	DialogDescription,
 } from './ui/dialog';
+export { Textarea, type TextareaProps } from './ui/textarea';
+export { FormField } from './ui/form-field';
+export {
+	Select,
+	SelectGroup,
+	SelectValue,
+	SelectTrigger,
+	SelectContent,
+	SelectLabel,
+	SelectItem,
+	SelectSeparator,
+} from './ui/select';
+export { Pagination } from './ui/pagination';
+export { ConfirmDialog } from './ui/confirm-dialog';
+export { NoAccountsEmptyState } from './ui/no-accounts-empty-state';
+export { AppShell } from './app-shell/AppShell';
+export { Sidebar } from './app-shell/Sidebar';
+export { SidebarContent } from './app-shell/SidebarContent';
+export { Navbar } from './app-shell/Navbar';
+export { AccountSwitcher } from './app-shell/AccountSwitcher';
+export { QuickAddTradeButton } from './app-shell/QuickAddTradeButton';
+export { VisuallyHiddenTitle } from './app-shell/VisuallyHiddenTitle';

@@ -1,2 +1,2 @@
 /** Shared React hooks — add domain-agnostic hooks here. */
-export {};
+export { useDebouncedValue } from './useDebouncedValue';

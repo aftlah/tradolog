@@ -5,7 +5,14 @@ export {
 } from './trading-account.repository';
 export { symbolRepository, SymbolRepository } from './symbol.repository';
 export { strategyRepository, StrategyRepository } from './strategy.repository';
-export { tradeRepository, TradeRepository } from './trade.repository';
+export {
+	tradeRepository,
+	TradeRepository,
+	type TradeListQuery,
+	type TradeListFilters,
+	type TradeListRow,
+	type TradeSortColumn,
+} from './trade.repository';
 export {
 	tradeImageRepository,
 	tradeNoteRepository,

@@ -1,8 +1,12 @@
 import { motion } from 'framer-motion';
 import { Wallet } from 'lucide-react';
 
-/** Shown when the signed-in user has no trading accounts yet. */
-export function DashboardEmptyState() {
+interface NoAccountsEmptyStateProps {
+	description: string;
+}
+
+/** Shown across every feature page when the signed-in user has no trading accounts yet. */
+export function NoAccountsEmptyState({ description }: NoAccountsEmptyStateProps) {
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 12 }}
@@ -15,10 +19,7 @@ export function DashboardEmptyState() {
 			</div>
 			<div>
 				<h2 className="text-xl font-semibold tracking-tight text-foreground">No trading accounts yet</h2>
-				<p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-					Your dashboard will come alive as soon as you add a trading account and start logging trades.
-					Account and trade management ship in the next features.
-				</p>
+				<p className="mx-auto mt-2 max-w-sm text-sm text-muted">{description}</p>
 			</div>
 		</motion.div>
 	);

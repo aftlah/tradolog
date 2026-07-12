@@ -1,0 +1,32 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { TradeCreateShell, tradeJournalService } from '@features/trade';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const userId = session.user.id;
+const options = await tradeJournalService.getFormOptions(userId);
+
+const requestedAccountId = Astro.url.searchParams.get('accountId');
+const defaultAccount =
+	(requestedAccountId ? options.accounts.find((account) => account.id === requestedAccountId) : undefined) ??
+	options.accounts.find((account) => account.isDefault) ??
+	options.accounts[0];
+
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title="New Trade — Tradolog">
+	<TradeCreateShell
+		client:load
+		options={options}
+		defaultAccountId={defaultAccount?.id ?? null}
+		userName={userName}
+		userEmail={userEmail}
+	/>
+</RootLayout>
