@@ -1,8 +1,11 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { NAV_ITEMS } from '@shared/constants/nav.constants';
 import type { AccountOption } from '@shared/types';
+import { cn } from '@shared/utils/cn';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
+
+const SIDEBAR_COLLAPSED_KEY = 'tradolog.sidebar.collapsed';
 
 interface AppShellProps {
 	title: string;
@@ -14,17 +17,21 @@ interface AppShellProps {
 	onAccountChange: (accountId: string) => void;
 	isLoadingAccount?: boolean;
 	showQuickAdd?: boolean;
-	/** Feature-owned logout control (see `Navbar`); keeps this shared shell free of feature imports. */
 	userMenuFooter: ReactNode;
 	children: ReactNode;
 }
 
-/**
- * Authenticated app chrome shared by every feature page (Dashboard, Trades, and beyond):
- * floating sidebar + fixed navbar, with a content slot for feature-specific UI. Keeping this in
- * `shared` — instead of duplicated per feature — is what lets each feature page stay focused on
- * its own data instead of re-implementing navigation.
- */
+function readCollapsedPreference(): boolean {
+	if (typeof window === 'undefined') {
+		return false;
+	}
+	try {
+		return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
+	} catch {
+		return false;
+	}
+}
+
 export function AppShell({
 	title,
 	activeHref,
@@ -39,6 +46,20 @@ export function AppShell({
 	children,
 }: AppShellProps) {
 	const [mobileNavOpen, setMobileNavOpen] = useState(false);
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+	useEffect(() => {
+		setSidebarCollapsed(readCollapsedPreference());
+	}, []);
+
+	function handleCollapsedChange(collapsed: boolean) {
+		setSidebarCollapsed(collapsed);
+		try {
+			window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0');
+		} catch {
+			// Ignore storage failures (private mode, quota, etc).
+		}
+	}
 
 	return (
 		<div className="relative min-h-dvh">
@@ -50,13 +71,24 @@ export function AppShell({
 			<Sidebar
 				navItems={NAV_ITEMS}
 				activeHref={activeHref}
+				collapsed={sidebarCollapsed}
+				onCollapsedChange={handleCollapsedChange}
 				mobileOpen={mobileNavOpen}
 				onMobileOpenChange={setMobileNavOpen}
 			/>
 
-			<div className="relative z-10 lg:pl-[18rem]">
-				{/* Fixed floating top bar — stays put while page content scrolls underneath. */}
-				<div className="pointer-events-none fixed inset-x-0 top-0 z-30 px-4 pt-4 lg:left-[18rem] lg:pr-4">
+			<div
+				className={cn(
+					'relative z-10 transition-[padding] duration-300 ease-out',
+					sidebarCollapsed ? 'lg:pl-[6.5rem]' : 'lg:pl-[18rem]',
+				)}
+			>
+				<div
+					className={cn(
+						'pointer-events-none fixed inset-x-0 top-0 z-30 px-4 pt-4 transition-[left] duration-300 ease-out lg:pr-4',
+						sidebarCollapsed ? 'lg:left-[6.5rem]' : 'lg:left-[18rem]',
+					)}
+				>
 					<div className="pointer-events-auto">
 						<Navbar
 							title={title}
@@ -73,7 +105,6 @@ export function AppShell({
 					</div>
 				</div>
 
-				{/* Reserves space under the fixed navbar, plus breathing room before page content. */}
 				<div className="h-32 shrink-0 sm:h-36" aria-hidden="true" />
 
 				<main className="space-y-6 px-4 pt-2 pb-8 lg:pr-4">{children}</main>
