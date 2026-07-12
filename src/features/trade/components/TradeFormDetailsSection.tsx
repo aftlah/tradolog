@@ -4,6 +4,7 @@ import { SESSION_OPTIONS, SIDE_OPTIONS, STATUS_OPTIONS } from '../constants/trad
 import type { TradeFormOptions } from '../types/trade.types';
 import type { TradeFormInput } from '../validators/trade-schemas';
 
+/** Radix Select rejects empty-string values — use a sentinel for optional "none" choices. */
 const NONE_VALUE = '__none__';
 
 interface TradeFormDetailsSectionProps {
@@ -28,9 +29,13 @@ export function TradeFormDetailsSection({ register, control, errors, watch, opti
 						name="accountId"
 						control={control}
 						render={({ field }) => (
-							<Select value={field.value as string} onValueChange={field.onChange}>
+							<Select
+								value={field.value ? String(field.value) : undefined}
+								onValueChange={field.onChange}
+								disabled={options.accounts.length === 0}
+							>
 								<SelectTrigger id="accountId" aria-invalid={Boolean(errors.accountId)}>
-									<SelectValue placeholder="Select account" />
+									<SelectValue placeholder={options.accounts.length === 0 ? 'No accounts yet' : 'Select account'} />
 								</SelectTrigger>
 								<SelectContent>
 									{options.accounts.map((account) => (
@@ -49,9 +54,13 @@ export function TradeFormDetailsSection({ register, control, errors, watch, opti
 						name="symbolId"
 						control={control}
 						render={({ field }) => (
-							<Select value={field.value as string} onValueChange={field.onChange}>
+							<Select
+								value={field.value ? String(field.value) : undefined}
+								onValueChange={field.onChange}
+								disabled={options.symbols.length === 0}
+							>
 								<SelectTrigger id="symbolId" aria-invalid={Boolean(errors.symbolId)}>
-									<SelectValue placeholder="Select symbol" />
+									<SelectValue placeholder={options.symbols.length === 0 ? 'No symbols yet' : 'Select symbol'} />
 								</SelectTrigger>
 								<SelectContent>
 									{options.symbols.map((symbol) => (
@@ -71,7 +80,7 @@ export function TradeFormDetailsSection({ register, control, errors, watch, opti
 						control={control}
 						render={({ field }) => (
 							<Select
-								value={(field.value as string) || NONE_VALUE}
+								value={field.value ? String(field.value) : NONE_VALUE}
 								onValueChange={(value) => field.onChange(value === NONE_VALUE ? '' : value)}
 							>
 								<SelectTrigger id="strategyId">
@@ -95,9 +104,9 @@ export function TradeFormDetailsSection({ register, control, errors, watch, opti
 						name="side"
 						control={control}
 						render={({ field }) => (
-							<Select value={field.value as string} onValueChange={field.onChange}>
+							<Select value={field.value ? String(field.value) : undefined} onValueChange={field.onChange}>
 								<SelectTrigger id="side">
-									<SelectValue />
+									<SelectValue placeholder="Select side" />
 								</SelectTrigger>
 								<SelectContent>
 									{SIDE_OPTIONS.map((option) => (
@@ -116,9 +125,9 @@ export function TradeFormDetailsSection({ register, control, errors, watch, opti
 						name="status"
 						control={control}
 						render={({ field }) => (
-							<Select value={field.value as string} onValueChange={field.onChange}>
+							<Select value={field.value ? String(field.value) : undefined} onValueChange={field.onChange}>
 								<SelectTrigger id="status">
-									<SelectValue />
+									<SelectValue placeholder="Select status" />
 								</SelectTrigger>
 								<SelectContent>
 									{STATUS_OPTIONS.map((option) => (
@@ -138,7 +147,7 @@ export function TradeFormDetailsSection({ register, control, errors, watch, opti
 						control={control}
 						render={({ field }) => (
 							<Select
-								value={(field.value as string) || NONE_VALUE}
+								value={field.value ? String(field.value) : NONE_VALUE}
 								onValueChange={(value) => field.onChange(value === NONE_VALUE ? '' : value)}
 							>
 								<SelectTrigger id="session">

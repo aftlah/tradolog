@@ -19,6 +19,7 @@ const defaultAccount =
 
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
+const nowIso = new Date().toISOString();
 ---
 
 <RootLayout title="New Trade — Tradolog">
@@ -26,6 +27,7 @@ const userEmail = session.user.email ?? '';
 		client:load
 		options={options}
 		defaultAccountId={defaultAccount?.id ?? null}
+		nowIso={nowIso}
 		userName={userName}
 		userEmail={userEmail}
 	/>

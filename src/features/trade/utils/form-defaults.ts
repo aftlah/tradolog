@@ -1,7 +1,8 @@
 import type { TradeFormInput } from '../validators/trade-schemas';
 import type { TradeDetail } from '../types/trade.types';
 
-function toDatetimeLocalValue(iso: string | null): string {
+/** Converts an ISO timestamp into the `yyyy-MM-ddTHH:mm` string `<input type="datetime-local">` expects. */
+export function toDatetimeLocalValue(iso: string | null | undefined): string {
 	if (!iso) {
 		return '';
 	}
@@ -18,10 +19,17 @@ function toInputValue(value: number | null): string {
 }
 
 /**
- * Builds the initial React Hook Form state for the Trade form: blank/"now" defaults for Create,
- * or the existing trade's values (converted back to plain strings) for Edit.
+ * Builds the initial React Hook Form state for the Trade form.
+ *
+ * `nowIso` must come from the Astro page (serialized prop) — never call `new Date()` here during
+ * render. A fresh `new Date()` on the server vs. the client causes a hydration mismatch that
+ * breaks every controlled Select/input in the form.
  */
-export function getTradeFormDefaults(detail?: TradeDetail | null, defaultAccountId?: string | null): TradeFormInput {
+export function getTradeFormDefaults(
+	detail?: TradeDetail | null,
+	defaultAccountId?: string | null,
+	nowIso?: string,
+): TradeFormInput {
 	if (!detail) {
 		return {
 			accountId: defaultAccountId ?? '',
@@ -36,7 +44,7 @@ export function getTradeFormDefaults(detail?: TradeDetail | null, defaultAccount
 			takeProfit: '',
 			quantity: '',
 			fees: '',
-			openedAt: toDatetimeLocalValue(new Date().toISOString()),
+			openedAt: toDatetimeLocalValue(nowIso),
 			closedAt: '',
 			tags: '',
 			setup: '',
