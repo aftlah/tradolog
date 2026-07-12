@@ -58,8 +58,13 @@ export function Navbar({
 	const firstName = firstNameFor(userName);
 
 	return (
-		<header className="glass-panel flex items-center justify-between gap-4 px-5 py-3.5 backdrop-blur-2xl">
-			<div className="flex min-w-0 items-center gap-3">
+		<header className="glass-panel relative flex items-center justify-between gap-4 overflow-hidden px-5 py-3.5 backdrop-blur-2xl">
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgb(165_180_252_/_0.1),_transparent_55%)]"
+			/>
+
+			<div className="relative flex min-w-0 items-center gap-3">
 				<Button
 					variant="ghost"
 					size="icon"
@@ -73,21 +78,23 @@ export function Navbar({
 				<div className="flex min-w-0 items-center gap-3">
 					<span
 						aria-hidden="true"
-						className="hidden h-10 w-1 shrink-0 rounded-full bg-gradient-to-b from-primary to-primary/30 sm:block"
+						className="hidden h-10 w-1 shrink-0 rounded-full bg-gradient-to-b from-indigo-300 via-primary to-slate-500/40 shadow-[0_0_14px_rgb(129_140_248_/_0.35)] sm:block"
 					/>
 					<div className="min-w-0">
-						<p className="truncate text-[11px] font-medium tracking-[0.14em] text-muted uppercase">
+						<p className="truncate text-[11px] font-medium tracking-[0.16em] text-slate-400 uppercase">
 							Welcome back,{' '}
-							<span className="text-primary/90 normal-case tracking-normal">{firstName}</span>
+							<span className="bg-gradient-to-r from-indigo-200 to-violet-300 bg-clip-text text-transparent normal-case tracking-normal">
+								{firstName}
+							</span>
 						</p>
-						<h1 className="mt-0.5 truncate text-xl font-semibold tracking-tight text-foreground sm:text-[1.35rem]">
+						<h1 className="mt-0.5 truncate text-xl font-semibold tracking-tight text-slate-50 sm:text-[1.35rem]">
 							{title}
 						</h1>
 					</div>
 				</div>
 			</div>
 
-			<div className="flex items-center gap-2">
+			<div className="relative flex items-center gap-2">
 				{accounts.length > 0 ? (
 					<AccountSwitcher
 						accounts={accounts}

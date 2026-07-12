@@ -44,7 +44,7 @@ export function AppShell({
 		<div className="relative min-h-dvh">
 			<div
 				aria-hidden="true"
-				className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgb(37_99_235_/_0.14),_transparent_55%)]"
+				className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgb(99_102_241_/_0.12),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgb(148_163_184_/_0.05),_transparent_45%)]"
 			/>
 
 			<Sidebar

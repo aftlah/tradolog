@@ -34,10 +34,12 @@ export function SidebarContent({ navItems, activeHref, onNavigate }: SidebarCont
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center gap-2 px-2 pb-6 pt-1">
-				<div className="flex size-9 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+				<div className="flex size-9 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-300/20 to-slate-600/40 text-indigo-300 shadow-[0_0_24px_rgb(129_140_248_/_0.18)] ring-1 ring-indigo-300/25">
 					<TrendingUp className="size-5" />
 				</div>
-				<span className="text-lg font-semibold tracking-tight text-foreground">Tradolog</span>
+				<span className="bg-gradient-to-r from-slate-50 to-indigo-200/80 bg-clip-text text-lg font-semibold tracking-tight text-transparent">
+					Tradolog
+				</span>
 			</div>
 
 			<nav aria-label="Primary" className="flex-1 space-y-1">
@@ -72,7 +74,7 @@ export function SidebarContent({ navItems, activeHref, onNavigate }: SidebarCont
 							className={cn(
 								'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200',
 								isActive
-									? 'bg-primary/15 text-primary'
+									? 'bg-gradient-to-r from-primary/15 to-slate-500/10 text-indigo-200 shadow-[inset_0_0_0_1px_rgb(165_180_252_/_0.18)]'
 									: 'text-muted hover:bg-white/5 hover:text-foreground',
 							)}
 						>

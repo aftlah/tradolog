@@ -4,13 +4,14 @@
 @theme {
 	--color-background: #09090b;
 	--color-surface: #18181b;
-	--color-primary: #2563eb;
-	--color-success: #22c55e;
-	--color-danger: #ef4444;
-	--color-warning: #f59e0b;
+	--color-primary: #818cf8;
+	--color-success: #34d399;
+	--color-danger: #f87171;
+	--color-warning: #fbbf24;
 	--color-border: rgb(255 255 255 / 0.08);
-	--color-foreground: #fafafa;
-	--color-muted: #a1a1aa;
+	--color-foreground: #f8fafc;
+	--color-muted: #94a3b8;
+	--color-accent-glow: #a5b4fc;
 
 	--color-card: #18181b;
 	--color-card-foreground: #fafafa;
@@ -25,7 +26,7 @@
 	--color-destructive: #ef4444;
 	--color-destructive-foreground: #fafafa;
 	--color-input: rgb(255 255 255 / 0.1);
-	--color-ring: #2563eb;
+	--color-ring: #818cf8;
 
 	--font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
 
@@ -61,20 +62,34 @@
 }
 
 @layer utilities {
-	.glass-card {
-		background: rgb(255 255 255 / 0.05);
-		border: 1px solid rgb(255 255 255 / 0.1);
+	.glass-panel {
+		background: linear-gradient(
+			165deg,
+			rgb(30 41 59 / 0.55) 0%,
+			rgb(15 23 42 / 0.5) 50%,
+			rgb(24 24 27 / 0.48) 100%
+		);
+		border: 1px solid rgb(148 163 184 / 0.14);
 		border-radius: var(--radius-3xl);
-		box-shadow: var(--shadow-glass);
+		box-shadow:
+			var(--shadow-soft),
+			0 0 0 1px rgb(129 140 248 / 0.06),
+			inset 0 1px 0 rgb(255 255 255 / 0.05);
 		backdrop-filter: blur(var(--blur-glass));
 		-webkit-backdrop-filter: blur(var(--blur-glass));
 	}
 
-	.glass-panel {
-		background: rgb(24 24 27 / 0.55);
-		border: 1px solid rgb(255 255 255 / 0.08);
+	.glass-card {
+		background: linear-gradient(
+			160deg,
+			rgb(255 255 255 / 0.055) 0%,
+			rgb(255 255 255 / 0.03) 100%
+		);
+		border: 1px solid rgb(148 163 184 / 0.12);
 		border-radius: var(--radius-3xl);
-		box-shadow: var(--shadow-soft);
+		box-shadow:
+			var(--shadow-glass),
+			0 0 0 1px rgb(129 140 248 / 0.04);
 		backdrop-filter: blur(var(--blur-glass));
 		-webkit-backdrop-filter: blur(var(--blur-glass));
 	}
