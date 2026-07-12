@@ -110,7 +110,7 @@ export function SymbolFormDialog({ open, onOpenChange, symbol, onSaved }: Symbol
 					<DialogDescription>Custom instruments for the trades you log — only your own symbols can be edited.</DialogDescription>
 				</DialogHeader>
 
-				<form className="max-h-[70vh] space-y-4 overflow-y-auto pr-1" onSubmit={handleSubmit(onSubmit)} noValidate>
+				<form className="max-h-[70vh] space-y-4 overflow-y-auto px-0.5 py-0.5" onSubmit={handleSubmit(onSubmit)} noValidate>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<FormField id="ticker" label="Ticker" error={errors.ticker?.message}>
 							<Input id="ticker" placeholder="e.g. EURUSD" {...register('ticker')} />

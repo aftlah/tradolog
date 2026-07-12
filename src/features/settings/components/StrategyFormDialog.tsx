@@ -104,7 +104,7 @@ export function StrategyFormDialog({ open, onOpenChange, strategy, onSaved }: St
 					<DialogDescription>Playbooks you can attach to trades when logging setups.</DialogDescription>
 				</DialogHeader>
 
-				<form className="max-h-[70vh] space-y-4 overflow-y-auto pr-1" onSubmit={handleSubmit(onSubmit)} noValidate>
+				<form className="max-h-[70vh] space-y-4 overflow-y-auto px-0.5 py-0.5" onSubmit={handleSubmit(onSubmit)} noValidate>
 					<FormField id="strategyName" label="Strategy Name" error={errors.name?.message}>
 						<Input id="strategyName" placeholder="e.g. London Breakout" {...register('name')} />
 					</FormField>

@@ -113,7 +113,7 @@ export function AccountFormDialog({ open, onOpenChange, account, onSaved }: Acco
 					<DialogDescription>Accounts track balances and scope your trades independently.</DialogDescription>
 				</DialogHeader>
 
-				<form className="max-h-[70vh] space-y-4 overflow-y-auto pr-1" onSubmit={handleSubmit(onSubmit)} noValidate>
+				<form className="max-h-[70vh] space-y-4 overflow-y-auto px-0.5 py-0.5" onSubmit={handleSubmit(onSubmit)} noValidate>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<FormField id="name" label="Account Name" error={errors.name?.message}>
 							<Input id="name" placeholder="Main FTMO Account" {...register('name')} />

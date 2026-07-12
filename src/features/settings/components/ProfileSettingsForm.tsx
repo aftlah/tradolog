@@ -15,7 +15,7 @@ interface ProfileSettingsFormProps {
 
 const selectClassName = cn(
 	'flex h-11 w-full appearance-none rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 pr-10 text-sm text-foreground shadow-soft backdrop-blur-md transition-colors duration-200',
-	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+	'focus-visible:outline-none focus-visible:border-primary/45 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 );
 

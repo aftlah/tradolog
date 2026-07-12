@@ -18,7 +18,7 @@ function SelectTrigger({
 			className={cn(
 				'flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-foreground shadow-soft backdrop-blur-md transition-colors duration-200',
 				'data-[placeholder]:text-muted-foreground',
-				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+				'focus-visible:outline-none focus-visible:border-primary/45 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0',
 				'disabled:cursor-not-allowed disabled:opacity-50',
 				'[&>span]:line-clamp-1 [&>span]:text-left',
 				className,
