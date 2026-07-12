@@ -74,7 +74,7 @@ export function AppShell({
 				</div>
 
 				{/* Reserves space under the fixed navbar, plus breathing room before page content. */}
-				<div className="h-28 shrink-0 sm:h-32" aria-hidden="true" />
+				<div className="h-32 shrink-0 sm:h-36" aria-hidden="true" />
 
 				<main className="space-y-6 px-4 pt-2 pb-8 lg:pr-4">{children}</main>
 			</div>

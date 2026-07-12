@@ -58,7 +58,7 @@ export function Navbar({
 	const firstName = firstNameFor(userName);
 
 	return (
-		<header className="glass-panel relative flex items-center justify-between gap-4 overflow-hidden px-5 py-3.5 backdrop-blur-2xl">
+		<header className="glass-panel relative flex items-center justify-between gap-4 overflow-hidden px-5 py-4 backdrop-blur-2xl sm:px-6 sm:py-5">
 			<div
 				aria-hidden="true"
 				className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgb(165_180_252_/_0.1),_transparent_55%)]"
@@ -75,19 +75,19 @@ export function Navbar({
 					<Menu className="size-5" aria-hidden="true" />
 				</Button>
 
-				<div className="flex min-w-0 items-center gap-3">
+				<div className="flex min-w-0 items-center gap-3.5">
 					<span
 						aria-hidden="true"
-						className="hidden h-10 w-1 shrink-0 rounded-full bg-gradient-to-b from-indigo-300 via-primary to-slate-500/40 shadow-[0_0_14px_rgb(129_140_248_/_0.35)] sm:block"
+						className="hidden h-12 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-indigo-300 via-primary to-slate-500/40 shadow-[0_0_14px_rgb(129_140_248_/_0.35)] sm:block"
 					/>
 					<div className="min-w-0">
-						<p className="truncate text-[11px] font-medium tracking-[0.16em] text-slate-400 uppercase">
+						<p className="truncate text-xs font-medium tracking-[0.16em] text-slate-400 uppercase sm:text-[13px]">
 							Welcome back,{' '}
 							<span className="bg-gradient-to-r from-indigo-200 to-violet-300 bg-clip-text text-transparent normal-case tracking-normal">
 								{firstName}
 							</span>
 						</p>
-						<h1 className="mt-0.5 truncate text-xl font-semibold tracking-tight text-slate-50 sm:text-[1.35rem]">
+						<h1 className="mt-1 truncate text-2xl font-semibold tracking-tight text-slate-50 sm:text-[1.75rem]">
 							{title}
 						</h1>
 					</div>
