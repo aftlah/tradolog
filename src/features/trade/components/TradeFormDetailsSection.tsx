@@ -2,6 +2,7 @@ import type { FieldErrors, UseFormRegister, UseFormRegisterReturn, UseFormWatch 
 import type { ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { FormField, Input } from '@shared/components';
+import type { TradeSide } from '@shared/types';
 import { cn } from '@shared/utils/cn';
 import { SESSION_OPTIONS, SIDE_OPTIONS, STATUS_OPTIONS } from '../constants/trade.constants';
 import type { TradeFormOptions } from '../types/trade.types';
@@ -18,6 +19,7 @@ interface TradeFormDetailsSectionProps {
 	errors: FieldErrors<TradeFormInput>;
 	watch: UseFormWatch<TradeFormInput>;
 	options: TradeFormOptions;
+	inferredSide: TradeSide | null;
 }
 
 interface NativeSelectProps {
@@ -42,12 +44,17 @@ function NativeSelect({ id, invalid, disabled, children, registerProps }: Native
 	);
 }
 
-/**
- * Account / symbol / strategy / side / status / session pickers plus opened/closed timestamps.
- * Uses native `<select>` (not Radix) — Radix Select was blank/unusable in this form after hydration.
- */
-export function TradeFormDetailsSection({ register, errors, watch, options }: TradeFormDetailsSectionProps) {
+export function TradeFormDetailsSection({
+	register,
+	errors,
+	watch,
+	options,
+	inferredSide,
+}: TradeFormDetailsSectionProps) {
 	const status = watch('status');
+	const side = watch('side');
+	const sideLabel = SIDE_OPTIONS.find((option) => option.value === side)?.label ?? '—';
+	const sideLocked = inferredSide !== null;
 
 	return (
 		<div className="glass-card space-y-5 p-6">
@@ -123,14 +130,28 @@ export function TradeFormDetailsSection({ register, errors, watch, options }: Tr
 					</NativeSelect>
 				</FormField>
 
-				<FormField id="side" label="Side" error={errors.side?.message}>
-					<NativeSelect id="side" invalid={Boolean(errors.side)} registerProps={register('side')}>
-						{SIDE_OPTIONS.map((option) => (
-							<option key={option.value} value={option.value} className="bg-surface text-foreground">
-								{option.label}
-							</option>
-						))}
-					</NativeSelect>
+				<FormField
+					id="side"
+					label="Side"
+					hint={
+						sideLocked
+							? `Locked: detected as ${inferredSide === 'long' ? 'Long' : 'Short'} from Entry / SL / TP`
+							: 'Fill Entry + SL/TP — Side is set automatically and cannot be changed manually'
+					}
+					error={errors.side?.message}
+				>
+					<input type="hidden" {...register('side')} />
+					<div
+						id="side"
+						aria-readonly="true"
+						className={cn(
+							selectClassName,
+							'flex items-center text-muted',
+							sideLocked && 'border-primary/30 text-foreground',
+						)}
+					>
+						{sideLocked ? sideLabel : 'Waiting for Entry / SL / TP'}
+					</div>
 				</FormField>
 
 				<FormField id="status" label="Status" error={errors.status?.message}>
@@ -173,3 +194,4 @@ export function TradeFormDetailsSection({ register, errors, watch, options }: Tr
 		</div>
 	);
 }
+

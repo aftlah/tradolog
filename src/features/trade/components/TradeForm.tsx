@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@shared/components';
 import { TRADES_API_ROUTE } from '../constants/trade.constants';
+import { inferTradeSide } from '../utils/infer-trade-side';
 import { tradeFormSchema, type TradeFormInput, type TradeFormValues } from '../validators/trade-schemas';
 import type { TradeFormOptions } from '../types/trade.types';
 import { TradeFormDetailsSection } from './TradeFormDetailsSection';
@@ -19,16 +20,12 @@ interface TradeFormProps {
 	defaultValues: TradeFormInput;
 }
 
-/**
- * Single reusable Create/Edit Trade form. Owns validation (RHF + the shared `tradeFormSchema`)
- * and the create/update network call; every derived metric is computed server-side by
- * `TradeJournalService`, so this form only ever submits raw prices/quantities/dates.
- */
 export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormProps) {
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const {
 		register,
 		watch,
+		setValue,
 		handleSubmit,
 		formState: { errors, isSubmitting },
 	} = useForm<TradeFormInput, unknown, TradeFormValues>({
@@ -36,19 +33,40 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 		defaultValues,
 	});
 
+	const entryPrice = watch('entryPrice');
+	const stopLoss = watch('stopLoss');
+	const takeProfit = watch('takeProfit');
+	const side = watch('side');
+	const inferredSide = inferTradeSide(entryPrice, stopLoss, takeProfit);
+
+	useEffect(() => {
+		if (!inferredSide || inferredSide === side) {
+			return;
+		}
+		setValue('side', inferredSide, { shouldDirty: true, shouldValidate: true });
+	}, [inferredSide, side, setValue]);
+
 	async function onSubmit(values: TradeFormValues) {
 		setSubmitError(null);
+		const sideFromPrices = inferTradeSide(values.entryPrice, values.stopLoss, values.takeProfit);
+		if (!sideFromPrices) {
+			toast.error('Add Stop Loss or Take Profit so Side can be detected from Entry.');
+			return;
+		}
+
+		const payload = { ...values, side: sideFromPrices };
+
 		try {
 			const url = mode === 'create' ? TRADES_API_ROUTE : `${TRADES_API_ROUTE}/${tradeId}`;
 			const response = await fetch(url, {
 				method: mode === 'create' ? 'POST' : 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(values),
+				body: JSON.stringify(payload),
 			});
 
 			if (!response.ok) {
-				const payload = await response.json().catch(() => null);
-				throw new Error(payload?.error ?? 'Could not save this trade.');
+				const responsePayload = await response.json().catch(() => null);
+				throw new Error(responsePayload?.error ?? 'Could not save this trade.');
 			}
 
 			const trade = (await response.json()) as { id: string };
@@ -72,7 +90,13 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 
 	return (
 		<form className="space-y-6" onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
-			<TradeFormDetailsSection register={register} errors={errors} watch={watch} options={options} />
+			<TradeFormDetailsSection
+				register={register}
+				errors={errors}
+				watch={watch}
+				options={options}
+				inferredSide={inferredSide}
+			/>
 			<TradeFormPricingSection register={register} errors={errors} watch={watch} options={options} />
 			<TradePlanPreview watch={watch} options={options} />
 			<TradeFormJournalSection register={register} errors={errors} />
