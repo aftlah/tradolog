@@ -37,6 +37,11 @@ function initialsFor(name: string): string {
 	return `${first}${last}`.toUpperCase();
 }
 
+function firstNameFor(name: string): string {
+	const first = name.trim().split(/\s+/).filter(Boolean)[0];
+	return first || 'Trader';
+}
+
 /** Floating Navbar: fixed glass panel with the mobile nav trigger, account switcher, quick add, and user menu. */
 export function Navbar({
 	title,
@@ -50,9 +55,11 @@ export function Navbar({
 	showQuickAdd = true,
 	userMenuFooter,
 }: NavbarProps) {
+	const firstName = firstNameFor(userName);
+
 	return (
-		<header className="glass-panel flex items-center justify-between gap-3 px-4 py-3 backdrop-blur-2xl">
-			<div className="flex items-center gap-3">
+		<header className="glass-panel flex items-center justify-between gap-4 px-5 py-3.5 backdrop-blur-2xl">
+			<div className="flex min-w-0 items-center gap-3">
 				<Button
 					variant="ghost"
 					size="icon"
@@ -62,9 +69,21 @@ export function Navbar({
 				>
 					<Menu className="size-5" aria-hidden="true" />
 				</Button>
-				<div>
-					<p className="text-sm font-medium text-muted">Welcome back {userName}</p>
-					<h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
+
+				<div className="flex min-w-0 items-center gap-3">
+					<span
+						aria-hidden="true"
+						className="hidden h-10 w-1 shrink-0 rounded-full bg-gradient-to-b from-primary to-primary/30 sm:block"
+					/>
+					<div className="min-w-0">
+						<p className="truncate text-[11px] font-medium tracking-[0.14em] text-muted uppercase">
+							Welcome back,{' '}
+							<span className="text-primary/90 normal-case tracking-normal">{firstName}</span>
+						</p>
+						<h1 className="mt-0.5 truncate text-xl font-semibold tracking-tight text-foreground sm:text-[1.35rem]">
+							{title}
+						</h1>
+					</div>
 				</div>
 			</div>
 
