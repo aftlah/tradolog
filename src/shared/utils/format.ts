@@ -8,11 +8,20 @@
 
 const DEFAULT_LOCALE = 'en-US';
 
+/** Currencies that never show fractional units — ICU defaults differ between Node and browsers. */
+const ZERO_DECIMAL_CURRENCIES = new Set(['IDR', 'JPY', 'KRW', 'VND', 'CLP', 'ISK']);
+
+function currencyFractionDigits(currency: string): number {
+	return ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase()) ? 0 : 2;
+}
+
 export function formatCurrency(value: number, currency = 'USD'): string {
+	const fractionDigits = currencyFractionDigits(currency);
 	return new Intl.NumberFormat(DEFAULT_LOCALE, {
 		style: 'currency',
 		currency,
-		maximumFractionDigits: 2,
+		minimumFractionDigits: fractionDigits,
+		maximumFractionDigits: fractionDigits,
 	}).format(value);
 }
 

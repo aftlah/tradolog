@@ -4,9 +4,29 @@ import { getDb } from '@shared/lib/db';
 import * as schema from '@shared/lib/db/schema';
 import { requireEnv, getEnv } from '@shared/lib/env';
 
+function buildTrustedOrigins(baseURL: string): string[] {
+	const origins = new Set<string>([
+		baseURL.replace(/\/$/, ''),
+		'http://localhost:4321',
+		'http://127.0.0.1:4321',
+	]);
+
+	const vercelUrl = process.env.VERCEL_URL?.trim();
+	if (vercelUrl) {
+		origins.add(`https://${vercelUrl.replace(/^https?:\/\//, '')}`);
+	}
+
+	const vercelProject = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+	if (vercelProject) {
+		origins.add(`https://${vercelProject.replace(/^https?:\/\//, '')}`);
+	}
+
+	return [...origins];
+}
+
 function createAuth() {
 	const secret = requireEnv('BETTER_AUTH_SECRET');
-	const baseURL = requireEnv('BETTER_AUTH_URL');
+	const baseURL = requireEnv('BETTER_AUTH_URL').replace(/\/$/, '');
 	const env = getEnv();
 
 	const googleConfigured =
@@ -59,7 +79,7 @@ function createAuth() {
 				maxAge: 60 * 5,
 			},
 		},
-		trustedOrigins: [baseURL],
+		trustedOrigins: buildTrustedOrigins(baseURL),
 	});
 }
 

@@ -41,12 +41,20 @@ export function toUserFacingAuthMessage(error: unknown): string {
 	if (error instanceof Error && error.message.trim().length > 0) {
 		const message = error.message.toLowerCase();
 
-		if (message.includes('invalid') || message.includes('credential')) {
-			return 'Invalid email or password.';
+		if (message.includes('origin') || message.includes('csrf') || message.includes('forbidden')) {
+			return 'Auth request was blocked. Restart the dev server and confirm BETTER_AUTH_URL matches this site (e.g. http://localhost:4321).';
 		}
 
 		if (message.includes('exists') || message.includes('already')) {
-			return 'An account with this email already exists.';
+			return 'An account with this email already exists. Try signing in instead.';
+		}
+
+		if (message.includes('invalid email or password') || message.includes('invalid credentials')) {
+			return 'Invalid email or password.';
+		}
+
+		if (message.includes('credential')) {
+			return 'Invalid email or password.';
 		}
 
 		if (message.includes('password')) {
