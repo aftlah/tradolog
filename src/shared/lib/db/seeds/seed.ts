@@ -59,7 +59,30 @@ async function seed() {
 		});
 	}
 
+	/** Global catalog — locked in Settings (not editable/deletable by traders). */
 	const systemSymbols = [
+		{
+			ticker: 'XAUUSD',
+			name: 'Gold / US Dollar',
+			marketType: 'forex' as const,
+			baseAsset: 'XAU',
+			quoteAsset: 'USD',
+			pipSize: '0.01',
+			pricePrecision: 2,
+		},
+		{
+			ticker: 'BTCUSD',
+			name: 'Bitcoin / US Dollar',
+			marketType: 'crypto' as const,
+			baseAsset: 'BTC',
+			quoteAsset: 'USD',
+			pipSize: '0.01',
+			pricePrecision: 2,
+		},
+	];
+
+	/** Starter instruments owned by the seed user — editable (no System lock). */
+	const userOwnedSymbols = [
 		{
 			ticker: 'EURUSD',
 			name: 'Euro / US Dollar',
@@ -79,24 +102,6 @@ async function seed() {
 			pricePrecision: 5,
 		},
 		{
-			ticker: 'XAUUSD',
-			name: 'Gold / US Dollar',
-			marketType: 'forex' as const,
-			baseAsset: 'XAU',
-			quoteAsset: 'USD',
-			pipSize: '0.01',
-			pricePrecision: 2,
-		},
-		{
-			ticker: 'BTCUSD',
-			name: 'Bitcoin / US Dollar',
-			marketType: 'crypto' as const,
-			baseAsset: 'BTC',
-			quoteAsset: 'USD',
-			pipSize: '0.01',
-			pricePrecision: 2,
-		},
-		{
 			ticker: 'NAS100',
 			name: 'Nasdaq 100',
 			marketType: 'indices' as const,
@@ -111,12 +116,36 @@ async function seed() {
 		const found = await db
 			.select()
 			.from(symbols)
-			.where(and(isNull(symbols.userId), eq(symbols.ticker, symbol.ticker)))
+			.where(and(isNull(symbols.userId), eq(symbols.ticker, symbol.ticker), isNull(symbols.deletedAt)))
 			.limit(1);
 
 		if (!found[0]) {
 			await db.insert(symbols).values({
 				userId: null,
+				...symbol,
+				isActive: true,
+			});
+		}
+	}
+
+	// Soft-delete legacy system copies of tickers that are now user-owned only.
+	for (const symbol of userOwnedSymbols) {
+		await db
+			.update(symbols)
+			.set({ deletedAt: new Date(), updatedAt: new Date() })
+			.where(and(isNull(symbols.userId), eq(symbols.ticker, symbol.ticker), isNull(symbols.deletedAt)));
+	}
+
+	for (const symbol of userOwnedSymbols) {
+		const found = await db
+			.select()
+			.from(symbols)
+			.where(and(eq(symbols.userId, seedUser.id), eq(symbols.ticker, symbol.ticker), isNull(symbols.deletedAt)))
+			.limit(1);
+
+		if (!found[0]) {
+			await db.insert(symbols).values({
+				userId: seedUser.id,
 				...symbol,
 				isActive: true,
 			});

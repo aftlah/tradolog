@@ -61,31 +61,37 @@ async function ensureAccount(userId: string) {
 
 async function ensureSymbols(userId: string) {
 	const symbols = await symbolService.listForUser(userId);
-	if (symbols.length > 0) {
-		return symbols;
+	const tickers = new Set(symbols.map((symbol) => symbol.ticker));
+
+	if (!tickers.has('EURUSD')) {
+		await symbolService.create({
+			userId,
+			ticker: 'EURUSD',
+			name: 'Euro / US Dollar',
+			marketType: 'forex',
+			baseAsset: 'EUR',
+			quoteAsset: 'USD',
+			pipSize: '0.0001',
+			pricePrecision: 5,
+			isActive: true,
+		});
 	}
-	await symbolService.create({
-		userId,
-		ticker: 'EURUSD',
-		name: 'Euro / US Dollar',
-		marketType: 'forex',
-		baseAsset: 'EUR',
-		quoteAsset: 'USD',
-		pipSize: '0.0001',
-		pricePrecision: 5,
-		isActive: true,
-	});
-	await symbolService.create({
-		userId,
-		ticker: 'XAUUSD',
-		name: 'Gold / US Dollar',
-		marketType: 'forex',
-		baseAsset: 'XAU',
-		quoteAsset: 'USD',
-		pipSize: '0.01',
-		pricePrecision: 2,
-		isActive: true,
-	});
+
+	if (!tickers.has('XAUUSD') && !symbols.some((symbol) => symbol.ticker === 'XAUUSD')) {
+		// XAUUSD is normally a system symbol; only create a user copy if catalog is empty.
+		await symbolService.create({
+			userId,
+			ticker: 'XAUUSD',
+			name: 'Gold / US Dollar',
+			marketType: 'forex',
+			baseAsset: 'XAU',
+			quoteAsset: 'USD',
+			pipSize: '0.01',
+			pricePrecision: 2,
+			isActive: true,
+		});
+	}
+
 	return symbolService.listForUser(userId);
 }
 
