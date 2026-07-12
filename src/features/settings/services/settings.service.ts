@@ -25,7 +25,7 @@ import {
 	tradingAccountInsertSchema,
 	tradingAccountUpdateSchema,
 } from '@shared/validators';
-import { toNullableNumber } from '@shared/services';
+import { toNullableNumber, tradingAccountService } from '@shared/services';
 import { toAccountOption } from '@shared/utils/account-option';
 import type { Profile, Strategy, TradeSymbol, TradingAccount } from '@shared/types';
 import type {
@@ -105,7 +105,7 @@ export class SettingsService {
 	async getSettingsPageData(userId: string): Promise<SettingsPageData> {
 		const [profile, accounts, strategies, symbols] = await Promise.all([
 			this.getOrCreateProfile(userId),
-			tradingAccountRepository.listByUserId(userId),
+			tradingAccountService.syncAllCurrentBalances(userId),
 			strategyRepository.listByUserId(userId),
 			symbolRepository.listForUser(userId),
 		]);
@@ -141,8 +141,14 @@ export class SettingsService {
 		const data = parseOrThrow(tradingAccountInsertSchema, withUserId(input, userId));
 		const existingAccounts = await tradingAccountRepository.listByUserId(userId);
 		const shouldBeDefault = data.isDefault || existingAccounts.length === 0;
+		const startingBalance = data.startingBalance ?? '0';
 
-		const account = await tradingAccountRepository.insert({ ...data, isDefault: shouldBeDefault });
+		const account = await tradingAccountRepository.insert({
+			...data,
+			startingBalance,
+			currentBalance: startingBalance,
+			isDefault: shouldBeDefault,
+		});
 
 		if (shouldBeDefault) {
 			await clearOtherDefaultAccounts(userId, account.id);
@@ -158,7 +164,8 @@ export class SettingsService {
 		}
 
 		const data = parseOrThrow(tradingAccountUpdateSchema, input);
-		const updated = await tradingAccountRepository.updateForUser(id, userId, data);
+		const { currentBalance: _ignoredCurrentBalance, ...safeData } = data;
+		const updated = await tradingAccountRepository.updateForUser(id, userId, safeData);
 		if (!updated) {
 			throw new NotFoundError('Trading account not found.');
 		}
@@ -167,7 +174,8 @@ export class SettingsService {
 			await clearOtherDefaultAccounts(userId, id);
 		}
 
-		return toAccountDto(updated);
+		const synced = await tradingAccountService.syncCurrentBalance(userId, id);
+		return toAccountDto(synced);
 	}
 
 	async deleteAccount(id: string, userId: string): Promise<void> {

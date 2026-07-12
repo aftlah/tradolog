@@ -39,7 +39,6 @@ const EMPTY_DEFAULTS: AccountFormInput = {
 	accountType: 'demo',
 	currency: 'USD',
 	startingBalance: '0',
-	currentBalance: '0',
 	leverage: '',
 	quoteToAccountRate: '',
 	isDefault: false,
@@ -56,7 +55,6 @@ function toFormDefaults(account: AccountSettingsDto | null): AccountFormInput {
 		accountType: account.accountType,
 		currency: account.currency,
 		startingBalance: String(account.startingBalance),
-		currentBalance: String(account.currentBalance),
 		leverage: account.leverage !== null ? String(account.leverage) : '',
 		quoteToAccountRate: account.quoteToAccountRate !== null ? String(account.quoteToAccountRate) : '',
 		isDefault: account.isDefault,
@@ -150,13 +148,26 @@ export function AccountFormDialog({ open, onOpenChange, account, onSaved }: Acco
 							<Input id="currency" maxLength={3} placeholder="USD" {...register('currency')} />
 						</FormField>
 
-						<FormField id="startingBalance" label="Starting Balance" error={errors.startingBalance?.message}>
+						<FormField
+							id="startingBalance"
+							label="Starting Balance"
+							hint="Current balance updates automatically from closed trade P&L."
+							error={errors.startingBalance?.message}
+						>
 							<Input id="startingBalance" type="number" step="0.01" {...register('startingBalance')} />
 						</FormField>
 
-						<FormField id="currentBalance" label="Current Balance" error={errors.currentBalance?.message}>
-							<Input id="currentBalance" type="number" step="0.01" {...register('currentBalance')} />
-						</FormField>
+						{account ? (
+							<FormField id="currentBalance" label="Current Balance" hint="Starting + closed trades P&L (read-only)">
+								<Input
+									id="currentBalance"
+									type="text"
+									readOnly
+									disabled
+									value={String(account.currentBalance)}
+								/>
+							</FormField>
+						) : null}
 
 						<FormField id="leverage" label="Leverage" optional hint="e.g. 100 for 1:100 (margin only, not P&L)" error={errors.leverage?.message}>
 							<Input id="leverage" type="number" step="1" placeholder="100" {...register('leverage')} />

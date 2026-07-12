@@ -11,6 +11,7 @@ import {
 	tradeService,
 	tradingAccountService,
 	tradingCalculatorService,
+	computeCurrentBalance,
 	toFiniteNumber,
 	type ClosedTradeResult,
 	type DrawdownPoint,
@@ -121,6 +122,10 @@ export class AnalyticsService {
 		const closedResults = closedTrades.map(toClosedTradeResult);
 
 		const startingBalance = toFiniteNumber(activeAccount.startingBalance);
+		const currentBalance = computeCurrentBalance(
+			startingBalance,
+			closedResults.map((result) => result.profitLoss),
+		);
 
 		const performance = tradingCalculatorService.performanceSummary(closedResults);
 		const streaks = tradingCalculatorService.streaks(closedResults);
@@ -131,13 +136,28 @@ export class AnalyticsService {
 		const weeklyReturns = tradingCalculatorService.weeklyReturns(closedResults, startingBalance);
 		const monthlyReturns = tradingCalculatorService.monthlyReturns(closedResults, startingBalance);
 
+		const accountsWithLiveBalance = accounts.map((account) => {
+			const option = toAccountOption(account);
+			const accountClosed = allTrades.filter(
+				(trade) =>
+					trade.accountId === account.id && trade.status === 'closed' && trade.profitLoss !== null,
+			);
+			return {
+				...option,
+				currentBalance: computeCurrentBalance(
+					account.startingBalance,
+					accountClosed.map((trade) => trade.profitLoss),
+				),
+			};
+		});
+
 		return {
 			hasAccounts: true,
-			accounts: accounts.map(toAccountOption),
+			accounts: accountsWithLiveBalance,
 			activeAccountId: activeAccount.id,
 			currency: activeAccount.currency,
 			startingBalance,
-			currentBalance: toFiniteNumber(activeAccount.currentBalance),
+			currentBalance,
 			performance,
 			streaks,
 			drawdown: {

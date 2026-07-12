@@ -22,7 +22,7 @@ import {
 	tradingAccountRepository,
 	type TradeListQuery as RepositoryTradeListQuery,
 } from '@shared/repositories';
-import { tradeDetailsService, tradingCalculatorService } from '@shared/services';
+import { tradeDetailsService, tradingAccountService, tradingCalculatorService } from '@shared/services';
 import { toAccountOption } from '@shared/utils/account-option';
 import type {
 	Strategy,
@@ -237,7 +237,7 @@ export class TradeJournalService {
 
 	async getFormOptions(userId: string): Promise<TradeFormOptions> {
 		const [accounts, symbols, strategies] = await Promise.all([
-			tradingAccountRepository.listByUserId(userId),
+			tradingAccountService.list(userId),
 			symbolRepository.listForUser(userId),
 			strategyRepository.listByUserId(userId),
 		]);
@@ -331,6 +331,7 @@ export class TradeJournalService {
 			tags: data.tags ?? null,
 		});
 
+		await tradingAccountService.syncCurrentBalance(userId, data.accountId);
 		return this.getDetail(trade.id, userId);
 	}
 
@@ -397,14 +398,26 @@ export class TradeJournalService {
 			throw new NotFoundError('Trade not found.');
 		}
 
+		await tradingAccountService.syncCurrentBalance(userId, data.accountId);
+		if (existing.accountId !== data.accountId) {
+			await tradingAccountService.syncCurrentBalance(userId, existing.accountId);
+		}
+
 		return this.getDetail(id, userId);
 	}
 
 	async remove(id: string, userId: string): Promise<void> {
+		const existing = await tradeRepository.findByIdForUser(id, userId);
+		if (!existing) {
+			throw new NotFoundError('Trade not found.');
+		}
+
 		const deleted = await tradeRepository.softDeleteForUser(id, userId);
 		if (!deleted) {
 			throw new NotFoundError('Trade not found.');
 		}
+
+		await tradingAccountService.syncCurrentBalance(userId, existing.accountId);
 	}
 
 	async addImages(tradeId: string, userId: string, files: File[]): Promise<TradeImageDto[]> {

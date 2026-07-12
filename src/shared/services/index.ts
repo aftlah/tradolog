@@ -17,4 +17,6 @@ export {
 	watchlistService,
 } from './domain.service';
 
+export { computeCurrentBalance } from './account-balance';
+
 export * from './trading-calculator';

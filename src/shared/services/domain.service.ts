@@ -35,6 +35,7 @@ import {
 	type TradingAccountInsertInput,
 	type WatchlistInsertInput,
 } from '@shared/validators';
+import { computeCurrentBalance } from './account-balance';
 
 export class ProfileService {
 	async getByUserId(userId: string) {
@@ -66,7 +67,22 @@ export class ProfileService {
 
 export class TradingAccountService {
 	async list(userId: string) {
-		return tradingAccountRepository.listByUserId(userId);
+		const accounts = await tradingAccountRepository.listByUserId(userId);
+		const trades = await tradeRepository.listByUserId(userId);
+
+		return accounts.map((account) => {
+			const closedProfitLosses = trades
+				.filter(
+					(trade) =>
+						trade.accountId === account.id && trade.status === 'closed' && trade.profitLoss !== null,
+				)
+				.map((trade) => trade.profitLoss);
+
+			return {
+				...account,
+				currentBalance: String(computeCurrentBalance(account.startingBalance, closedProfitLosses)),
+			};
+		});
 	}
 
 	async requireForUser(id: string, userId: string) {
@@ -79,7 +95,39 @@ export class TradingAccountService {
 
 	async create(input: TradingAccountInsertInput) {
 		const data = parseOrThrow(tradingAccountInsertSchema, input);
-		return tradingAccountRepository.insert(data);
+		const startingBalance = data.startingBalance ?? '0';
+		return tradingAccountRepository.insert({
+			...data,
+			startingBalance,
+			currentBalance: startingBalance,
+		});
+	}
+
+	/**
+	 * Sets `currentBalance` = starting balance + sum of closed-trade P&L for this account.
+	 * Call after trade create/update/delete and when starting balance changes.
+	 */
+	async syncCurrentBalance(userId: string, accountId: string) {
+		const account = await this.requireForUser(accountId, userId);
+		const trades = await tradeRepository.listByUserId(userId);
+		const closedProfitLosses = trades
+			.filter(
+				(trade) =>
+					trade.accountId === accountId && trade.status === 'closed' && trade.profitLoss !== null,
+			)
+			.map((trade) => trade.profitLoss);
+
+		const currentBalance = computeCurrentBalance(account.startingBalance, closedProfitLosses);
+		const updated = await tradingAccountRepository.updateForUser(accountId, userId, {
+			currentBalance: String(currentBalance),
+		});
+		return updated ?? account;
+	}
+
+	async syncAllCurrentBalances(userId: string) {
+		const accounts = await tradingAccountRepository.listByUserId(userId);
+		await Promise.all(accounts.map((account) => this.syncCurrentBalance(userId, account.id)));
+		return tradingAccountRepository.listByUserId(userId);
 	}
 }
 
