@@ -11,23 +11,29 @@ interface CalendarSummaryStatProps {
 }
 
 const TONE_TEXT_CLASS: Record<StatTone, string> = {
-	success: 'text-success',
-	danger: 'text-danger',
+	success: 'text-emerald-300',
+	danger: 'text-rose-300',
 	primary: 'text-primary',
 	muted: 'text-foreground',
 };
 
 const TONE_ICON_WRAP_CLASS: Record<StatTone, string> = {
-	success: 'bg-success/10 text-success',
-	danger: 'bg-danger/10 text-danger',
+	success: 'border border-emerald-400/25 bg-emerald-400/12 text-emerald-300 shadow-[0_0_18px_rgb(52_211_153_/_0.12)]',
+	danger: 'border border-rose-400/25 bg-rose-400/12 text-rose-300 shadow-[0_0_18px_rgb(251_113_133_/_0.12)]',
 	primary: 'bg-primary/10 text-primary',
 	muted: 'bg-white/8 text-muted',
 };
 
-/** Single stat tile used by `CalendarHeader`'s month-summary row. Purely presentational. */
+const TONE_CARD_CLASS: Record<StatTone, string> = {
+	success: 'border-emerald-400/15 bg-emerald-400/[0.04]',
+	danger: 'border-rose-400/15 bg-rose-400/[0.04]',
+	primary: 'border-white/8 bg-white/[0.03]',
+	muted: 'border-white/8 bg-white/[0.03]',
+};
+
 export function CalendarSummaryStat({ label, value, tone, icon: Icon }: CalendarSummaryStatProps) {
 	return (
-		<div className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+		<div className={cn('flex items-center gap-3 rounded-2xl border p-4', TONE_CARD_CLASS[tone])}>
 			<div className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl', TONE_ICON_WRAP_CLASS[tone])}>
 				<Icon className="size-4.5" aria-hidden="true" />
 			</div>

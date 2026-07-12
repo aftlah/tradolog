@@ -1,23 +1,8 @@
-/**
- * CalendarService
- *
- * Composes `TradeService`/`TradingAccountService`/`SymbolService` into a ready-to-render month
- * heat-map payload. Per the project rules, the UI must never aggregate P&L itself — every
- * number in `CalendarData` is already computed here.
- *
- * Trading days are grouped by the **UTC** calendar date of each trade's `closedAt` timestamp
- * (never the viewer's local timezone), so the same account renders an identical calendar
- * regardless of where — or in what timezone — it's viewed. Only trades with `status === 'closed'`
- * contribute to the heat-map; planned/open/cancelled trades are excluded.
- *
- * UI → CalendarService → (TradingAccountService / TradeService / SymbolService) → Repository → Database
- */
 import { PRICE_DECIMALS, round, symbolService, tradeService, tradingAccountService, toFiniteNumber } from '@shared/services';
 import type { Trade, TradeSymbol } from '@shared/types';
 import { toAccountOption } from '@shared/utils/account-option';
 import type { CalendarData, CalendarDay, CalendarMonthTotals, CalendarTradeSummary } from '../types/calendar.types';
 
-/** UTC calendar-day key, e.g. `2026-07-12`, for the date a trade was `closedAt`. */
 function toUtcDateKey(date: Date): string {
 	const year = date.getUTCFullYear();
 	const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -25,12 +10,10 @@ function toUtcDateKey(date: Date): string {
 	return `${year}-${month}-${day}`;
 }
 
-/** Number of calendar days in `year`/`month` (1-12), per the UTC calendar. */
 function daysInUtcMonth(year: number, month: number): number {
 	return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-/** Every UTC day in `year`/`month`, pre-populated with zeroed stats, in chronological order. */
 function buildEmptyDays(year: number, month: number): CalendarDay[] {
 	const total = daysInUtcMonth(year, month);
 	const monthKey = String(month).padStart(2, '0');
@@ -88,10 +71,6 @@ function emptyCalendar(year: number, month: number): CalendarData {
 }
 
 export class CalendarService {
-	/**
-	 * Builds the month heat-map for `userId`/`year`/`month` (1-12), scoped to `requestedAccountId`
-	 * when provided and owned by the user, otherwise the user's default (or first) account.
-	 */
 	async getCalendarData(userId: string, year: number, month: number, requestedAccountId?: string | null): Promise<CalendarData> {
 		const accounts = await tradingAccountService.list(userId);
 

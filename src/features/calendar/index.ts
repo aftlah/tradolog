@@ -1,6 +1,3 @@
-/**
- * Calendar feature public exports.
- */
 export { CalendarShell } from './components/CalendarShell';
 export { CalendarService, calendarService } from './services/calendar.service';
 export { parseCalendarQuery, buildCalendarQueryParams, type CalendarQuery } from './utils/query';

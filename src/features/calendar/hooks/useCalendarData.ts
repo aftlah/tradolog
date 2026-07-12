@@ -13,12 +13,6 @@ interface UseCalendarDataResult {
 	switchAccount: (accountId: string) => void;
 }
 
-/**
- * Client-side state for the Calendar. Starts from the server-rendered `initialData` (so the
- * first paint needs no extra fetch) and re-fetches from the calendar API route whenever the
- * user navigates months or switches trading accounts, keeping the URL in sync so views stay
- * shareable/bookmarkable.
- */
 export function useCalendarData(initialData: CalendarData): UseCalendarDataResult {
 	const [data, setData] = useState(initialData);
 	const [isLoading, setIsLoading] = useState(false);

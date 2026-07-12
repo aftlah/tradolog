@@ -15,5 +15,4 @@ export const MONTH_LABELS = [
 	'December',
 ] as const;
 
-/** Week starts on Sunday, matching `Date#getUTCDay()` (0-6). */
 export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;

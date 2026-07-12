@@ -1,11 +1,3 @@
-/**
- * Single source of truth for turning a `URLSearchParams` into a validated `{ year, month,
- * accountId }` triple and back again. Used by the API route, the SSR Astro page, and the
- * client-side hook so the three never drift out of sync on param names or defaults.
- *
- * `month` is always 1-12 in every layer of the Calendar feature (never the 0-11 JS `Date`
- * index), and unset/invalid values default to the current UTC year/month.
- */
 export interface CalendarQuery {
 	year: number;
 	month: number;

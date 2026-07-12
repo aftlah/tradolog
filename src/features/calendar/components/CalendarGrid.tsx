@@ -16,11 +16,6 @@ function todayUtcDateKey(): string {
 	return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
 }
 
-/**
- * 7-column week grid for one month. `days` already holds every UTC day of the month with
- * pre-aggregated stats from `CalendarService`; this component only lays them out, pads the
- * leading/trailing blanks so the grid always spans full weeks, and scales heat-map intensity.
- */
 export function CalendarGrid({ year, month, days, currency, onSelectDay }: CalendarGridProps) {
 	const leadingBlanks = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
 	const trailingBlanks = (7 - ((leadingBlanks + days.length) % 7)) % 7;

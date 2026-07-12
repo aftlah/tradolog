@@ -10,11 +10,6 @@ interface CalendarDayDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-/**
- * Detail dialog shown when a day cell with trades is clicked. `trades` is already the exact
- * subset for `day` (filtered by `CalendarShell` using `day.tradeIds`) — this component only
- * renders and links back to `/app/trades/[id]`.
- */
 export function CalendarDayDialog({ day, trades, currency, onOpenChange }: CalendarDayDialogProps) {
 	return (
 		<Dialog open={day !== null} onOpenChange={onOpenChange}>
@@ -27,7 +22,7 @@ export function CalendarDayDialog({ day, trades, currency, onOpenChange }: Calen
 						{day ? (
 							<>
 								{day.tradeCount} trade{day.tradeCount === 1 ? '' : 's'} · Net{' '}
-								<span className={day.profitLoss >= 0 ? 'text-success' : 'text-danger'}>
+								<span className={day.profitLoss > 0 ? 'text-emerald-300' : day.profitLoss < 0 ? 'text-rose-300' : 'text-slate-300'}>
 									{formatSignedCurrency(day.profitLoss, currency)}
 								</span>
 							</>
@@ -53,7 +48,15 @@ export function CalendarDayDialog({ day, trades, currency, onOpenChange }: Calen
 							</span>
 
 							<span className="flex items-center gap-1.5">
-								<span className={trade.profitLoss >= 0 ? 'text-sm font-semibold text-success' : 'text-sm font-semibold text-danger'}>
+								<span
+									className={
+										trade.profitLoss > 0
+											? 'text-sm font-semibold text-emerald-300'
+											: trade.profitLoss < 0
+												? 'text-sm font-semibold text-rose-300'
+												: 'text-sm font-semibold text-slate-300'
+									}
+								>
 									{formatSignedCurrency(trade.profitLoss, currency)}
 								</span>
 								<ChevronRight className="size-4 text-muted" aria-hidden="true" />

@@ -13,11 +13,6 @@ interface CalendarShellProps {
 	userEmail: string;
 }
 
-/**
- * Top-level Calendar orchestrator. Owns month/account-switching state and the selected-day
- * dialog; every child component is purely presentational and receives already-computed data
- * from `CalendarService` as props. Navigation chrome comes from the shared `FeaturePageShell`.
- */
 export function CalendarShell({ initialData, userName, userEmail }: CalendarShellProps) {
 	const { data, isLoading, goToPrevMonth, goToNextMonth, goToToday, switchAccount } = useCalendarData(initialData);
 	const [selectedDate, setSelectedDate] = useState<string | null>(null);

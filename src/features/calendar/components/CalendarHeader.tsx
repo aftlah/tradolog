@@ -16,10 +16,6 @@ interface CalendarHeaderProps {
 	onToday: () => void;
 }
 
-/**
- * Month navigation + month-summary stats for the Calendar page. All figures come straight from
- * `CalendarData.monthTotals` (computed by `CalendarService`) — this component only formats them.
- */
 export function CalendarHeader({ year, month, monthTotals, currency, isLoading, onPrevMonth, onNextMonth, onToday }: CalendarHeaderProps) {
 	const netTone = monthTotals.profitLoss > 0 ? 'success' : monthTotals.profitLoss < 0 ? 'danger' : 'muted';
 	const monthLabel = MONTH_LABELS[month - 1] ?? '—';
