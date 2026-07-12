@@ -21,7 +21,7 @@ interface AppShellProps {
 
 /**
  * Authenticated app chrome shared by every feature page (Dashboard, Trades, and beyond):
- * floating sidebar + navbar, with a content slot for feature-specific UI. Keeping this in
+ * floating sidebar + fixed navbar, with a content slot for feature-specific UI. Keeping this in
  * `shared` — instead of duplicated per feature — is what lets each feature page stay focused on
  * its own data instead of re-implementing navigation.
  */
@@ -55,22 +55,28 @@ export function AppShell({
 			/>
 
 			<div className="relative z-10 lg:pl-[18rem]">
-				<div className="px-4 pt-4 lg:pr-4">
-					<Navbar
-						title={title}
-						userName={userName}
-						userEmail={userEmail}
-						accounts={accounts}
-						activeAccountId={activeAccountId}
-						onAccountChange={onAccountChange}
-						onOpenMobileNav={() => setMobileNavOpen(true)}
-						isLoadingAccount={isLoadingAccount}
-						showQuickAdd={showQuickAdd}
-						userMenuFooter={userMenuFooter}
-					/>
+				{/* Fixed floating top bar — stays put while page content scrolls underneath. */}
+				<div className="pointer-events-none fixed inset-x-0 top-0 z-30 px-4 pt-4 lg:left-[18rem] lg:pr-4">
+					<div className="pointer-events-auto">
+						<Navbar
+							title={title}
+							userName={userName}
+							userEmail={userEmail}
+							accounts={accounts}
+							activeAccountId={activeAccountId}
+							onAccountChange={onAccountChange}
+							onOpenMobileNav={() => setMobileNavOpen(true)}
+							isLoadingAccount={isLoadingAccount}
+							showQuickAdd={showQuickAdd}
+							userMenuFooter={userMenuFooter}
+						/>
+					</div>
 				</div>
 
-				<main className="space-y-6 px-4 py-6 lg:pr-4">{children}</main>
+				{/* Reserves space under the fixed navbar, plus breathing room before page content. */}
+				<div className="h-28 shrink-0 sm:h-32" aria-hidden="true" />
+
+				<main className="space-y-6 px-4 pt-2 pb-8 lg:pr-4">{children}</main>
 			</div>
 		</div>
 	);

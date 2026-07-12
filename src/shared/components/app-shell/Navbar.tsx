@@ -37,7 +37,7 @@ function initialsFor(name: string): string {
 	return `${first}${last}`.toUpperCase();
 }
 
-/** Floating Navbar: sticky glass panel with the mobile nav trigger, account switcher, quick add, and user menu. */
+/** Floating Navbar: fixed glass panel with the mobile nav trigger, account switcher, quick add, and user menu. */
 export function Navbar({
 	title,
 	userName,
@@ -51,7 +51,7 @@ export function Navbar({
 	userMenuFooter,
 }: NavbarProps) {
 	return (
-		<header className="glass-panel sticky top-4 z-30 flex items-center justify-between gap-3 px-4 py-3">
+		<header className="glass-panel flex items-center justify-between gap-3 px-4 py-3 backdrop-blur-2xl">
 			<div className="flex items-center gap-3">
 				<Button
 					variant="ghost"
@@ -63,7 +63,7 @@ export function Navbar({
 					<Menu className="size-5" aria-hidden="true" />
 				</Button>
 				<div>
-					<p className="text-sm font-medium text-muted">Welcome back</p>
+					<p className="text-sm font-medium text-muted">Welcome back {userName}</p>
 					<h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
 				</div>
 			</div>
