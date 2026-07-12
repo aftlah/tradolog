@@ -1,0 +1,39 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { GoalsShell, goalsService } from '@features/goals';
+import { tradingAccountService } from '@shared/services';
+import { toAccountOption } from '@shared/utils/account-option';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const userId = session.user.id;
+const rawAccounts = await tradingAccountService.list(userId);
+const accounts = rawAccounts.map(toAccountOption);
+
+const requestedAccountId = Astro.url.searchParams.get('accountId');
+const activeAccountId =
+	(requestedAccountId && accounts.some((account) => account.id === requestedAccountId) ? requestedAccountId : null) ??
+	accounts.find((account) => account.isDefault)?.id ??
+	accounts[0]?.id ??
+	null;
+
+const initialGoals = await goalsService.listWithProgress(userId, activeAccountId ?? undefined);
+
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title="Goals — Tradolog">
+	<GoalsShell
+		client:load
+		initialGoals={initialGoals}
+		accounts={accounts}
+		activeAccountId={activeAccountId}
+		userName={userName}
+		userEmail={userEmail}
+	/>
+</RootLayout>

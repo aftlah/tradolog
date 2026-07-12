@@ -34,6 +34,16 @@ export class StrategyRepository {
 		return row;
 	}
 
+	async updateForUser(id: string, userId: string, data: Partial<NewStrategy>): Promise<Strategy | null> {
+		const db = getDb();
+		const rows = await db
+			.update(strategies)
+			.set({ ...data, updatedAt: new Date() })
+			.where(and(eq(strategies.id, id), eq(strategies.userId, userId), isNull(strategies.deletedAt)))
+			.returning();
+		return rows[0] ?? null;
+	}
+
 	async softDeleteForUser(id: string, userId: string): Promise<boolean> {
 		const db = getDb();
 		const rows = await db

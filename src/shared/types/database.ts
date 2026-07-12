@@ -1,5 +1,6 @@
 import type {
 	accounts,
+	journalNotes,
 	monthlyGoals,
 	profiles,
 	strategies,
@@ -50,6 +51,8 @@ export type MonthlyGoal = typeof monthlyGoals.$inferSelect;
 export type NewMonthlyGoal = typeof monthlyGoals.$inferInsert;
 export type WatchlistEntry = typeof watchlists.$inferSelect;
 export type NewWatchlistEntry = typeof watchlists.$inferInsert;
+export type JournalNote = typeof journalNotes.$inferSelect;
+export type NewJournalNote = typeof journalNotes.$inferInsert;
 
 export type SoftDeletable = {
 	deletedAt: Date | null;

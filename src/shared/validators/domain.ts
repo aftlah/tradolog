@@ -160,6 +160,18 @@ export const monthlyGoalInsertSchema = z.object({
 	status: goalStatusSchema.default('active'),
 });
 
+export const monthlyGoalUpdateSchema = monthlyGoalInsertSchema.omit({ userId: true }).partial();
+
+export const journalNoteInsertSchema = z.object({
+	userId: userIdSchema,
+	title: z.string().max(200).optional().nullable(),
+	body: z.string().trim().min(1).max(20000),
+	tags: z.string().max(1000).optional().nullable(),
+	isPinned: z.boolean().default(false),
+});
+
+export const journalNoteUpdateSchema = journalNoteInsertSchema.omit({ userId: true }).partial();
+
 export const watchlistInsertSchema = z.object({
 	userId: userIdSchema,
 	symbolId: uuidSchema,
@@ -180,3 +192,4 @@ export type TradeNoteInsertInput = z.infer<typeof tradeNoteInsertSchema>;
 export type TradeReviewInsertInput = z.infer<typeof tradeReviewInsertSchema>;
 export type MonthlyGoalInsertInput = z.infer<typeof monthlyGoalInsertSchema>;
 export type WatchlistInsertInput = z.infer<typeof watchlistInsertSchema>;
+export type JournalNoteInsertInput = z.infer<typeof journalNoteInsertSchema>;

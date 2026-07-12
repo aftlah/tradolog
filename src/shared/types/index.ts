@@ -39,5 +39,7 @@ export type {
 	NewMonthlyGoal,
 	WatchlistEntry,
 	NewWatchlistEntry,
+	JournalNote,
+	NewJournalNote,
 	UserScoped,
 } from './database';

@@ -22,6 +22,13 @@
       "when": 1783843251553,
       "tag": "0002_smart_slipstream",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783845000000,
+      "tag": "0003_journal_notes",
+      "breakpoints": true
     }
   ]
 }

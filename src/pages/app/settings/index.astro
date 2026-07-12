@@ -1,0 +1,26 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { SettingsShell, settingsService } from '@features/settings';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const userId = session.user.id;
+const data = await settingsService.getSettingsPageData(userId);
+
+const requestedAccountId = Astro.url.searchParams.get('accountId');
+const activeAccount =
+	(requestedAccountId ? data.accounts.find((account) => account.id === requestedAccountId) : undefined) ??
+	data.accounts.find((account) => account.isDefault) ??
+	data.accounts[0];
+
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title="Settings — Tradolog">
+	<SettingsShell client:load data={data} activeAccountId={activeAccount?.id ?? null} userName={userName} userEmail={userEmail} />
+</RootLayout>

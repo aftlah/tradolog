@@ -39,6 +39,16 @@ export class SymbolRepository {
 		return row;
 	}
 
+	async updateForUser(id: string, userId: string, data: Partial<NewTradeSymbol>): Promise<TradeSymbol | null> {
+		const db = getDb();
+		const rows = await db
+			.update(symbols)
+			.set({ ...data, updatedAt: new Date() })
+			.where(and(eq(symbols.id, id), eq(symbols.userId, userId), isNull(symbols.deletedAt)))
+			.returning();
+		return rows[0] ?? null;
+	}
+
 	async softDeleteForUser(id: string, userId: string): Promise<boolean> {
 		const db = getDb();
 		const rows = await db

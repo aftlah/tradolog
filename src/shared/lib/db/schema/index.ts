@@ -25,6 +25,7 @@ export { symbols, strategies } from './symbols';
 export { trades } from './trades';
 export { tradeImages, tradeNotes, tradeReviews } from './trade-details';
 export { monthlyGoals, watchlists } from './goals-watchlists';
+export { journalNotes } from './journal-notes';
 
 export {
 	userRelations,
@@ -40,4 +41,5 @@ export {
 	tradeReviewRelations,
 	monthlyGoalRelations,
 	watchlistRelations,
+	journalNoteRelations,
 } from './relations';

@@ -41,6 +41,23 @@ export class MonthlyGoalRepository {
 		return row;
 	}
 
+	async updateForUser(
+		id: string,
+		userId: string,
+		data: Partial<NewMonthlyGoal>,
+	): Promise<MonthlyGoal | null> {
+		const db = getDb();
+		const rows = await db
+			.update(monthlyGoals)
+			.set({ ...data, updatedAt: new Date() })
+			.where(
+				and(eq(monthlyGoals.id, id), eq(monthlyGoals.userId, userId), isNull(monthlyGoals.deletedAt)),
+			)
+			.returning();
+
+		return rows[0] ?? null;
+	}
+
 	async softDeleteForUser(id: string, userId: string): Promise<boolean> {
 		const db = getDb();
 		const rows = await db

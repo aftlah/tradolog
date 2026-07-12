@@ -27,3 +27,7 @@ export {
 	MonthlyGoalRepository,
 	WatchlistRepository,
 } from './goals-watchlists.repository';
+export {
+	journalNoteRepository,
+	JournalNoteRepository,
+} from './journal-note.repository';

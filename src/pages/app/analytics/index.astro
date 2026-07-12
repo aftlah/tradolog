@@ -1,0 +1,20 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { AnalyticsShell, analyticsService } from '@features/analytics';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const requestedAccountId = Astro.url.searchParams.get('accountId');
+const analyticsData = await analyticsService.getAnalyticsData(session.user.id, requestedAccountId);
+
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title="Analytics — Tradolog">
+	<AnalyticsShell client:load initialData={analyticsData} userName={userName} userEmail={userEmail} />
+</RootLayout>

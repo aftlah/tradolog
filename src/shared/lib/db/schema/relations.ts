@@ -5,6 +5,7 @@ import { symbols, strategies } from './symbols';
 import { trades } from './trades';
 import { tradeImages, tradeNotes, tradeReviews } from './trade-details';
 import { monthlyGoals, watchlists } from './goals-watchlists';
+import { journalNotes } from './journal-notes';
 
 /** Better Auth: user → sessions / credential accounts / domain graph */
 export const userRelations = relations(user, ({ many, one }) => ({
@@ -23,6 +24,7 @@ export const userRelations = relations(user, ({ many, one }) => ({
 	tradeReviews: many(tradeReviews),
 	monthlyGoals: many(monthlyGoals),
 	watchlists: many(watchlists),
+	journalNotes: many(journalNotes),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -144,6 +146,13 @@ export const watchlistRelations = relations(watchlists, ({ one }) => ({
 	symbol: one(symbols, {
 		fields: [watchlists.symbolId],
 		references: [symbols.id],
+	}),
+}));
+
+export const journalNoteRelations = relations(journalNotes, ({ one }) => ({
+	user: one(user, {
+		fields: [journalNotes.userId],
+		references: [user.id],
 	}),
 }));
 

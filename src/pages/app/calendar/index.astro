@@ -1,0 +1,20 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { CalendarShell, calendarService, parseCalendarQuery } from '@features/calendar';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const query = parseCalendarQuery(Astro.url.searchParams);
+const calendarData = await calendarService.getCalendarData(session.user.id, query.year, query.month, query.accountId);
+
+const userName = session.user.name ?? 'Trader';
+const userEmail = session.user.email ?? '';
+---
+
+<RootLayout title="Calendar — Tradolog">
+	<CalendarShell client:load initialData={calendarData} userName={userName} userEmail={userEmail} />
+</RootLayout>
