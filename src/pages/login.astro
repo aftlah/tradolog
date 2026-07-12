@@ -1,0 +1,12 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { LoginPage } from '@features/auth';
+import { getEnv } from '@shared/lib/env';
+
+const env = getEnv();
+const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+---
+
+<RootLayout title="Login — Tradolog">
+	<LoginPage client:load googleEnabled={googleEnabled} />
+</RootLayout>

@@ -1,0 +1,91 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+
+@theme {
+	--color-background: #09090b;
+	--color-surface: #18181b;
+	--color-primary: #2563eb;
+	--color-success: #22c55e;
+	--color-danger: #ef4444;
+	--color-warning: #f59e0b;
+	--color-border: rgb(255 255 255 / 0.08);
+	--color-foreground: #fafafa;
+	--color-muted: #a1a1aa;
+
+	--color-card: #18181b;
+	--color-card-foreground: #fafafa;
+	--color-popover: #18181b;
+	--color-popover-foreground: #fafafa;
+	--color-primary-foreground: #fafafa;
+	--color-secondary: #27272a;
+	--color-secondary-foreground: #fafafa;
+	--color-muted-foreground: #a1a1aa;
+	--color-accent: #27272a;
+	--color-accent-foreground: #fafafa;
+	--color-destructive: #ef4444;
+	--color-destructive-foreground: #fafafa;
+	--color-input: rgb(255 255 255 / 0.1);
+	--color-ring: #2563eb;
+
+	--font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+
+	--radius-sm: 0.5rem;
+	--radius-md: 0.75rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1rem;
+	--radius-2xl: 1.5rem;
+	--radius-3xl: 1.5rem;
+
+	--shadow-soft: 0 10px 40px rgb(0 0 0 / 0.28);
+	--shadow-glass: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 20px 50px rgb(0 0 0 / 0.4);
+	--blur-glass: 24px;
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+
+	html {
+		color-scheme: dark;
+	}
+
+	body {
+		@apply bg-background text-foreground font-sans antialiased;
+		min-height: 100dvh;
+	}
+
+	:focus-visible {
+		@apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+	}
+}
+
+@layer utilities {
+	.glass-card {
+		background: rgb(255 255 255 / 0.05);
+		border: 1px solid rgb(255 255 255 / 0.1);
+		border-radius: var(--radius-3xl);
+		box-shadow: var(--shadow-glass);
+		backdrop-filter: blur(var(--blur-glass));
+		-webkit-backdrop-filter: blur(var(--blur-glass));
+	}
+
+	.glass-panel {
+		background: rgb(24 24 27 / 0.55);
+		border: 1px solid rgb(255 255 255 / 0.08);
+		border-radius: var(--radius-3xl);
+		box-shadow: var(--shadow-soft);
+		backdrop-filter: blur(var(--blur-glass));
+		-webkit-backdrop-filter: blur(var(--blur-glass));
+	}
+
+	.glass-input {
+		background: rgb(255 255 255 / 0.04);
+		border: 1px solid rgb(255 255 255 / 0.1);
+		backdrop-filter: blur(12px);
+	}
+
+	.shadow-soft {
+		box-shadow: var(--shadow-soft);
+	}
+}

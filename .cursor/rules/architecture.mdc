@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+---
+
+# Architecture
+
+Always use Feature Based Architecture.
+
+src/
+
+features/
+
+auth/
+
+dashboard/
+
+trade/
+
+analytics/
+
+calendar/
+
+notes/
+
+goals/
+
+settings/
+
+shared/
+
+Never place business logic inside React components.
+
+Always use:
+
+Repositories
+
+Services
+
+Hooks
+
+Utils
+
+Keep every component under 300 lines.
+
+Split components whenever necessary.

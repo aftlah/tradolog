@@ -1,0 +1,49 @@
+---
+alwaysApply: true
+---
+
+# Tradolog
+
+Tradolog is a premium Trading Journal SaaS.
+
+Tech Stack
+
+- Astro 7
+- React
+- Tailwind CSS v4
+- shadcn/ui
+- PostgreSQL
+- Drizzle ORM
+- Better Auth
+- Cloudflare R2
+
+Always use Feature Based Architecture.
+
+Always use Strict TypeScript.
+
+Never use any.
+
+Always use Repository Pattern.
+
+Always use Service Layer.
+
+Never mix business logic with UI.
+
+Always use reusable components.
+
+Always use Zod validation.
+
+Always use React Hook Form.
+
+Use UUID.
+
+Every table has
+
+- id
+- created_at
+- updated_at
+- deleted_at
+
+Deploy target
+
+- Vercel

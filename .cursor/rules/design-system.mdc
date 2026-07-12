@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+# Design System
+
+Use NeoGlass UI.
+
+Dark mode first.
+
+Inspired by
+
+- Linear
+- TradingView
+- Apple VisionOS
+- Arc Browser
+- Vercel Dashboard
+
+Use
+
+- Glassmorphism
+- Soft Neomorphic Shadows
+- Floating Panels
+
+Never use classic neumorphism.
+
+Cards
+
+- rounded-3xl
+- backdrop-blur-2xl
+- border-white/10
+
+Buttons
+
+- rounded-xl
+
+Inputs
+
+- glass style
+
+Use Geist font.
+
+Animations
+
+Framer Motion
+
+200-300ms
+
+Always prioritize readability.

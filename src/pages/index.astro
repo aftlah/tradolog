@@ -1,11 +1,56 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import RootLayout from '@shared/layouts/RootLayout.astro';
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<RootLayout title="Tradolog — Trading Journal">
+	<main class="relative flex min-h-dvh flex-col overflow-hidden">
+		<div
+			aria-hidden="true"
+			class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgb(37_99_235_/_0.18),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgb(24_24_27_/_1),_#09090b_70%)]"
+		>
+		</div>
+
+		<header class="relative z-10 flex items-center justify-between px-6 py-6 md:px-10">
+			<p class="text-sm font-medium tracking-[0.2em] text-muted uppercase">Tradolog</p>
+			<nav class="flex items-center gap-3" aria-label="Account">
+				<a
+					href="/login"
+					class="inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-medium text-muted transition-colors hover:text-foreground"
+				>
+					Login
+				</a>
+				<a
+					href="/register"
+					class="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-soft transition-colors hover:bg-primary/90"
+				>
+					Get started
+				</a>
+			</nav>
+		</header>
+
+		<section class="relative z-10 flex flex-1 flex-col justify-center px-6 pb-24 md:px-10">
+			<div class="mx-auto w-full max-w-3xl">
+				<h1 class="font-sans text-5xl font-semibold tracking-tight text-foreground md:text-7xl">
+					Tradolog
+				</h1>
+				<p class="mt-5 max-w-xl text-lg text-muted md:text-xl">
+					Track Every Trade. Master Every Decision. — a journal built for focused analysis, not execution.
+				</p>
+				<div class="mt-10 flex flex-wrap gap-3">
+					<a
+						href="/register"
+						class="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-7 text-sm font-medium text-primary-foreground shadow-soft transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					>
+						Get started
+					</a>
+					<a
+						href="/login"
+						class="inline-flex h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-7 text-sm font-medium text-foreground backdrop-blur-md transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					>
+						Login
+					</a>
+				</div>
+			</div>
+		</section>
+	</main>
+</RootLayout>
