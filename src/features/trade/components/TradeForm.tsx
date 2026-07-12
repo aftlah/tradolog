@@ -27,7 +27,6 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const {
 		register,
-		control,
 		watch,
 		handleSubmit,
 		formState: { errors, isSubmitting },
@@ -61,9 +60,15 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 		}
 	}
 
+	function onInvalid() {
+		toast.error('Please fix the highlighted fields before saving.');
+		const firstError = document.querySelector<HTMLElement>('[aria-invalid="true"], [role="alert"]');
+		firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	}
+
 	return (
-		<form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
-			<TradeFormDetailsSection register={register} control={control} errors={errors} watch={watch} options={options} />
+		<form className="space-y-6" onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
+			<TradeFormDetailsSection register={register} errors={errors} watch={watch} options={options} />
 			<TradeFormPricingSection register={register} errors={errors} watch={watch} />
 			<TradeFormJournalSection register={register} errors={errors} />
 

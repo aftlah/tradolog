@@ -1,10 +1,31 @@
-import { ACCOUNT_TYPES, MARKET_TYPES } from '@shared/lib/db/schema';
+import { ACCOUNT_TYPES, MARKET_TYPES } from '@shared/lib/db/schema/enums';
 import type { AccountType, MarketType } from '@shared/types';
 
 export const SETTINGS_PROFILE_API_ROUTE = '/api/settings/profile';
 export const SETTINGS_ACCOUNTS_API_ROUTE = '/api/settings/accounts';
 export const SETTINGS_STRATEGIES_API_ROUTE = '/api/settings/strategies';
 export const SETTINGS_SYMBOLS_API_ROUTE = '/api/settings/symbols';
+
+export const SETTINGS_PAGE_ROUTE = '/app/settings';
+
+export const SETTINGS_TABS = ['profile', 'accounts', 'strategies', 'symbols'] as const;
+
+export type SettingsTab = (typeof SETTINGS_TABS)[number];
+
+export const SETTINGS_TAB_OPTIONS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
+	{ id: 'profile', label: 'Profile' },
+	{ id: 'accounts', label: 'Accounts' },
+	{ id: 'strategies', label: 'Strategies' },
+	{ id: 'symbols', label: 'Symbols' },
+];
+
+/** Parses `?tab=` from the Settings URL; unknown values fall back to Profile. */
+export function parseSettingsTab(value: string | null | undefined): SettingsTab {
+	if (value && (SETTINGS_TABS as readonly string[]).includes(value)) {
+		return value as SettingsTab;
+	}
+	return 'profile';
+}
 
 const ACCOUNT_TYPE_LABEL: Record<AccountType, string> = {
 	demo: 'Demo',

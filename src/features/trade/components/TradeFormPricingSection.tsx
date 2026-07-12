@@ -19,7 +19,7 @@ export function TradeFormPricingSection({ register, errors, watch }: TradeFormPr
 
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				<FormField id="entryPrice" label="Entry Price" error={errors.entryPrice?.message as string | undefined}>
-					<Input id="entryPrice" type="number" step="any" inputMode="decimal" placeholder="0.00" {...register('entryPrice')} />
+					<Input id="entryPrice" inputMode="decimal" placeholder="1.0850" {...register('entryPrice')} />
 				</FormField>
 
 				<FormField
@@ -29,23 +29,23 @@ export function TradeFormPricingSection({ register, errors, watch }: TradeFormPr
 					hint={exitRequired ? undefined : 'Required once the trade is closed.'}
 					error={errors.exitPrice?.message as string | undefined}
 				>
-					<Input id="exitPrice" type="number" step="any" inputMode="decimal" placeholder="0.00" {...register('exitPrice')} />
+					<Input id="exitPrice" inputMode="decimal" placeholder="1.0900" {...register('exitPrice')} />
 				</FormField>
 
 				<FormField id="quantity" label="Quantity / Size" error={errors.quantity?.message as string | undefined}>
-					<Input id="quantity" type="number" step="any" inputMode="decimal" placeholder="0.00" {...register('quantity')} />
+					<Input id="quantity" inputMode="decimal" placeholder="1.00" {...register('quantity')} />
 				</FormField>
 
 				<FormField id="stopLoss" label="Stop Loss" optional error={errors.stopLoss?.message as string | undefined}>
-					<Input id="stopLoss" type="number" step="any" inputMode="decimal" placeholder="0.00" {...register('stopLoss')} />
+					<Input id="stopLoss" inputMode="decimal" placeholder="1.0800" {...register('stopLoss')} />
 				</FormField>
 
 				<FormField id="takeProfit" label="Take Profit" optional error={errors.takeProfit?.message as string | undefined}>
-					<Input id="takeProfit" type="number" step="any" inputMode="decimal" placeholder="0.00" {...register('takeProfit')} />
+					<Input id="takeProfit" inputMode="decimal" placeholder="1.1000" {...register('takeProfit')} />
 				</FormField>
 
 				<FormField id="fees" label="Fees" optional error={errors.fees?.message as string | undefined}>
-					<Input id="fees" type="number" step="any" inputMode="decimal" placeholder="0.00" {...register('fees')} />
+					<Input id="fees" inputMode="decimal" placeholder="0.00" {...register('fees')} />
 				</FormField>
 			</div>
 

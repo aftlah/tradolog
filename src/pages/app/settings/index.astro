@@ -1,6 +1,8 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { SettingsShell, settingsService } from '@features/settings';
+import { SettingsShell } from '@features/settings/components/SettingsShell';
+import { parseSettingsTab } from '@features/settings/constants/settings.constants';
+import { settingsService } from '@features/settings/services/settings.service';
 
 const session = Astro.locals.session;
 
@@ -10,6 +12,7 @@ if (!session) {
 
 const userId = session.user.id;
 const data = await settingsService.getSettingsPageData(userId);
+const activeTab = parseSettingsTab(Astro.url.searchParams.get('tab'));
 
 const requestedAccountId = Astro.url.searchParams.get('accountId');
 const activeAccount =
@@ -22,5 +25,12 @@ const userEmail = session.user.email ?? '';
 ---
 
 <RootLayout title="Settings — Tradolog">
-	<SettingsShell client:load data={data} activeAccountId={activeAccount?.id ?? null} userName={userName} userEmail={userEmail} />
+	<SettingsShell
+		client:load
+		data={data}
+		activeTab={activeTab}
+		activeAccountId={activeAccount?.id ?? null}
+		userName={userName}
+		userEmail={userEmail}
+	/>
 </RootLayout>
