@@ -1,46 +1,81 @@
-# Astro Starter Kit: Basics
+# Tradolog
+
+Modern SaaS trading journal for recording, reviewing, analyzing, and improving trading performance.
+
+This is **not** a trading platform and does **not** execute trades.
+
+## Stack
+
+- Astro 7 (SSR) + React islands
+- Tailwind CSS v4 + shadcn/ui (NeoGlass)
+- PostgreSQL + Drizzle ORM
+- Better Auth
+- Cloudflare R2 (screenshots — later)
+- Deployed on Vercel
+
+## Setup
 
 ```sh
-npm create astro@latest -- --template basics
+npm install
+cp .env.example .env
+# Fill DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL
+npm run db:migrate
+npm run db:seed
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Dev server: `http://localhost:4321`
 
-## 🚀 Project Structure
+Auth pages: `/login`, `/register`, `/forgot-password`, `/reset-password`
 
-Inside of your Astro project, you'll see the following folders and files:
+Protected area (auth verification only): `/app`
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+## Database
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Migrations live in `drizzle/`:
 
-## 🧞 Commands
+- `0000_auth_tables.sql` — Better Auth
+- `0001_domain_schema.sql` — trading journal domain
 
-All commands are run from the root of the project, from a terminal:
+Domain tables: `profiles`, `accounts` (trading), `symbols`, `strategies`, `trades`, `trade_images`, `trade_notes`, `trade_reviews`, `monthly_goals`, `watchlists`
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Note: Better Auth `account` (OAuth/credentials) is separate from trading `accounts`.
 
-## 👀 Want to learn more?
+## Auth notes
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Google OAuth appears when both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set.
+- Password reset emails are logged to the server console until an email provider is wired.
+
+## Scripts
+
+| Command | Action |
+| --- | --- |
+| `npm run dev` | Start Astro dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run check` | Type-check with `astro check` |
+| `npm run db:generate` | Generate Drizzle migrations |
+| `npm run db:migrate` | Apply migrations |
+| `npm run db:seed` | Seed demo catalog data |
+| `npm run db:studio` | Open Drizzle Studio |
+
+## Architecture
+
+Feature-based layout under `src/features/*` with shared kernel in `src/shared/*`.
+
+Data access: UI → Service → Repository → Drizzle (no DB logic in components).
+
+## Feature order
+
+1. Authentication
+2. Database schema ← current
+3. Trading calculator
+4. Dashboard layout
+5. Trade CRUD
+6. Analytics
+7. Calendar
+8. Goals
+9. Notes
+10. Settings
+11. Optimization
+12. Testing
