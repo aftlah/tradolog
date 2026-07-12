@@ -1,8 +1,7 @@
-import { loadEnv } from 'vite';
 import { z } from 'zod';
 
 const envSchema = z.object({
-	DATABASE_URL: z.url().optional(),
+	DATABASE_URL: z.string().min(1).optional(),
 	BETTER_AUTH_SECRET: z.string().min(32).optional(),
 	BETTER_AUTH_URL: z.url().optional(),
 	GOOGLE_CLIENT_ID: z.string().optional(),
@@ -26,16 +25,18 @@ function pick(...candidates: Array<string | undefined>): string | undefined {
 }
 
 /**
- * Read env for Astro SSR + Node scripts (tsx).
- * - `loadEnv(..., '')` reads `.env*` from disk (all keys, not only PUBLIC_/VITE_).
- * - Bracket `process.env[name]` avoids Vite replacing static `process.env.NAME` with undefined.
+ * Read env for Astro SSR + Vercel serverless + Node scripts.
+ *
+ * Do NOT import `vite` / `loadEnv` here — Vite pulls Rolldown native bindings into the
+ * serverless bundle and crashes on Vercel (`Cannot find native binding`).
+ *
+ * - Astro / Vercel inject secrets into `process.env` at runtime.
+ * - Local scripts (`tsx`, drizzle) should call `import 'dotenv/config'` themselves.
+ * - Bracket access `process.env[name]` avoids Vite build-time env inlining.
  */
 function readRawEnv(): Record<keyof Env, string | undefined> {
-	const mode = process.env.NODE_ENV ?? 'development';
-	const fileEnv = loadEnv(mode, process.cwd(), '');
-
 	const fromRuntime = (name: keyof Env): string | undefined => {
-		return pick(fileEnv[name], process.env[name]);
+		return pick(process.env[name]);
 	};
 
 	return {
