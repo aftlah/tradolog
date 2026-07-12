@@ -22,7 +22,6 @@ interface GoalCardProps {
 	onDeleted: () => void;
 }
 
-/** A single monthly goal: targets vs actuals progress bars, plus an edit/delete menu. */
 export function GoalCard({ goal, onEdit, onDeleted }: GoalCardProps) {
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const statusBadge = GOAL_STATUS_BADGE[goal.status];

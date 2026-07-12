@@ -10,4 +10,6 @@ export interface AccountOption {
 	isDefault: boolean;
 	startingBalance: number;
 	currentBalance: number;
+	/** Quote→account FX (e.g. USDIDR). `null` means 1 (no conversion). */
+	quoteToAccountRate: number | null;
 }

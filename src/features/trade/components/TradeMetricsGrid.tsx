@@ -7,20 +7,21 @@ import {
 	formatSignedCurrency,
 	formatSignedPercent,
 } from '@shared/utils/format';
+import { XAUUSD_TICKER } from '../constants/trade.constants';
 import type { TradeDetail } from '../types/trade.types';
 
 interface TradeMetricsGridProps {
 	trade: TradeDetail;
 }
 
-/**
- * Read-only grid of every metric `TradingCalculatorService` derived for this trade. Purely
- * presentational — no calculation happens here, it only formats numbers already computed
- * server-side.
- */
 export function TradeMetricsGrid({ trade }: TradeMetricsGridProps) {
 	const pl = trade.profitLoss;
-	const plClassName = pl === null ? undefined : pl >= 0 ? 'text-success' : 'text-danger';
+	const plClassName = pl === null ? undefined : pl >= 0 ? 'text-emerald-300' : 'text-rose-300';
+	const showProfitPerLot = trade.symbol === XAUUSD_TICKER && trade.profitPerLot !== null;
+	const fxHint =
+		trade.quoteToAccountRate !== null && trade.quoteToAccountRate > 1
+			? `Converted with account rate 1 USD = ${formatNumber(trade.quoteToAccountRate, 0)} ${trade.currency}.`
+			: undefined;
 
 	return (
 		<div className="glass-card p-6">
@@ -30,14 +31,25 @@ export function TradeMetricsGrid({ trade }: TradeMetricsGridProps) {
 				<Metric label="Exit Price" value={trade.exitPrice === null ? '—' : formatNumber(trade.exitPrice, 5)} />
 				<Metric label="Stop Loss" value={trade.stopLoss === null ? '—' : formatNumber(trade.stopLoss, 5)} />
 				<Metric label="Take Profit" value={trade.takeProfit === null ? '—' : formatNumber(trade.takeProfit, 5)} />
-				<Metric label="Quantity" value={trade.quantity === null ? '—' : formatNumber(trade.quantity, 2)} />
+				<Metric
+					label={trade.symbol === XAUUSD_TICKER ? 'Lots' : 'Quantity'}
+					value={trade.quantity === null ? '—' : formatNumber(trade.quantity, 2)}
+				/>
 				<Metric label="Fees" value={trade.fees === null ? '—' : formatCurrency(trade.fees, trade.currency)} />
 
 				<Metric
 					label="Profit / Loss"
 					value={pl === null ? '—' : formatSignedCurrency(pl, trade.currency)}
 					valueClassName={plClassName}
+					hint={fxHint}
 				/>
+				{showProfitPerLot && trade.profitPerLot !== null ? (
+					<Metric
+						label="Profit / Lot"
+						value={formatSignedCurrency(trade.profitPerLot, trade.currency)}
+						valueClassName={trade.profitPerLot >= 0 ? 'text-emerald-300' : 'text-rose-300'}
+					/>
+				) : null}
 				<Metric
 					label="Profit / Loss %"
 					value={trade.profitLossPercent === null ? '—' : formatSignedPercent(trade.profitLossPercent)}
@@ -45,20 +57,47 @@ export function TradeMetricsGrid({ trade }: TradeMetricsGridProps) {
 				/>
 				<Metric label="Planned RR" value={formatRiskReward(trade.plannedRR)} />
 				<Metric label="Actual RR" value={formatRiskReward(trade.actualRR)} />
-				<Metric label="Risk Amount" value={trade.riskAmount === null ? '—' : formatCurrency(trade.riskAmount, trade.currency)} />
-				<Metric label="Reward Amount" value={trade.rewardAmount === null ? '—' : formatCurrency(trade.rewardAmount, trade.currency)} />
-				<Metric label="Pips" value={trade.pips === null ? '—' : formatNumber(trade.pips, 1)} />
+				<Metric
+					label="Risk Amount"
+					value={trade.riskAmount === null ? '—' : formatCurrency(trade.riskAmount, trade.currency)}
+					hint={fxHint}
+				/>
+				<Metric
+					label="Reward Amount"
+					value={trade.rewardAmount === null ? '—' : formatCurrency(trade.rewardAmount, trade.currency)}
+					hint={fxHint}
+				/>
+				<Metric
+					label="Pips"
+					value={trade.pips === null ? '—' : formatNumber(trade.pips, 1)}
+					hint={
+						trade.symbol === XAUUSD_TICKER
+							? 'Price move ÷ 0.01 (1 pip XAUUSD = $0.01). Positive = favorable.'
+							: 'Price move ÷ symbol pip size. Positive = favorable.'
+					}
+				/>
 				<Metric label="Holding Time" value={formatHoldingTime(trade.holdingTimeSeconds)} />
 			</div>
 		</div>
 	);
 }
 
-function Metric({ label, value, valueClassName }: { label: string; value: ReactNode; valueClassName?: string }) {
+function Metric({
+	label,
+	value,
+	valueClassName,
+	hint,
+}: {
+	label: string;
+	value: ReactNode;
+	valueClassName?: string;
+	hint?: string;
+}) {
 	return (
-		<div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+		<div className="rounded-2xl border border-white/8 bg-white/3 p-4">
 			<p className="text-xs text-muted">{label}</p>
 			<p className={`mt-1 text-lg font-semibold tracking-tight text-foreground ${valueClassName ?? ''}`}>{value}</p>
+			{hint ? <p className="mt-1.5 text-[11px] leading-snug text-muted">{hint}</p> : null}
 		</div>
 	);
 }

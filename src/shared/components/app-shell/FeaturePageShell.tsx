@@ -16,11 +16,7 @@ interface FeaturePageShellProps {
 	children: ReactNode;
 }
 
-/**
- * Thin `AppShell` wrapper reused by every non-Dashboard feature page (Analytics, Calendar,
- * Goals, Notes, Settings, …). Account switching defaults to navigating to the same path with
- * `?accountId=` so each feature keeps its own scoped view without re-implementing chrome.
- */
+
 export function FeaturePageShell({
 	title,
 	activeHref,

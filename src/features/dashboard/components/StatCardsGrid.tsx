@@ -17,7 +17,6 @@ function trendFor(value: number): StatTrend {
 	return 'neutral';
 }
 
-/** Renders the headline Statistic Cards. All values are pre-computed by `TradingCalculatorService`. */
 export function StatCardsGrid({ data }: StatCardsGridProps) {
 	const netPnl = data.currentBalance - data.startingBalance;
 	const netPnlPercent = data.startingBalance > 0 ? (netPnl / data.startingBalance) * 100 : 0;

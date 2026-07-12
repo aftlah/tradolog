@@ -19,10 +19,7 @@ function isGuestOnlyPath(pathname: string): boolean {
 	return GUEST_ONLY_PATHS.some((path) => pathname === path);
 }
 
-/**
- * Build a Cookie header Better Auth can parse.
- * Prefer the raw request header; fall back to Astro's cookie jar for known auth cookies.
- */
+
 function buildCookieHeader(context: {
 	request: Request;
 	cookies: {
@@ -47,10 +44,7 @@ function buildCookieHeader(context: {
 	return parts.length > 0 ? parts.join('; ') : null;
 }
 
-/**
- * Clone request headers into a plain `Headers` instance.
- * Astro middleware's request Headers can fail Better Auth session lookups unless cloned.
- */
+
 function headersForSessionLookup(request: Request, cookieHeader: string | null): Headers {
 	const headers = new Headers(request.headers);
 	if (cookieHeader) {

@@ -1,12 +1,4 @@
-/**
- * DashboardService
- *
- * Composes the domain repositories/services with `TradingCalculatorService` to produce a
- * single, ready-to-render `DashboardData` payload. Per the project rules, the UI must never
- * calculate statistics itself — every number in `DashboardData` is already computed here.
- *
- * UI → DashboardService → (TradingAccountService / TradeService / SymbolService) → Repository → Database
- */
+
 import {
 	strategyService,
 	symbolService,
@@ -90,10 +82,7 @@ function emptyDashboard(): DashboardData {
 }
 
 export class DashboardService {
-	/**
-	 * Builds the complete dashboard payload for `userId`, scoped to `requestedAccountId` when
-	 * provided and owned by the user, otherwise the user's default (or first) trading account.
-	 */
+
 	async getDashboardData(userId: string, requestedAccountId?: string | null): Promise<DashboardData> {
 		const accounts = await tradingAccountService.list(userId);
 

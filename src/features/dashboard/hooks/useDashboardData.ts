@@ -9,11 +9,7 @@ interface UseDashboardDataResult {
 	switchAccount: (accountId: string) => Promise<void>;
 }
 
-/**
- * Client-side state for the dashboard. Starts from the server-rendered `initialData` (so the
- * first paint needs no extra fetch) and re-fetches from the dashboard API route whenever the
- * user switches trading accounts.
- */
+
 export function useDashboardData(initialData: DashboardData): UseDashboardDataResult {
 	const [data, setData] = useState(initialData);
 	const [isLoading, setIsLoading] = useState(false);

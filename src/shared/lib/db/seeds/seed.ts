@@ -68,6 +68,7 @@ async function seed() {
 			baseAsset: 'XAU',
 			quoteAsset: 'USD',
 			pipSize: '0.01',
+			contractSize: '100',
 			pricePrecision: 2,
 		},
 		{
@@ -125,6 +126,11 @@ async function seed() {
 				...symbol,
 				isActive: true,
 			});
+		} else if (symbol.ticker === 'XAUUSD' && 'contractSize' in symbol) {
+			await db
+				.update(symbols)
+				.set({ contractSize: symbol.contractSize, updatedAt: new Date() })
+				.where(eq(symbols.id, found[0].id));
 		}
 	}
 
@@ -172,10 +178,15 @@ async function seed() {
 		});
 	}
 
+	await db
+		.update(accounts)
+		.set({ quoteToAccountRate: '18050', updatedAt: new Date() })
+		.where(and(eq(accounts.currency, 'IDR'), isNull(accounts.quoteToAccountRate), isNull(accounts.deletedAt)));
+
 	const existingStrategies = await db
 		.select()
 		.from(strategies)
-		.where(eq(strategies.userId, seedUser.id))
+		.where(eq(strategies.userId, seedUser.id)) 
 		.limit(1);
 
 	if (!existingStrategies[0]) {

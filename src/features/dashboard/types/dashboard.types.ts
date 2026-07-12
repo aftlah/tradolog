@@ -1,14 +1,13 @@
 import type { DrawdownSummary, PerformanceSummary, StreakSummary, TradeDirection } from '@shared/services';
 import type { AccountOption, TradeResult, TradeStatus } from '@shared/types';
 
-/** JSON-serializable mirror of `EquityPoint` (dates as ISO strings, not `Date` instances). */
+
 export interface DashboardEquityPoint {
 	closedAt: string;
 	equity: number;
 	profitLoss: number;
 }
 
-/** JSON-serializable mirror of `DrawdownSummary`. */
 export interface DashboardDrawdownSummary extends Omit<DrawdownSummary, 'points'> {
 	points: Array<Omit<DrawdownSummary['points'][number], 'closedAt'> & { closedAt: string }>;
 }
@@ -27,11 +26,7 @@ export interface DashboardRecentTrade {
 	closedAt: string | null;
 }
 
-/**
- * The full, ready-to-render Dashboard payload. Every number here is already computed by
- * `TradingCalculatorService` — components only format and display these values, they never
- * derive them.
- */
+
 export interface DashboardData {
 	hasAccounts: boolean;
 	accounts: AccountOption[];

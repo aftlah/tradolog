@@ -9,7 +9,7 @@ interface GoalsListProps {
 	onDeleted: () => void;
 }
 
-/** Card grid of monthly goals, each showing targets vs actuals progress bars. */
+
 export function GoalsList({ goals, isLoading, onEdit, onDeleted }: GoalsListProps) {
 	if (isLoading && goals.length === 0) {
 		return (

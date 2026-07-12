@@ -38,28 +38,56 @@ export function calculateReward(entryPrice: NumericInput, takeProfit: NumericInp
 	return round(Math.abs(target - toFiniteNumber(entryPrice)), PRICE_DECIMALS);
 }
 
-/**
- * Risk Amount = Risk × Quantity
- *
- * The capital (in quote currency) exposed if the stop-loss is hit.
- */
-export function calculateRiskAmount(risk: number | null, quantity: NumericInput): number | null {
-	if (risk === null) {
+function resolveContractSize(contractSize: NumericInput = 1): number {
+	const size = toFiniteNumber(contractSize, 1);
+	return size > 0 ? size : 1;
+}
+
+function resolveFxRate(fxRate: NumericInput = 1): number {
+	const rate = toFiniteNumber(fxRate, 1);
+	return rate > 0 ? rate : 1;
+}
+
+function applyFxRate(amount: number | null, fxRate: number): number | null {
+	if (amount === null) {
 		return null;
 	}
-	return round(risk * toFiniteNumber(quantity), PRICE_DECIMALS);
+	if (fxRate === 1) {
+		return amount;
+	}
+	return round(amount * fxRate, PRICE_DECIMALS);
 }
 
 /**
- * Reward Amount = Reward × Quantity
+ * Risk Amount = Risk × Quantity × Contract Size
+ *
+ * The capital (in quote currency) exposed if the stop-loss is hit.
+ */
+export function calculateRiskAmount(
+	risk: number | null,
+	quantity: NumericInput,
+	contractSize: NumericInput = 1,
+): number | null {
+	if (risk === null) {
+		return null;
+	}
+	return round(risk * toFiniteNumber(quantity) * resolveContractSize(contractSize), PRICE_DECIMALS);
+}
+
+/**
+ * Reward Amount = Reward × Quantity × Contract Size
  *
  * The capital (in quote currency) that would be gained if the take-profit is hit.
  */
-export function calculateRewardAmount(reward: number | null, quantity: NumericInput): number | null {
+export function calculateRewardAmount(
+	reward: number | null,
+	quantity: NumericInput,
+	contractSize: NumericInput = 1,
+): number | null {
 	if (reward === null) {
 		return null;
 	}
-	return round(reward * toFiniteNumber(quantity), PRICE_DECIMALS);
+	return round(reward * toFiniteNumber(quantity) * resolveContractSize(contractSize), PRICE_DECIMALS);
 }
 
 /**
@@ -81,10 +109,11 @@ export function calculatePlannedRiskReward(
 /**
  * Profit / Loss
  *
- * Long:  (Exit Price − Entry Price) × Quantity − Fees
- * Short: (Entry Price − Exit Price) × Quantity − Fees
+ * Long:  (Exit Price − Entry Price) × Quantity × Contract Size − Fees
+ * Short: (Entry Price − Exit Price) × Quantity × Contract Size − Fees
  *
- * `null` when the trade has no exit price yet (still open/planned).
+ * For XAUUSD, contract size is typically `100` (oz per standard lot). `null` when the trade
+ * has no exit price yet (still open/planned).
  */
 export function calculateProfitLoss(
 	side: TradeDirection,
@@ -92,6 +121,7 @@ export function calculateProfitLoss(
 	exitPrice: NumericInput,
 	quantity: NumericInput,
 	fees: NumericInput = 0,
+	contractSize: NumericInput = 1,
 ): number | null {
 	const exit = toNullableNumber(exitPrice);
 	if (exit === null) {
@@ -101,29 +131,41 @@ export function calculateProfitLoss(
 	const qty = toFiniteNumber(quantity);
 	const feeAmount = toFiniteNumber(fees, 0);
 	const directionalMove = side === 'long' ? exit - entry : entry - exit;
-	return round(directionalMove * qty - feeAmount, PRICE_DECIMALS);
+	return round(directionalMove * qty * resolveContractSize(contractSize) - feeAmount, PRICE_DECIMALS);
 }
 
 /**
- * Profit % = Profit ÷ Position Notional × 100, where Position Notional = Entry Price × Quantity
- * by default (or a custom `basis`, e.g. account balance, when supplied).
- *
- * Expresses the trade's return relative to the capital committed to open it.
+ * Profit % = Profit ÷ Position Notional × 100, where Position Notional =
+ * Entry Price × Quantity × Contract Size by default (or a custom `basis` when supplied).
  */
 export function calculateProfitLossPercent(
 	profitLoss: number | null,
 	entryPrice: NumericInput,
 	quantity: NumericInput,
 	basis?: number,
+	contractSize: NumericInput = 1,
 ): number | null {
 	if (profitLoss === null) {
 		return null;
 	}
-	const denominator = basis ?? toFiniteNumber(entryPrice) * toFiniteNumber(quantity);
+	const denominator =
+		basis ?? toFiniteNumber(entryPrice) * toFiniteNumber(quantity) * resolveContractSize(contractSize);
 	if (!Number.isFinite(denominator) || denominator <= 0) {
 		return null;
 	}
 	return round((profitLoss / denominator) * 100, PERCENT_DECIMALS);
+}
+
+/** Profit Per Lot = Profit / Loss ÷ Quantity (lot size). */
+export function calculateProfitPerLot(profitLoss: number | null, quantity: NumericInput): number | null {
+	if (profitLoss === null) {
+		return null;
+	}
+	const qty = toFiniteNumber(quantity);
+	if (!Number.isFinite(qty) || qty <= 0) {
+		return null;
+	}
+	return round(profitLoss / qty, PRICE_DECIMALS);
 }
 
 /**
@@ -221,20 +263,33 @@ export function formatHoldingTime(seconds: number | null): string {
  * created or updated, so all derived columns stay in sync automatically.
  */
 export function calculateTradeMetrics(input: TradePriceInput): TradeMetrics {
+	const contractSize = input.contractSize ?? 1;
+	const fxRate = resolveFxRate(input.fxRate);
 	const risk = calculateRisk(input.entryPrice, input.stopLoss);
 	const reward = calculateReward(input.entryPrice, input.takeProfit);
-	const riskAmount = calculateRiskAmount(risk, input.quantity);
-	const rewardAmount = calculateRewardAmount(reward, input.quantity);
-	const plannedRR = calculatePlannedRiskReward(riskAmount, rewardAmount);
-	const profitLoss = calculateProfitLoss(
+	const riskAmountQuote = calculateRiskAmount(risk, input.quantity, contractSize);
+	const rewardAmountQuote = calculateRewardAmount(reward, input.quantity, contractSize);
+	const plannedRR = calculatePlannedRiskReward(riskAmountQuote, rewardAmountQuote);
+	const profitLossQuote = calculateProfitLoss(
 		input.side,
 		input.entryPrice,
 		input.exitPrice,
 		input.quantity,
 		input.fees,
+		contractSize,
 	);
-	const profitLossPercent = calculateProfitLossPercent(profitLoss, input.entryPrice, input.quantity);
-	const actualRR = calculateActualRiskReward(profitLoss, riskAmount);
+	const profitLossPercent = calculateProfitLossPercent(
+		profitLossQuote,
+		input.entryPrice,
+		input.quantity,
+		undefined,
+		contractSize,
+	);
+	const profitLoss = applyFxRate(profitLossQuote, fxRate);
+	const riskAmount = applyFxRate(riskAmountQuote, fxRate);
+	const rewardAmount = applyFxRate(rewardAmountQuote, fxRate);
+	const profitPerLot = calculateProfitPerLot(profitLoss, input.quantity);
+	const actualRR = calculateActualRiskReward(profitLossQuote, riskAmountQuote);
 	const pips = calculatePips(input.side, input.entryPrice, input.exitPrice, input.pipSize);
 	const holdingTimeSeconds = calculateHoldingTimeSeconds(input.openedAt, input.closedAt);
 
@@ -246,6 +301,7 @@ export function calculateTradeMetrics(input: TradePriceInput): TradeMetrics {
 		plannedRR,
 		profitLoss,
 		profitLossPercent,
+		profitPerLot,
 		actualRR,
 		pips,
 		holdingTimeSeconds,

@@ -50,6 +50,7 @@ export const accountFormSchema = z.object({
 	startingBalance: requiredDecimalString('Starting balance is required.'),
 	currentBalance: requiredDecimalString('Current balance is required.'),
 	leverage: optionalPositiveInt,
+	quoteToAccountRate: optionalDecimalString,
 	isDefault: z.boolean().default(false),
 	notes: optionalText(5000),
 });

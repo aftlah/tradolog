@@ -17,6 +17,7 @@ import {
 	calculatePlannedRiskReward,
 	calculateProfitLoss,
 	calculateProfitLossPercent,
+	calculateProfitPerLot,
 	calculateReward,
 	calculateRewardAmount,
 	calculateRisk,
@@ -71,12 +72,12 @@ export class TradingCalculatorService {
 		return calculateReward(entryPrice, takeProfit);
 	}
 
-	riskAmount(risk: number | null, quantity: NumericInput): number | null {
-		return calculateRiskAmount(risk, quantity);
+	riskAmount(risk: number | null, quantity: NumericInput, contractSize: NumericInput = 1): number | null {
+		return calculateRiskAmount(risk, quantity, contractSize);
 	}
 
-	rewardAmount(reward: number | null, quantity: NumericInput): number | null {
-		return calculateRewardAmount(reward, quantity);
+	rewardAmount(reward: number | null, quantity: NumericInput, contractSize: NumericInput = 1): number | null {
+		return calculateRewardAmount(reward, quantity, contractSize);
 	}
 
 	plannedRiskReward(riskAmount: number | null, rewardAmount: number | null): number | null {
@@ -89,8 +90,9 @@ export class TradingCalculatorService {
 		exitPrice: NumericInput,
 		quantity: NumericInput,
 		fees: NumericInput = 0,
+		contractSize: NumericInput = 1,
 	): number | null {
-		return calculateProfitLoss(side, entryPrice, exitPrice, quantity, fees);
+		return calculateProfitLoss(side, entryPrice, exitPrice, quantity, fees, contractSize);
 	}
 
 	profitLossPercent(
@@ -98,8 +100,13 @@ export class TradingCalculatorService {
 		entryPrice: NumericInput,
 		quantity: NumericInput,
 		basis?: number,
+		contractSize: NumericInput = 1,
 	): number | null {
-		return calculateProfitLossPercent(profitLoss, entryPrice, quantity, basis);
+		return calculateProfitLossPercent(profitLoss, entryPrice, quantity, basis, contractSize);
+	}
+
+	profitPerLot(profitLoss: number | null, quantity: NumericInput): number | null {
+		return calculateProfitPerLot(profitLoss, quantity);
 	}
 
 	actualRiskReward(profitLoss: number | null, riskAmount: number | null): number | null {

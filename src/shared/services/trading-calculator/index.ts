@@ -7,6 +7,7 @@ export {
 	calculatePlannedRiskReward,
 	calculateProfitLoss,
 	calculateProfitLossPercent,
+	calculateProfitPerLot,
 	calculateReward,
 	calculateRewardAmount,
 	calculateRisk,

@@ -10,6 +10,7 @@ import type { TradeFormOptions } from '../types/trade.types';
 import { TradeFormDetailsSection } from './TradeFormDetailsSection';
 import { TradeFormPricingSection } from './TradeFormPricingSection';
 import { TradeFormJournalSection } from './TradeFormJournalSection';
+import { TradePlanPreview } from './TradePlanPreview';
 
 interface TradeFormProps {
 	mode: 'create' | 'edit';
@@ -72,7 +73,8 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 	return (
 		<form className="space-y-6" onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
 			<TradeFormDetailsSection register={register} errors={errors} watch={watch} options={options} />
-			<TradeFormPricingSection register={register} errors={errors} watch={watch} />
+			<TradeFormPricingSection register={register} errors={errors} watch={watch} options={options} />
+			<TradePlanPreview watch={watch} options={options} />
 			<TradeFormJournalSection register={register} errors={errors} />
 
 			{submitError ? (

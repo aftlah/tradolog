@@ -51,6 +51,7 @@ export const tradingAccountInsertSchema = z.object({
 	startingBalance: z.string().regex(/^-?\d+(\.\d+)?$/).default('0'),
 	currentBalance: z.string().regex(/^-?\d+(\.\d+)?$/).default('0'),
 	leverage: z.number().int().positive().optional().nullable(),
+	quoteToAccountRate: numericStringSchema,
 	isDefault: z.boolean().default(false),
 	notes: z.string().max(5000).optional().nullable(),
 });

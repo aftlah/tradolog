@@ -41,6 +41,7 @@ const EMPTY_DEFAULTS: AccountFormInput = {
 	startingBalance: '0',
 	currentBalance: '0',
 	leverage: '',
+	quoteToAccountRate: '',
 	isDefault: false,
 	notes: '',
 };
@@ -57,6 +58,7 @@ function toFormDefaults(account: AccountSettingsDto | null): AccountFormInput {
 		startingBalance: String(account.startingBalance),
 		currentBalance: String(account.currentBalance),
 		leverage: account.leverage !== null ? String(account.leverage) : '',
+		quoteToAccountRate: account.quoteToAccountRate !== null ? String(account.quoteToAccountRate) : '',
 		isDefault: account.isDefault,
 		notes: account.notes ?? '',
 	};
@@ -156,11 +158,21 @@ export function AccountFormDialog({ open, onOpenChange, account, onSaved }: Acco
 							<Input id="currentBalance" type="number" step="0.01" {...register('currentBalance')} />
 						</FormField>
 
-						<FormField id="leverage" label="Leverage" optional hint="e.g. 100 for 1:100" error={errors.leverage?.message}>
+						<FormField id="leverage" label="Leverage" optional hint="e.g. 100 for 1:100 (margin only, not P&L)" error={errors.leverage?.message}>
 							<Input id="leverage" type="number" step="1" placeholder="100" {...register('leverage')} />
 						</FormField>
 
-						<div className="flex items-end pb-2">
+						<FormField
+							id="quoteToAccountRate"
+							label="USD → Account Rate"
+							optional
+							hint="For IDR accounts: e.g. 18050 means 1 USD = Rp 18.050. Leave empty for USD accounts."
+							error={errors.quoteToAccountRate?.message}
+						>
+							<Input id="quoteToAccountRate" inputMode="decimal" placeholder="18050" {...register('quoteToAccountRate')} />
+						</FormField>
+
+						<div className="flex items-end pb-2 sm:col-span-2">
 							<Controller
 								name="isDefault"
 								control={control}

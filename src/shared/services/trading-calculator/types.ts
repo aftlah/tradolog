@@ -26,6 +26,16 @@ export interface TradePriceInput {
 	fees?: NumericInput;
 	/** Size of one pip in quote-currency price units (e.g. `0.0001` for most FX pairs). */
 	pipSize?: NumericInput;
+	/**
+	 * Units per 1.0 lot (e.g. `100` for XAUUSD). Defaults to `1` so symbols without a
+	 * contract size keep the simple price × quantity formula.
+	 */
+	contractSize?: NumericInput;
+	/**
+	 * Quote → account currency rate (e.g. USDIDR `18050`). Applied to money metrics only
+	 * (P&L, risk/reward amounts). Defaults to `1` (no conversion). Pips / RR stay unchanged.
+	 */
+	fxRate?: NumericInput;
 	openedAt?: DateInput;
 	closedAt?: DateInput;
 }
@@ -43,6 +53,8 @@ export interface TradeMetrics {
 	plannedRR: number | null;
 	profitLoss: number | null;
 	profitLossPercent: number | null;
+	/** Net P&L divided by lot size (`quantity`). `null` when P&L or quantity is unavailable. */
+	profitPerLot: number | null;
 	actualRR: number | null;
 	pips: number | null;
 	holdingTimeSeconds: number | null;

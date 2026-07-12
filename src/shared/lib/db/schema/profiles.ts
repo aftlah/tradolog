@@ -47,6 +47,11 @@ export const accounts = pgTable(
 		startingBalance: numeric('starting_balance', { precision: 18, scale: 8 }).notNull().default('0'),
 		currentBalance: numeric('current_balance', { precision: 18, scale: 8 }).notNull().default('0'),
 		leverage: integer('leverage'),
+		/**
+		 * Converts instrument quote P&L (usually USD for XAUUSD) into account currency.
+		 * Example: IDR account → `18050` means 1 USD = Rp 18.050. Null/1 = no conversion.
+		 */
+		quoteToAccountRate: numeric('quote_to_account_rate', { precision: 18, scale: 8 }),
 		isDefault: boolean('is_default').notNull().default(false),
 		notes: text('notes'),
 	},

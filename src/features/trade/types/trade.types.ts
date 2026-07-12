@@ -104,6 +104,10 @@ export interface TradeDetail extends TradeListItem {
 	takeProfit: number | null;
 	riskAmount: number | null;
 	rewardAmount: number | null;
+	/** Net P&L per 1.0 lot. Shown for XAUUSD (100 oz contract). */
+	profitPerLot: number | null;
+	/** Account FX rate used for money metrics (quote → account currency). */
+	quoteToAccountRate: number | null;
 	fees: number | null;
 	holdingTimeSeconds: number | null;
 	setup: string | null;

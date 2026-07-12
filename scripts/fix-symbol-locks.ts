@@ -1,9 +1,4 @@
-/**
- * One-shot: keep only XAUUSD + BTCUSD as locked system symbols.
- * EURUSD / GBPUSD / NAS100 become user-owned (editable) for every existing user.
- *
- * Usage: npx tsx scripts/fix-symbol-locks.ts
- */
+
 import 'dotenv/config';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { getDb } from '../src/shared/lib/db';

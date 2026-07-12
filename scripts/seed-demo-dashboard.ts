@@ -1,9 +1,4 @@
-/**
- * Optional helper (NOT part of `npm run db:seed`) that creates a login-able demo user with a
- * trading account and closed trades, so the Dashboard can be verified end-to-end.
- *
- * Usage: npx tsx scripts/seed-demo-dashboard.ts
- */
+
 import 'dotenv/config';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../src/shared/lib/db';
@@ -78,7 +73,6 @@ async function ensureSymbols(userId: string) {
 	}
 
 	if (!tickers.has('XAUUSD') && !symbols.some((symbol) => symbol.ticker === 'XAUUSD')) {
-		// XAUUSD is normally a system symbol; only create a user copy if catalog is empty.
 		await symbolService.create({
 			userId,
 			ticker: 'XAUUSD',
@@ -87,6 +81,7 @@ async function ensureSymbols(userId: string) {
 			baseAsset: 'XAU',
 			quoteAsset: 'USD',
 			pipSize: '0.01',
+			contractSize: '100',
 			pricePrecision: 2,
 			isActive: true,
 		});

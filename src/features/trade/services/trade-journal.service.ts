@@ -36,6 +36,8 @@ import {
 	ALLOWED_IMAGE_MIME_TYPES,
 	MAX_IMAGES_PER_TRADE,
 	MAX_IMAGE_SIZE_BYTES,
+	XAUUSD_CONTRACT_SIZE,
+	XAUUSD_TICKER,
 } from '../constants/trade.constants';
 import { tradeFormSchema, tradeNoteFormSchema, type TradeFormValues } from '../validators/trade-schemas';
 import type {
@@ -54,6 +56,15 @@ function toNumberOrNull(value: string | null): number | null {
 	}
 	const parsed = Number.parseFloat(value);
 	return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** XAUUSD uses 100 oz per lot; other symbols stay at 1 until their contract size is configured. */
+function resolveContractSize(symbol: TradeSymbol): number {
+	const stored = toNumberOrNull(symbol.contractSize);
+	if (stored !== null && stored > 0) {
+		return stored;
+	}
+	return symbol.ticker === XAUUSD_TICKER ? XAUUSD_CONTRACT_SIZE : 1;
 }
 
 function toIsoOrNull(value: Date | null): string | null {
@@ -116,6 +127,8 @@ function buildTradeDetail(
 		takeProfit: toNumberOrNull(trade.takeProfit),
 		riskAmount: toNumberOrNull(trade.riskAmount),
 		rewardAmount: toNumberOrNull(trade.rewardAmount),
+		profitPerLot: tradingCalculatorService.profitPerLot(toNumberOrNull(trade.profitLoss), trade.quantity),
+		quoteToAccountRate: account ? toNumberOrNull(account.quoteToAccountRate) : null,
 		fees: toNumberOrNull(trade.fees),
 		holdingTimeSeconds: toNumberOrNull(trade.holdingTimeSeconds),
 		setup: trade.setup,
@@ -157,7 +170,7 @@ function toRepositoryQuery(userId: string, query: TradeListQuery): { userId: str
 async function assertOwnedReferences(
 	userId: string,
 	data: Pick<TradeFormValues, 'accountId' | 'symbolId' | 'strategyId'>,
-): Promise<{ symbol: TradeSymbol }> {
+): Promise<{ symbol: TradeSymbol; account: TradingAccount }> {
 	const account = await tradingAccountRepository.findByIdForUser(data.accountId, userId);
 	if (!account) {
 		throw new NotFoundError('Trading account not found.');
@@ -175,7 +188,12 @@ async function assertOwnedReferences(
 		}
 	}
 
-	return { symbol };
+	return { symbol, account };
+}
+
+function resolveFxRate(account: TradingAccount): number {
+	const rate = toNumberOrNull(account.quoteToAccountRate);
+	return rate !== null && rate > 0 ? rate : 1;
 }
 
 export class TradeJournalService {
@@ -260,7 +278,7 @@ export class TradeJournalService {
 
 	async create(userId: string, input: unknown): Promise<TradeDetail> {
 		const data = parseOrThrow(tradeFormSchema, input);
-		const { symbol } = await assertOwnedReferences(userId, data);
+		const { symbol, account } = await assertOwnedReferences(userId, data);
 
 		const metrics = tradingCalculatorService.tradeMetrics({
 			side: data.side,
@@ -271,6 +289,8 @@ export class TradeJournalService {
 			quantity: data.quantity,
 			fees: data.fees ?? 0,
 			pipSize: symbol.pipSize,
+			contractSize: resolveContractSize(symbol),
+			fxRate: resolveFxRate(account),
 			openedAt: data.openedAt,
 			closedAt: data.closedAt,
 		});
@@ -321,7 +341,7 @@ export class TradeJournalService {
 		}
 
 		const data = parseOrThrow(tradeFormSchema, input);
-		const { symbol } = await assertOwnedReferences(userId, data);
+		const { symbol, account } = await assertOwnedReferences(userId, data);
 
 		const metrics = tradingCalculatorService.tradeMetrics({
 			side: data.side,
@@ -332,6 +352,8 @@ export class TradeJournalService {
 			quantity: data.quantity,
 			fees: data.fees ?? 0,
 			pipSize: symbol.pipSize,
+			contractSize: resolveContractSize(symbol),
+			fxRate: resolveFxRate(account),
 			openedAt: data.openedAt,
 			closedAt: data.closedAt,
 		});

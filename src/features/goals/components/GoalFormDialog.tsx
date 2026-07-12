@@ -32,7 +32,7 @@ interface GoalFormDialogProps {
 	onSaved: () => void;
 }
 
-/** Create/Edit dialog for a monthly goal — a single RHF + Zod form shared by both modes. */
+
 export function GoalFormDialog({ open, onOpenChange, goal, onSaved }: GoalFormDialogProps) {
 	const mode = goal ? 'edit' : 'create';
 	const {

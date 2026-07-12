@@ -8,7 +8,7 @@ interface GoalProgressBarProps {
 	isMet: boolean;
 }
 
-/** A single target-vs-actual row: label, values, and a capped progress bar tinted by goal status. */
+
 export function GoalProgressBar({ label, actualLabel, targetLabel, percent, isMet }: GoalProgressBarProps) {
 	const clampedPercent = percent === null ? 0 : Math.min(Math.max(percent, 0), 100);
 

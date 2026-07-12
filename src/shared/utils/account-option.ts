@@ -1,5 +1,5 @@
 import type { AccountOption, TradingAccount } from '@shared/types';
-import { toFiniteNumber } from '@shared/services';
+import { toFiniteNumber, toNullableNumber } from '@shared/services';
 
 /** Maps a raw `TradingAccount` row into the serializable DTO used by the app-wide account switcher. */
 export function toAccountOption(account: TradingAccount): AccountOption {
@@ -12,5 +12,6 @@ export function toAccountOption(account: TradingAccount): AccountOption {
 		isDefault: account.isDefault,
 		startingBalance: toFiniteNumber(account.startingBalance),
 		currentBalance: toFiniteNumber(account.currentBalance),
+		quoteToAccountRate: toNullableNumber(account.quoteToAccountRate),
 	};
 }
