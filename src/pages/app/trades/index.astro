@@ -1,6 +1,8 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { TradeJournalShell, tradeJournalService, parseTradeListQuery } from '@features/trade';
+import { TradeJournalShell } from '@features/trade/components/TradeJournalShell';
+import { tradeJournalService } from '@features/trade/services/trade-journal.service';
+import { parseTradeListQuery } from '@features/trade/utils/query';
 
 const session = Astro.locals.session;
 

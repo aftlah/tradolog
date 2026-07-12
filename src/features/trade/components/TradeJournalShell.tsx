@@ -1,5 +1,5 @@
 import { AppShell, NoAccountsEmptyState, Pagination } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { useTradeTable } from '../hooks/useTradeTable';
 import type { PaginatedResult, TradeFormOptions, TradeListItem, TradeListQuery } from '../types/trade.types';
 import { TradeFiltersBar } from './TradeFiltersBar';

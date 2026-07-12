@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FeaturePageShell, NoAccountsEmptyState } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { useCalendarData } from '../hooks/useCalendarData';
 import type { CalendarData, CalendarDay } from '../types/calendar.types';
 import { CalendarHeader } from './CalendarHeader';

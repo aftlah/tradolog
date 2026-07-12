@@ -45,7 +45,7 @@ function SelectContent({
 				data-slot="select-content"
 				position={position}
 				className={cn(
-					'glass-panel relative z-[100] max-h-[min(18rem,var(--radix-select-content-available-height))] min-w-[10rem] overflow-y-auto overflow-x-hidden p-1.5 text-foreground shadow-glass',
+					'glass-panel relative z-[100] max-h-[min(18rem,var(--radix-select-content-available-height))] min-w-[10rem] overflow-y-auto overflow-x-hidden p-2 text-foreground shadow-glass',
 					position === 'popper' &&
 						'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
 					className,
@@ -85,7 +85,9 @@ function SelectItem({
 			data-slot="select-item"
 			className={cn(
 				'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pr-8 pl-2.5 text-sm outline-none transition-colors duration-150',
-				'focus:bg-white/8 focus:text-foreground',
+				'data-[highlighted]:bg-white/8 data-[highlighted]:text-foreground',
+				// Inset ring so global focus styles are not clipped by the overflow-hidden panel.
+				'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0',
 				'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 				className,
 			)}

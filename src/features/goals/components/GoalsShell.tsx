@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button, FeaturePageShell } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import type { AccountOption } from '@shared/types';
 import { useGoals } from '../hooks/useGoals';
 import type { GoalDto } from '../types/goals.types';

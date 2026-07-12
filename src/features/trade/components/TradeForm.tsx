@@ -60,8 +60,11 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 		}
 	}
 
-	function onInvalid() {
-		toast.error('Please fix the highlighted fields before saving.');
+	function onInvalid(formErrors: typeof errors) {
+		const firstMessage = Object.values(formErrors)
+			.map((error) => (error && typeof error === 'object' && 'message' in error ? String(error.message) : null))
+			.find((message): message is string => Boolean(message));
+		toast.error(firstMessage ?? 'Please fix the highlighted fields before saving.');
 		const firstError = document.querySelector<HTMLElement>('[aria-invalid="true"], [role="alert"]');
 		firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 	}

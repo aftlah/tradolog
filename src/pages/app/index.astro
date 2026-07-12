@@ -1,6 +1,7 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { DashboardShell, dashboardService } from '@features/dashboard';
+import { DashboardShell } from '@features/dashboard/components/DashboardShell';
+import { dashboardService } from '@features/dashboard/services/dashboard.service';
 
 const session = Astro.locals.session;
 

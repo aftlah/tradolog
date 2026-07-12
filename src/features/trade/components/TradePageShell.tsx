@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { AppShell } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { AppShell } from '@shared/components/app-shell/AppShell';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import type { AccountOption } from '@shared/types';
 
 interface TradePageShellProps {

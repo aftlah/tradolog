@@ -1,6 +1,7 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { AnalyticsShell, analyticsService } from '@features/analytics';
+import { AnalyticsShell } from '@features/analytics/components/AnalyticsShell';
+import { analyticsService } from '@features/analytics/services/analytics.service';
 
 const session = Astro.locals.session;
 

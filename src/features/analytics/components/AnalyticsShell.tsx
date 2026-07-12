@@ -1,5 +1,5 @@
 import { FeaturePageShell, NoAccountsEmptyState } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { useAnalyticsData } from '../hooks/useAnalyticsData';
 import type { AnalyticsData } from '../types/analytics.types';
 import { AnalyticsStatGrid } from './AnalyticsStatGrid';

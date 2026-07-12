@@ -1,5 +1,5 @@
 import { AppShell, NoAccountsEmptyState } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { useDashboardData } from '../hooks/useDashboardData';
 import type { DashboardData } from '../types/dashboard.types';
 import { StatCardsGrid } from './StatCardsGrid';

@@ -1,6 +1,7 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { GoalsShell, goalsService } from '@features/goals';
+import { GoalsShell } from '@features/goals/components/GoalsShell';
+import { goalsService } from '@features/goals/services/goals.service';
 import { tradingAccountService } from '@shared/services';
 import { toAccountOption } from '@shared/utils/account-option';
 

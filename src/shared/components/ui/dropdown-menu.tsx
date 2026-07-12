@@ -21,7 +21,7 @@ function DropdownMenuContent({
 				data-slot="dropdown-menu-content"
 				sideOffset={sideOffset}
 				className={cn(
-					'glass-panel z-50 min-w-[12rem] overflow-hidden p-1.5 text-foreground shadow-glass',
+					'glass-panel z-50 min-w-[12rem] overflow-hidden p-2 text-foreground shadow-glass',
 					className,
 				)}
 				{...props}
@@ -46,7 +46,9 @@ function DropdownMenuItem({
 			data-variant={variant}
 			className={cn(
 				'relative flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none select-none',
-				'focus:bg-white/8 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+				'focus:bg-white/8 data-[highlighted]:bg-white/8',
+				'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0',
+				'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 				'data-[variant=destructive]:text-danger data-[variant=destructive]:focus:bg-danger/10',
 				'data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
 				className,
@@ -67,7 +69,9 @@ function DropdownMenuCheckboxItem({
 			data-slot="dropdown-menu-checkbox-item"
 			className={cn(
 				'relative flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-2.5 pl-8 text-sm outline-none select-none',
-				'focus:bg-white/8 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+				'focus:bg-white/8 data-[highlighted]:bg-white/8',
+				'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0',
+				'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 				className,
 			)}
 			checked={checked}
@@ -93,7 +97,9 @@ function DropdownMenuRadioItem({
 			data-slot="dropdown-menu-radio-item"
 			className={cn(
 				'relative flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-2.5 pl-8 text-sm outline-none select-none',
-				'focus:bg-white/8 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+				'focus:bg-white/8 data-[highlighted]:bg-white/8',
+				'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0',
+				'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 				className,
 			)}
 			{...props}

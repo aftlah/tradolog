@@ -1,6 +1,8 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { CalendarShell, calendarService, parseCalendarQuery } from '@features/calendar';
+import { CalendarShell } from '@features/calendar/components/CalendarShell';
+import { calendarService } from '@features/calendar/services/calendar.service';
+import { parseCalendarQuery } from '@features/calendar/utils/query';
 
 const session = Astro.locals.session;
 

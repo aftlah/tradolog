@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { Button, FeaturePageShell, Input } from '@shared/components';
-import { LogoutButton } from '@features/auth';
+import { LogoutButton } from '@features/auth/components/LogoutButton';
 import type { AccountOption } from '@shared/types';
 import { useNotes } from '../hooks/useNotes';
 import type { NoteDto } from '../types/notes.types';

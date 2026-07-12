@@ -1,6 +1,7 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
-import { TradeEditShell, tradeJournalService } from '@features/trade';
+import { TradeEditShell } from '@features/trade/components/TradeEditShell';
+import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { NotFoundError } from '@shared/lib/errors';
 
 const session = Astro.locals.session;
