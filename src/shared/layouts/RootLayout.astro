@@ -33,11 +33,57 @@ const {
 				}
 			} catch (e) {}
 		</script>
+		<style is:global>
+			#tradolog-nav-progress {
+				position: fixed;
+				top: 0;
+				left: 0;
+				z-index: 9999;
+				height: 2px;
+				width: 0;
+				pointer-events: none;
+				background: linear-gradient(90deg, #818cf8, #a5b4fc);
+				opacity: 0;
+				transition:
+					width 280ms ease-out,
+					opacity 160ms ease;
+			}
+			#tradolog-nav-progress[data-active='1'] {
+				opacity: 1;
+				width: 78%;
+			}
+			#tradolog-nav-progress[data-done='1'] {
+				opacity: 0;
+				width: 100%;
+				transition:
+					width 120ms ease-out,
+					opacity 220ms ease 80ms;
+			}
+		</style>
 	</head>
 	<body>
+		<div id="tradolog-nav-progress" transition:persist="tradolog-nav-progress" aria-hidden="true"></div>
 		<slot />
 		<div transition:persist="tradolog-toaster">
 			<Toaster client:load />
 		</div>
+		<script is:inline>
+			(function () {
+				var bar = document.getElementById('tradolog-nav-progress');
+				if (!bar) return;
+				document.addEventListener('astro:before-preparation', function () {
+					bar.removeAttribute('data-done');
+					bar.setAttribute('data-active', '1');
+				});
+				document.addEventListener('astro:page-load', function () {
+					bar.setAttribute('data-done', '1');
+					bar.removeAttribute('data-active');
+					window.setTimeout(function () {
+						bar.removeAttribute('data-done');
+						bar.style.width = '0';
+					}, 280);
+				});
+			})();
+		</script>
 	</body>
 </html>

@@ -42,5 +42,5 @@ const userEmail = session.user.email ?? '';
 	showQuickAdd={false}
 	accountChangePath="/app/trades"
 >
-	<TradeDetailShell client:idle trade={trade} />
+	<TradeDetailShell client:load trade={trade} />
 </AppLayout>

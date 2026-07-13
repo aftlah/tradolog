@@ -36,5 +36,5 @@ const userEmail = session.user.email ?? '';
 	accounts={accounts}
 	activeAccountId={activeAccountId}
 >
-	<NotesShell client:idle initialNotes={initialNotes} />
+	<NotesShell client:load initialNotes={initialNotes} />
 </AppLayout>

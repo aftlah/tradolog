@@ -1,5 +1,5 @@
-import { PRICE_DECIMALS, round, symbolService, tradeService, tradingAccountService, toFiniteNumber } from '@shared/services';
-import type { Trade, TradeSymbol } from '@shared/types';
+import { PRICE_DECIMALS, round, tradeService, tradingAccountService, toFiniteNumber } from '@shared/services';
+import type { TradeCalendarSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
 import type { CalendarData, CalendarDay, CalendarMonthTotals, CalendarTradeSummary } from '../types/calendar.types';
 
@@ -47,11 +47,11 @@ function buildMonthTotals(days: readonly CalendarDay[]): CalendarMonthTotals {
 	return { profitLoss: round(profitLoss, PRICE_DECIMALS), tradeCount, tradingDays, winDays, lossDays };
 }
 
-function toTradeSummaryDto(trade: Trade, symbolMap: Map<string, TradeSymbol>, profitLoss: number, closedAt: Date): CalendarTradeSummary {
+function toTradeSummaryDto(row: TradeCalendarSummary, profitLoss: number, closedAt: Date): CalendarTradeSummary {
 	return {
-		id: trade.id,
-		symbol: symbolMap.get(trade.symbolId)?.ticker ?? 'Unknown',
-		side: trade.side,
+		id: row.id,
+		symbol: row.symbolTicker ?? 'Unknown',
+		side: row.side,
 		profitLoss,
 		closedAt: closedAt.toISOString(),
 	};
@@ -87,42 +87,36 @@ export class CalendarService {
 			return emptyCalendar(year, month);
 		}
 
-		const [accountTrades, symbols] = await Promise.all([
-			tradeService.listByAccount(userId, activeAccount.id),
-			symbolService.listForUser(userId),
-		]);
-		const symbolMap = new Map(symbols.map((symbol) => [symbol.id, symbol]));
-
 		const monthStart = new Date(Date.UTC(year, month - 1, 1));
 		const monthEnd = new Date(Date.UTC(year, month, 1));
+		const closedRows = await tradeService.listClosedSummariesInRange(
+			userId,
+			activeAccount.id,
+			monthStart,
+			monthEnd,
+		);
 
 		const days = buildEmptyDays(year, month);
 		const dayIndexByDate = new Map(days.map((day, index) => [day.date, index]));
 		const trades: CalendarTradeSummary[] = [];
 
-		for (const trade of accountTrades) {
-			if (trade.status !== 'closed' || !trade.closedAt) {
+		for (const row of closedRows) {
+			if (!row.closedAt) {
 				continue;
 			}
-			const closedAt = trade.closedAt;
-			if (closedAt < monthStart || closedAt >= monthEnd) {
-				continue;
-			}
-
+			const closedAt = row.closedAt;
 			const dayIndex = dayIndexByDate.get(toUtcDateKey(closedAt));
 			const day = dayIndex !== undefined ? days[dayIndex] : undefined;
-			const profitLoss = toFiniteNumber(trade.profitLoss);
+			const profitLoss = toFiniteNumber(row.profitLoss);
 
 			if (day) {
 				day.profitLoss = round(day.profitLoss + profitLoss, PRICE_DECIMALS);
 				day.tradeCount += 1;
-				day.tradeIds.push(trade.id);
+				day.tradeIds.push(row.id);
 			}
 
-			trades.push(toTradeSummaryDto(trade, symbolMap, profitLoss, closedAt));
+			trades.push(toTradeSummaryDto(row, profitLoss, closedAt));
 		}
-
-		trades.sort((a, b) => new Date(b.closedAt).getTime() - new Date(a.closedAt).getTime());
 
 		return {
 			year,

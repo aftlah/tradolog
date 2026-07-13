@@ -28,22 +28,26 @@ function readStateFromDom(fallback: AppChromeState): AppChromeState {
  */
 export function AppChrome({ initialState }: AppChromeProps) {
 	const [state, setState] = useState(initialState);
-	const [activeHref, setActiveHref] = useState(() =>
-		typeof window === 'undefined' ? '/app' : resolveActiveHref(window.location.pathname),
-	);
+	const [activeHref, setActiveHref] = useState(initialState.activeHref);
 	const [mobileNavOpen, setMobileNavOpen] = useState(false);
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-		const collapsed = readSidebarCollapsedPreference();
-		syncSidebarCollapsedDocument(collapsed);
-		return collapsed;
-	});
+	// Always start expanded on SSR; sync localStorage after mount to avoid hydration mismatch.
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [animateLayout, setAnimateLayout] = useState(false);
 	const [isNavigatingAccount, setIsNavigatingAccount] = useState(false);
 
 	useEffect(() => {
+		const collapsed = readSidebarCollapsedPreference();
+		setSidebarCollapsed(collapsed);
+		syncSidebarCollapsedDocument(collapsed);
+	}, []);
+
+	useEffect(() => {
 		function syncFromPage() {
-			setState((prev) => readStateFromDom(prev));
-			setActiveHref(resolveActiveHref(window.location.pathname));
+			setState((prev) => {
+				const next = readStateFromDom(prev);
+				setActiveHref(next.activeHref || resolveActiveHref(window.location.pathname));
+				return next;
+			});
 			setMobileNavOpen(false);
 			setIsNavigatingAccount(false);
 		}

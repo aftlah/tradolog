@@ -12,6 +12,9 @@ export {
 	type TradeListFilters,
 	type TradeListRow,
 	type TradeSortColumn,
+	type TradeClosedMetrics,
+	type TradeRecentSummary,
+	type TradeCalendarSummary,
 } from './trade.repository';
 export {
 	tradeImageRepository,

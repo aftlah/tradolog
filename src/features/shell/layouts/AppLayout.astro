@@ -2,6 +2,7 @@
 import RootLayout from '@shared/layouts/RootLayout.astro';
 import { AppChrome } from '@features/shell/components/AppChrome';
 import { APP_CHROME_STATE_ID, type AppChromeState } from '@features/shell/types/chrome.types';
+import { resolveActiveHref } from '@features/shell/utils/resolve-active-href';
 import type { AccountOption } from '@shared/types';
 
 interface Props {
@@ -32,6 +33,7 @@ const chromeState: AppChromeState = {
 	userEmail,
 	accounts,
 	activeAccountId,
+	activeHref: resolveActiveHref(Astro.url.pathname),
 	showQuickAdd,
 	accountChangePath,
 };

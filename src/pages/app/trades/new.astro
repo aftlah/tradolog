@@ -33,5 +33,5 @@ const nowIso = new Date().toISOString();
 	showQuickAdd={false}
 	accountChangePath="/app/trades"
 >
-	<TradeCreateShell client:idle options={options} defaultAccountId={defaultAccount?.id ?? null} nowIso={nowIso} />
+	<TradeCreateShell client:load options={options} defaultAccountId={defaultAccount?.id ?? null} nowIso={nowIso} />
 </AppLayout>

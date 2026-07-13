@@ -52,14 +52,21 @@ interface ReturnsBarChartProps {
 	emptyLabel: string;
 }
 
+const CHART_HEIGHT = 256;
+
 function ReturnsBarChart({ data, currency, tickFormat, emptyLabel }: ReturnsBarChartProps) {
 	if (data.length === 0) {
 		return <p className="py-10 text-center text-sm text-muted">{emptyLabel}</p>;
 	}
 
 	return (
-		<div className="h-64 w-full" role="img" aria-label="Period returns chart">
-			<ResponsiveContainer width="100%" height="100%">
+		<div className="w-full min-w-0" style={{ height: CHART_HEIGHT }} role="img" aria-label="Period returns chart">
+			<ResponsiveContainer
+				width="100%"
+				height={CHART_HEIGHT}
+				minWidth={0}
+				initialDimension={{ width: 640, height: CHART_HEIGHT }}
+			>
 				<BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
 					<CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
 					<XAxis
@@ -104,7 +111,7 @@ export function AnalyticsPeriodReturnsCard({ periodReturns, currency }: Analytic
 					<TabsTrigger value="weekly">Weekly</TabsTrigger>
 					<TabsTrigger value="monthly">Monthly</TabsTrigger>
 				</TabsList>
-				<TabsContent value="daily">
+				<TabsContent value="daily" forceMount className="data-[state=inactive]:hidden">
 					<ReturnsBarChart
 						data={periodReturns.daily}
 						currency={currency}
@@ -112,7 +119,7 @@ export function AnalyticsPeriodReturnsCard({ periodReturns, currency }: Analytic
 						emptyLabel="No daily returns yet — closed trades will appear here by day."
 					/>
 				</TabsContent>
-				<TabsContent value="weekly">
+				<TabsContent value="weekly" forceMount className="data-[state=inactive]:hidden">
 					<ReturnsBarChart
 						data={periodReturns.weekly}
 						currency={currency}
@@ -120,7 +127,7 @@ export function AnalyticsPeriodReturnsCard({ periodReturns, currency }: Analytic
 						emptyLabel="No weekly returns yet — closed trades will appear here by week."
 					/>
 				</TabsContent>
-				<TabsContent value="monthly">
+				<TabsContent value="monthly" forceMount className="data-[state=inactive]:hidden">
 					<ReturnsBarChart
 						data={periodReturns.monthly}
 						currency={currency}

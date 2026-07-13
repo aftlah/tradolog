@@ -1,7 +1,4 @@
-
 import {
-	strategyService,
-	symbolService,
 	tradeService,
 	tradingAccountService,
 	tradingCalculatorService,
@@ -9,7 +6,7 @@ import {
 	type ClosedTradeResult,
 	type EquityPoint,
 } from '@shared/services';
-import type { Trade, TradeSymbol } from '@shared/types';
+import type { TradeClosedMetrics, TradeRecentSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
 import { EQUITY_CURVE_LOOKBACK_DAYS, RECENT_TRADES_LIMIT } from '../constants/dashboard.constants';
 import type {
@@ -19,13 +16,16 @@ import type {
 	DashboardRecentTrade,
 } from '../types/dashboard.types';
 
-function toClosedTradeResult(trade: Trade): ClosedTradeResult {
+function toClosedTradeResult(row: TradeClosedMetrics): ClosedTradeResult | null {
+	if (row.profitLoss === null || row.closedAt === null) {
+		return null;
+	}
 	return {
-		profitLoss: trade.profitLoss,
-		closedAt: trade.closedAt,
-		plannedRR: trade.plannedRr,
-		actualRR: trade.actualRr,
-		holdingTimeSeconds: trade.holdingTimeSeconds,
+		profitLoss: row.profitLoss,
+		closedAt: row.closedAt,
+		plannedRR: row.plannedRr,
+		actualRR: row.actualRr,
+		holdingTimeSeconds: row.holdingTimeSeconds,
 	};
 }
 
@@ -37,28 +37,28 @@ function serializeEquityPoint(point: EquityPoint): DashboardEquityPoint {
 	};
 }
 
-function toRecentTradeDto(trade: Trade, symbolMap: Map<string, TradeSymbol>, strategyMap: Map<string, string>): DashboardRecentTrade {
-	return {
-		id: trade.id,
-		symbol: symbolMap.get(trade.symbolId)?.ticker ?? 'Unknown',
-		side: trade.side,
-		status: trade.status,
-		result: trade.result,
-		strategy: trade.strategyId ? strategyMap.get(trade.strategyId) ?? null : null,
-		profitLoss: toFiniteNumberOrNull(trade.profitLoss),
-		profitLossPercent: toFiniteNumberOrNull(trade.profitLossPercent),
-		actualRR: toFiniteNumberOrNull(trade.actualRr),
-		openedAt: trade.openedAt ? trade.openedAt.toISOString() : null,
-		closedAt: trade.closedAt ? trade.closedAt.toISOString() : null,
-	};
-}
-
 function toFiniteNumberOrNull(value: string | null): number | null {
 	if (value === null) {
 		return null;
 	}
 	const parsed = Number.parseFloat(value);
 	return Number.isFinite(parsed) ? parsed : null;
+}
+
+function toRecentTradeDto(row: TradeRecentSummary): DashboardRecentTrade {
+	return {
+		id: row.id,
+		symbol: row.symbolTicker ?? 'Unknown',
+		side: row.side,
+		status: row.status,
+		result: row.result,
+		strategy: row.strategyName,
+		profitLoss: toFiniteNumberOrNull(row.profitLoss),
+		profitLossPercent: toFiniteNumberOrNull(row.profitLossPercent),
+		actualRR: toFiniteNumberOrNull(row.actualRr),
+		openedAt: row.openedAt ? row.openedAt.toISOString() : null,
+		closedAt: row.closedAt ? row.closedAt.toISOString() : null,
+	};
 }
 
 function emptyDashboard(): DashboardData {
@@ -82,7 +82,6 @@ function emptyDashboard(): DashboardData {
 }
 
 export class DashboardService {
-
 	async getDashboardData(userId: string, requestedAccountId?: string | null): Promise<DashboardData> {
 		const accounts = await tradingAccountService.list(userId);
 
@@ -99,19 +98,14 @@ export class DashboardService {
 			return emptyDashboard();
 		}
 
-		const [accountTrades, symbols, strategies] = await Promise.all([
-			tradeService.listByAccount(userId, activeAccount.id),
-			symbolService.listForUser(userId),
-			strategyService.list(userId),
+		const [closedMetrics, recentRows] = await Promise.all([
+			tradeService.listClosedMetricsByAccount(userId, activeAccount.id),
+			tradeService.listRecentSummariesByAccount(userId, activeAccount.id, RECENT_TRADES_LIMIT),
 		]);
 
-		const symbolMap = new Map(symbols.map((symbol) => [symbol.id, symbol]));
-		const strategyMap = new Map(strategies.map((strategy) => [strategy.id, strategy.name]));
-
-		const closedTrades = accountTrades.filter(
-			(trade) => trade.status === 'closed' && trade.profitLoss !== null && trade.closedAt !== null,
-		);
-		const closedResults = closedTrades.map(toClosedTradeResult);
+		const closedResults = closedMetrics
+			.map(toClosedTradeResult)
+			.filter((result): result is ClosedTradeResult => result !== null);
 
 		const startingBalance = toFiniteNumber(activeAccount.startingBalance);
 		const currentBalance = toFiniteNumber(activeAccount.currentBalance);
@@ -126,15 +120,6 @@ export class DashboardService {
 		const drawdown = tradingCalculatorService.drawdown(startingBalance, closedResults);
 		const equityCurve = tradingCalculatorService.equityCurve(startingBalance, recentClosedResults);
 
-		const recentTrades = [...accountTrades]
-			.sort((a, b) => {
-				const aTime = (a.closedAt ?? a.openedAt ?? a.createdAt).getTime();
-				const bTime = (b.closedAt ?? b.openedAt ?? b.createdAt).getTime();
-				return bTime - aTime;
-			})
-			.slice(0, RECENT_TRADES_LIMIT)
-			.map((trade) => toRecentTradeDto(trade, symbolMap, strategyMap));
-
 		return {
 			hasAccounts: true,
 			accounts: accounts.map(toAccountOption),
@@ -146,11 +131,12 @@ export class DashboardService {
 			streaks,
 			drawdown: {
 				...drawdown,
-				points: drawdown.points.map((point) => ({ ...point, closedAt: point.closedAt.toISOString() })),
+				points: [],
 			} satisfies DashboardDrawdownSummary,
 			equityCurve: equityCurve.map(serializeEquityPoint),
-			recentTrades,
+			recentTrades: recentRows.map(toRecentTradeDto),
 		};
 	}
 }
+
 export const dashboardService = new DashboardService();

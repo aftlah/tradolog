@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, ilike, isNull, lte, or, sum, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, isNull, lt, lte, or, sum, type SQL } from 'drizzle-orm';
 import { getDb } from '@shared/lib/db';
 import { accounts, strategies, symbols, trades } from '@shared/lib/db/schema';
 import type { NewTrade, Trade, TradeResult, TradeSession, TradeSide, TradeStatus } from '@shared/types';
@@ -9,6 +9,41 @@ export interface TradeListRow {
 	strategyName: string | null;
 	accountName: string | null;
 	accountCurrency: string | null;
+}
+
+/** Calculator-ready closed trade columns only. */
+export interface TradeClosedMetrics {
+	id: string;
+	profitLoss: string | null;
+	closedAt: Date | null;
+	plannedRr: string | null;
+	actualRr: string | null;
+	holdingTimeSeconds: string | null;
+}
+
+/** Dashboard recent-trades row. */
+export interface TradeRecentSummary {
+	id: string;
+	side: TradeSide;
+	status: TradeStatus;
+	result: TradeResult | null;
+	profitLoss: string | null;
+	profitLossPercent: string | null;
+	actualRr: string | null;
+	openedAt: Date | null;
+	closedAt: Date | null;
+	createdAt: Date;
+	symbolTicker: string | null;
+	strategyName: string | null;
+}
+
+/** Calendar day trade chip. */
+export interface TradeCalendarSummary {
+	id: string;
+	side: TradeSide;
+	profitLoss: string | null;
+	closedAt: Date | null;
+	symbolTicker: string | null;
 }
 
 const SORTABLE_COLUMNS = {
@@ -93,6 +128,100 @@ export class TradeRepository {
 				),
 			)
 			.orderBy(desc(trades.openedAt), desc(trades.createdAt));
+	}
+
+	/**
+	 * Slim closed-trade rows for calculators — skips notes/prices/setup text.
+	 * Ordered oldest→newest so equity/drawdown series stay chronological.
+	 */
+	async listClosedMetricsByAccount(userId: string, accountId: string): Promise<TradeClosedMetrics[]> {
+		const db = getDb();
+		return db
+			.select({
+				id: trades.id,
+				profitLoss: trades.profitLoss,
+				closedAt: trades.closedAt,
+				plannedRr: trades.plannedRr,
+				actualRr: trades.actualRr,
+				holdingTimeSeconds: trades.holdingTimeSeconds,
+			})
+			.from(trades)
+			.where(
+				and(
+					eq(trades.userId, userId),
+					eq(trades.accountId, accountId),
+					eq(trades.status, 'closed'),
+					isNull(trades.deletedAt),
+				),
+			)
+			.orderBy(asc(trades.closedAt), asc(trades.createdAt));
+	}
+
+	/** Recent trades for dashboard table — limited rows with symbol/strategy labels. */
+	async listRecentSummariesByAccount(
+		userId: string,
+		accountId: string,
+		limit: number,
+	): Promise<TradeRecentSummary[]> {
+		const db = getDb();
+		return db
+			.select({
+				id: trades.id,
+				side: trades.side,
+				status: trades.status,
+				result: trades.result,
+				profitLoss: trades.profitLoss,
+				profitLossPercent: trades.profitLossPercent,
+				actualRr: trades.actualRr,
+				openedAt: trades.openedAt,
+				closedAt: trades.closedAt,
+				createdAt: trades.createdAt,
+				symbolTicker: symbols.ticker,
+				strategyName: strategies.name,
+			})
+			.from(trades)
+			.leftJoin(symbols, eq(trades.symbolId, symbols.id))
+			.leftJoin(strategies, eq(trades.strategyId, strategies.id))
+			.where(
+				and(
+					eq(trades.userId, userId),
+					eq(trades.accountId, accountId),
+					isNull(trades.deletedAt),
+				),
+			)
+			.orderBy(desc(trades.closedAt), desc(trades.openedAt), desc(trades.createdAt))
+			.limit(limit);
+	}
+
+	/** Closed trades in a closedAt range — used by calendar month views. */
+	async listClosedSummariesInRange(
+		userId: string,
+		accountId: string,
+		rangeStart: Date,
+		rangeEnd: Date,
+	): Promise<TradeCalendarSummary[]> {
+		const db = getDb();
+		return db
+			.select({
+				id: trades.id,
+				side: trades.side,
+				profitLoss: trades.profitLoss,
+				closedAt: trades.closedAt,
+				symbolTicker: symbols.ticker,
+			})
+			.from(trades)
+			.leftJoin(symbols, eq(trades.symbolId, symbols.id))
+			.where(
+				and(
+					eq(trades.userId, userId),
+					eq(trades.accountId, accountId),
+					eq(trades.status, 'closed'),
+					isNull(trades.deletedAt),
+					gte(trades.closedAt, rangeStart),
+					lt(trades.closedAt, rangeEnd),
+				),
+			)
+			.orderBy(desc(trades.closedAt));
 	}
 
 	/** SQL SUM of closed P&L for one account (no row materialization). */

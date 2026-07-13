@@ -37,6 +37,8 @@ function EquityTooltip({
 	);
 }
 
+const CHART_HEIGHT = 256;
+
 /** Renders the realized equity curve built by `TradingCalculatorService.equityCurve()`. */
 export function EquityCurveCard({ equityCurve, startingBalance, currency }: EquityCurveCardProps) {
 	const chartData =
@@ -45,7 +47,7 @@ export function EquityCurveCard({ equityCurve, startingBalance, currency }: Equi
 			: [{ closedAt: new Date().toISOString(), equity: startingBalance, profitLoss: 0 }];
 
 	return (
-		<div className="glass-card flex h-full flex-col gap-4 p-6">
+		<div className="glass-card flex h-full min-w-0 flex-col gap-4 p-6">
 			<div className="flex items-center justify-between">
 				<div>
 					<h2 className="text-sm font-medium text-muted">Equity Curve</h2>
@@ -60,8 +62,13 @@ export function EquityCurveCard({ equityCurve, startingBalance, currency }: Equi
 				<p className="text-sm text-muted">No closed trades yet — the curve will fill in as trades close.</p>
 			) : null}
 
-			<div className="h-64 w-full" role="img" aria-label="Equity curve chart">
-				<ResponsiveContainer width="100%" height="100%">
+			<div className="w-full min-w-0" style={{ height: CHART_HEIGHT }} role="img" aria-label="Equity curve chart">
+				<ResponsiveContainer
+					width="100%"
+					height={CHART_HEIGHT}
+					minWidth={0}
+					initialDimension={{ width: 640, height: CHART_HEIGHT }}
+				>
 					<AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
 						<defs>
 							<linearGradient id="dashboardEquityFill" x1="0" y1="0" x2="0" y2="1">
@@ -79,18 +86,16 @@ export function EquityCurveCard({ equityCurve, startingBalance, currency }: Equi
 							axisLine={false}
 							minTickGap={32}
 						/>
-						<YAxis
-							hide
-							domain={['dataMin - 100', 'dataMax + 100']}
-						/>
+						<YAxis hide domain={['auto', 'auto']} />
 						<Tooltip content={(props) => <EquityTooltip {...props} currency={currency} />} />
 						<Area
 							type="monotone"
 							dataKey="equity"
-							stroke="#2563EB"
+							stroke="#818cf8"
 							strokeWidth={2.5}
 							fill="url(#dashboardEquityFill)"
 							isAnimationActive={false}
+							dot={false}
 						/>
 					</AreaChart>
 				</ResponsiveContainer>

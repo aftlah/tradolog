@@ -24,5 +24,5 @@ const userEmail = session.user.email ?? '';
 	accounts={dashboardData.accounts}
 	activeAccountId={dashboardData.activeAccountId}
 >
-	<DashboardShell client:idle initialData={dashboardData} />
+	<DashboardShell client:load initialData={dashboardData} />
 </AppLayout>

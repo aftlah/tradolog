@@ -10,12 +10,15 @@ export default defineConfig({
 	output: 'server',
 	prefetch: {
 		prefetchAll: false,
-		defaultStrategy: 'hover',
+		defaultStrategy: 'viewport',
 	},
 	integrations: [react()],
 	adapter: vercel(),
 	vite: {
 		plugins: [tailwindcss()],
+		optimizeDeps: {
+			include: ['recharts', 'lucide-react', 'framer-motion', '@tanstack/react-table'],
+		},
 		resolve: {
 			alias: {
 				'@': fileURLToPath(new URL('./src', import.meta.url)),

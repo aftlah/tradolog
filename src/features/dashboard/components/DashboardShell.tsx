@@ -2,7 +2,7 @@ import { NoAccountsEmptyState } from '@shared/components';
 import { useDashboardData } from '../hooks/useDashboardData';
 import type { DashboardData } from '../types/dashboard.types';
 import { StatCardsGrid } from './StatCardsGrid';
-import { LazyEquityCurveCard } from './LazyEquityCurveCard';
+import { EquityCurveCard } from './EquityCurveCard';
 import { PerformanceSummaryCard } from './PerformanceSummaryCard';
 import { RecentTradesTable } from './RecentTradesTable';
 
@@ -26,7 +26,7 @@ export function DashboardShell({ initialData }: DashboardShellProps) {
 
 			<div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
 				<div className="min-h-72 lg:col-span-2">
-					<LazyEquityCurveCard
+					<EquityCurveCard
 						equityCurve={data.equityCurve}
 						startingBalance={data.startingBalance}
 						currency={data.currency}

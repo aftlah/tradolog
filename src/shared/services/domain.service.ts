@@ -157,6 +157,18 @@ export class TradeService {
 		return tradeRepository.listByAccountId(userId, accountId);
 	}
 
+	async listClosedMetricsByAccount(userId: string, accountId: string) {
+		return tradeRepository.listClosedMetricsByAccount(userId, accountId);
+	}
+
+	async listRecentSummariesByAccount(userId: string, accountId: string, limit: number) {
+		return tradeRepository.listRecentSummariesByAccount(userId, accountId, limit);
+	}
+
+	async listClosedSummariesInRange(userId: string, accountId: string, rangeStart: Date, rangeEnd: Date) {
+		return tradeRepository.listClosedSummariesInRange(userId, accountId, rangeStart, rangeEnd);
+	}
+
 	async requireForUser(id: string, userId: string) {
 		const trade = await tradeRepository.findByIdForUser(id, userId);
 		if (!trade) {

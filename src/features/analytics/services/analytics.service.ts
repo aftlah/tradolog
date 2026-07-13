@@ -17,7 +17,7 @@ import {
 	type EquityPoint,
 	type PeriodReturn,
 } from '@shared/services';
-import type { Trade } from '@shared/types';
+import type { TradeClosedMetrics } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
 import {
 	DAILY_RETURNS_LOOKBACK,
@@ -32,13 +32,16 @@ import type {
 	AnalyticsPeriodReturn,
 } from '../types/analytics.types';
 
-function toClosedTradeResult(trade: Trade): ClosedTradeResult {
+function toClosedTradeResult(row: TradeClosedMetrics): ClosedTradeResult | null {
+	if (row.profitLoss === null || row.closedAt === null) {
+		return null;
+	}
 	return {
-		profitLoss: trade.profitLoss,
-		closedAt: trade.closedAt,
-		plannedRR: trade.plannedRr,
-		actualRR: trade.actualRr,
-		holdingTimeSeconds: trade.holdingTimeSeconds,
+		profitLoss: row.profitLoss,
+		closedAt: row.closedAt,
+		plannedRR: row.plannedRr,
+		actualRR: row.actualRr,
+		holdingTimeSeconds: row.holdingTimeSeconds,
 	};
 }
 
@@ -113,11 +116,10 @@ export class AnalyticsService {
 			return emptyAnalytics();
 		}
 
-		const accountTrades = await tradeService.listByAccount(userId, activeAccount.id);
-		const closedTrades = accountTrades.filter(
-			(trade) => trade.status === 'closed' && trade.profitLoss !== null && trade.closedAt !== null,
-		);
-		const closedResults = closedTrades.map(toClosedTradeResult);
+		const closedMetrics = await tradeService.listClosedMetricsByAccount(userId, activeAccount.id);
+		const closedResults = closedMetrics
+			.map(toClosedTradeResult)
+			.filter((result): result is ClosedTradeResult => result !== null);
 
 		const startingBalance = toFiniteNumber(activeAccount.startingBalance);
 		const currentBalance = toFiniteNumber(activeAccount.currentBalance);
@@ -154,4 +156,5 @@ export class AnalyticsService {
 		};
 	}
 }
+
 export const analyticsService = new AnalyticsService();

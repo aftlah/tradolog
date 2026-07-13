@@ -2,11 +2,9 @@ import { NoAccountsEmptyState } from '@shared/components';
 import { useAnalyticsData } from '../hooks/useAnalyticsData';
 import type { AnalyticsData } from '../types/analytics.types';
 import { AnalyticsStatGrid } from './AnalyticsStatGrid';
-import {
-	LazyAnalyticsDrawdownCard,
-	LazyAnalyticsEquityChart,
-	LazyAnalyticsPeriodReturnsCard,
-} from './LazyAnalyticsCharts';
+import { AnalyticsEquityChart } from './AnalyticsEquityChart';
+import { AnalyticsPeriodReturnsCard } from './AnalyticsPeriodReturnsCard';
+import { AnalyticsDrawdownCard } from './AnalyticsDrawdownCard';
 import { AnalyticsStreaksCard } from './AnalyticsStreaksCard';
 
 interface AnalyticsShellProps {
@@ -29,7 +27,7 @@ export function AnalyticsShell({ initialData }: AnalyticsShellProps) {
 
 			<div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
 				<div className="min-h-72 lg:col-span-2">
-					<LazyAnalyticsEquityChart
+					<AnalyticsEquityChart
 						equityCurve={data.equityCurve}
 						startingBalance={data.startingBalance}
 						currency={data.currency}
@@ -40,9 +38,9 @@ export function AnalyticsShell({ initialData }: AnalyticsShellProps) {
 
 			<div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
 				<div className="min-h-72 lg:col-span-2">
-					<LazyAnalyticsPeriodReturnsCard periodReturns={data.periodReturns} currency={data.currency} />
+					<AnalyticsPeriodReturnsCard periodReturns={data.periodReturns} currency={data.currency} />
 				</div>
-				<LazyAnalyticsDrawdownCard drawdown={data.drawdown} currency={data.currency} />
+				<AnalyticsDrawdownCard drawdown={data.drawdown} currency={data.currency} />
 			</div>
 
 			{isLoading ? <p className="text-center text-xs text-muted">Refreshing analytics…</p> : null}

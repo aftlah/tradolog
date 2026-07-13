@@ -10,28 +10,31 @@
  */
 import { NotFoundError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
-import { monthlyGoalRepository } from '@shared/repositories';
+import { monthlyGoalRepository, type TradeClosedMetrics } from '@shared/repositories';
 import { tradeService, tradingCalculatorService, round, toNullableNumber, type ClosedTradeResult } from '@shared/services';
 import { monthlyGoalInsertSchema, monthlyGoalUpdateSchema } from '@shared/validators';
-import type { MonthlyGoal, Trade } from '@shared/types';
+import type { MonthlyGoal } from '@shared/types';
 import { goalFormSchema } from '../validators/goal-schemas';
 import type { GoalDto } from '../types/goals.types';
 
-function toClosedTradeResult(trade: Trade): ClosedTradeResult {
+function toClosedTradeResult(row: TradeClosedMetrics): ClosedTradeResult | null {
+	if (row.profitLoss === null || row.closedAt === null) {
+		return null;
+	}
 	return {
-		profitLoss: trade.profitLoss,
-		closedAt: trade.closedAt,
-		plannedRR: trade.plannedRr,
-		actualRR: trade.actualRr,
-		holdingTimeSeconds: trade.holdingTimeSeconds,
+		profitLoss: row.profitLoss,
+		closedAt: row.closedAt,
+		plannedRR: row.plannedRr,
+		actualRR: row.actualRr,
+		holdingTimeSeconds: row.holdingTimeSeconds,
 	};
 }
 
-function isClosedWithinPeriod(trade: Trade, year: number, month: number): boolean {
-	if (trade.status !== 'closed' || trade.profitLoss === null || trade.closedAt === null) {
+function isClosedWithinPeriod(row: TradeClosedMetrics, year: number, month: number): boolean {
+	if (row.profitLoss === null || row.closedAt === null) {
 		return false;
 	}
-	return trade.closedAt.getUTCFullYear() === year && trade.closedAt.getUTCMonth() + 1 === month;
+	return row.closedAt.getUTCFullYear() === year && row.closedAt.getUTCMonth() + 1 === month;
 }
 
 /** Percentage of `target` reached by `actual`, or `null` when the goal has no target for this metric. */
@@ -42,9 +45,11 @@ function progressPercent(actual: number, target: number | null): number | null {
 	return round((actual / target) * 100, 1);
 }
 
-function toGoalDto(goal: MonthlyGoal, trades: readonly Trade[]): GoalDto {
-	const closedTrades = trades.filter((trade) => isClosedWithinPeriod(trade, goal.year, goal.month));
-	const closedResults = closedTrades.map(toClosedTradeResult);
+function toGoalDto(goal: MonthlyGoal, closedMetrics: readonly TradeClosedMetrics[]): GoalDto {
+	const closedResults = closedMetrics
+		.filter((row) => isClosedWithinPeriod(row, goal.year, goal.month))
+		.map(toClosedTradeResult)
+		.filter((result): result is ClosedTradeResult => result !== null);
 
 	const performance = tradingCalculatorService.performanceSummary(closedResults);
 	const drawdown = tradingCalculatorService.drawdown(0, closedResults);
@@ -91,15 +96,33 @@ function toGoalDto(goal: MonthlyGoal, trades: readonly Trade[]): GoalDto {
 	};
 }
 
+async function loadClosedMetrics(userId: string, accountId?: string): Promise<TradeClosedMetrics[]> {
+	if (accountId) {
+		return tradeService.listClosedMetricsByAccount(userId, accountId);
+	}
+
+	const trades = await tradeService.list(userId);
+	return trades
+		.filter((trade) => trade.status === 'closed')
+		.map((trade) => ({
+			id: trade.id,
+			profitLoss: trade.profitLoss,
+			closedAt: trade.closedAt,
+			plannedRr: trade.plannedRr,
+			actualRr: trade.actualRr,
+			holdingTimeSeconds: trade.holdingTimeSeconds,
+		}));
+}
+
 export class GoalsService {
 	/** Every one of `userId`'s goals, each with its actuals computed from that month's closed trades, optionally scoped to a single account. */
 	async listWithProgress(userId: string, accountId?: string): Promise<GoalDto[]> {
-		const [goals, trades] = await Promise.all([
+		const [goals, closedMetrics] = await Promise.all([
 			monthlyGoalRepository.listByUserId(userId),
-			accountId ? tradeService.listByAccount(userId, accountId) : tradeService.list(userId),
+			loadClosedMetrics(userId, accountId),
 		]);
 
-		return goals.map((goal) => toGoalDto(goal, trades));
+		return goals.map((goal) => toGoalDto(goal, closedMetrics));
 	}
 
 	async create(userId: string, input: unknown): Promise<GoalDto> {
@@ -119,8 +142,8 @@ export class GoalsService {
 		});
 
 		const goal = await monthlyGoalRepository.insert(data);
-		const trades = await tradeService.list(userId);
-		return toGoalDto(goal, trades);
+		const closedMetrics = await loadClosedMetrics(userId);
+		return toGoalDto(goal, closedMetrics);
 	}
 
 	async update(id: string, userId: string, input: unknown): Promise<GoalDto> {
@@ -143,8 +166,8 @@ export class GoalsService {
 			throw new NotFoundError('Goal not found.');
 		}
 
-		const trades = await tradeService.list(userId);
-		return toGoalDto(updated, trades);
+		const closedMetrics = await loadClosedMetrics(userId);
+		return toGoalDto(updated, closedMetrics);
 	}
 
 	async remove(id: string, userId: string): Promise<void> {
