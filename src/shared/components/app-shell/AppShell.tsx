@@ -1,18 +1,14 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { useState, type ReactNode } from 'react';
+import { cn } from '@shared/utils/cn';
 import { NAV_ITEMS } from '@shared/constants/nav.constants';
 import type { AccountOption } from '@shared/types';
 import { Sidebar } from './Sidebar';
-import {
-	SIDEBAR_COLLAPSED_WIDTH,
-	SIDEBAR_EXPANDED_WIDTH,
-	sidebarTransition,
-} from './sidebar.motion';
 import { Navbar } from './Navbar';
-
-const SIDEBAR_COLLAPSED_KEY = 'tradolog.sidebar.collapsed';
-const SIDEBAR_INSET = 16;
-const SIDEBAR_GAP = 16;
+import {
+	persistSidebarCollapsedPreference,
+	readSidebarCollapsedPreference,
+	syncSidebarCollapsedDocument,
+} from './sidebar.motion';
 
 interface AppShellProps {
 	title: string;
@@ -26,31 +22,6 @@ interface AppShellProps {
 	showQuickAdd?: boolean;
 	userMenuFooter: ReactNode;
 	children: ReactNode;
-}
-
-function readCollapsedPreference(): boolean {
-	if (typeof window === 'undefined') {
-		return false;
-	}
-	try {
-		return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
-	} catch {
-		return false;
-	}
-}
-
-function useIsLargeScreen(): boolean {
-	const [isLarge, setIsLarge] = useState(false);
-
-	useEffect(() => {
-		const media = window.matchMedia('(min-width: 1024px)');
-		const sync = () => setIsLarge(media.matches);
-		sync();
-		media.addEventListener('change', sync);
-		return () => media.removeEventListener('change', sync);
-	}, []);
-
-	return isLarge;
 }
 
 export function AppShell({
@@ -67,24 +38,18 @@ export function AppShell({
 	children,
 }: AppShellProps) {
 	const [mobileNavOpen, setMobileNavOpen] = useState(false);
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-	const isLargeScreen = useIsLargeScreen();
-
-	useEffect(() => {
-		setSidebarCollapsed(readCollapsedPreference());
-	}, []);
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+		const collapsed = readSidebarCollapsedPreference();
+		syncSidebarCollapsedDocument(collapsed);
+		return collapsed;
+	});
+	const [animateLayout, setAnimateLayout] = useState(false);
 
 	function handleCollapsedChange(collapsed: boolean) {
+		setAnimateLayout(true);
 		setSidebarCollapsed(collapsed);
-		try {
-			window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0');
-		} catch {
-			// Ignore storage failures (private mode, quota, etc).
-		}
+		persistSidebarCollapsedPreference(collapsed);
 	}
-
-	const sidebarWidth = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH;
-	const contentOffset = isLargeScreen ? SIDEBAR_INSET + sidebarWidth + SIDEBAR_GAP : 0;
 
 	return (
 		<div className="relative min-h-dvh">
@@ -100,20 +65,14 @@ export function AppShell({
 				onCollapsedChange={handleCollapsedChange}
 				mobileOpen={mobileNavOpen}
 				onMobileOpenChange={setMobileNavOpen}
+				animateLayout={animateLayout}
 			/>
 
-			<motion.div
-				className="relative z-10"
-				initial={false}
-				animate={{ paddingLeft: contentOffset }}
-				transition={sidebarTransition}
+			<div
+				className={cn('relative z-10 app-shell-offset', animateLayout && 'app-shell-offset--animated')}
+				data-collapsed={sidebarCollapsed ? 'true' : undefined}
 			>
-				<motion.div
-					className="pointer-events-none fixed inset-x-0 top-0 z-30 px-4 pt-4 lg:pr-4"
-					initial={false}
-					animate={{ left: contentOffset }}
-					transition={sidebarTransition}
-				>
+				<div className="app-shell-navbar pointer-events-none fixed top-0 right-0 z-30 px-4 pt-4 lg:pr-4">
 					<div className="pointer-events-auto">
 						<Navbar
 							title={title}
@@ -128,12 +87,12 @@ export function AppShell({
 							userMenuFooter={userMenuFooter}
 						/>
 					</div>
-				</motion.div>
+				</div>
 
 				<div className="h-32 shrink-0 sm:h-36" aria-hidden="true" />
 
 				<main className="space-y-6 px-4 pt-2 pb-8 lg:pr-4">{children}</main>
-			</motion.div>
+			</div>
 		</div>
 	);
 }

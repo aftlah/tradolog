@@ -1,13 +1,8 @@
-import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '../ui/dialog';
 import type { NavItem } from '@shared/types';
+import { cn } from '@shared/utils/cn';
 import { VisuallyHiddenTitle } from './VisuallyHiddenTitle';
 import { SidebarContent } from './SidebarContent';
-import {
-	SIDEBAR_COLLAPSED_WIDTH,
-	SIDEBAR_EXPANDED_WIDTH,
-	sidebarTransition,
-} from './sidebar.motion';
 
 interface SidebarProps {
 	navItems: NavItem[];
@@ -16,6 +11,7 @@ interface SidebarProps {
 	onCollapsedChange: (collapsed: boolean) => void;
 	mobileOpen: boolean;
 	onMobileOpenChange: (open: boolean) => void;
+	animateLayout?: boolean;
 }
 
 export function Sidebar({
@@ -25,20 +21,18 @@ export function Sidebar({
 	onCollapsedChange,
 	mobileOpen,
 	onMobileOpenChange,
+	animateLayout = false,
 }: SidebarProps) {
 	return (
 		<>
-			<motion.aside
+			<aside
 				aria-label="Sidebar"
 				aria-expanded={!collapsed}
-				initial={false}
-				animate={{
-					width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH,
-					paddingLeft: collapsed ? 12 : 16,
-					paddingRight: collapsed ? 12 : 16,
-				}}
-				transition={sidebarTransition}
-				className="glass-panel fixed inset-y-4 left-4 z-40 hidden flex-col overflow-hidden py-4 lg:flex"
+				data-collapsed={collapsed ? 'true' : undefined}
+				className={cn(
+					'glass-panel app-shell-sidebar fixed inset-y-4 left-4 z-40 hidden flex-col overflow-hidden py-4 lg:flex',
+					animateLayout && 'app-shell-sidebar--animated',
+				)}
 			>
 				<SidebarContent
 					navItems={navItems}
@@ -46,7 +40,7 @@ export function Sidebar({
 					collapsed={collapsed}
 					onToggleCollapsed={() => onCollapsedChange(!collapsed)}
 				/>
-			</motion.aside>
+			</aside>
 
 			<Dialog open={mobileOpen} onOpenChange={onMobileOpenChange}>
 				<DialogContent
@@ -61,4 +55,4 @@ export function Sidebar({
 	);
 }
 
-export { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_EXPANDED_WIDTH, sidebarTransition } from './sidebar.motion';
+export { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_EXPANDED_WIDTH } from './sidebar.motion';

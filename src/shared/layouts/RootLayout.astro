@@ -22,6 +22,14 @@ const {
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
 		<title>{title}</title>
+		{/* Apply collapsed sidebar before first paint so navigation does not flash expanded. */}
+		<script is:inline>
+			try {
+				if (localStorage.getItem('tradolog.sidebar.collapsed') === '1') {
+					document.documentElement.dataset.sidebarCollapsed = '1';
+				}
+			} catch (e) {}
+		</script>
 	</head>
 	<body>
 		<slot />
