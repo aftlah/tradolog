@@ -1,6 +1,7 @@
 import { PRICE_DECIMALS, round, tradeService, tradingAccountService, toFiniteNumber } from '@shared/services';
 import type { TradeCalendarSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
+import { calendarCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
 import type { CalendarData, CalendarDay, CalendarMonthTotals, CalendarTradeSummary } from '../types/calendar.types';
 
 function toUtcDateKey(date: Date): string {
@@ -70,64 +71,121 @@ function emptyCalendar(year: number, month: number): CalendarData {
 	};
 }
 
+function assembleCalendar(
+	year: number,
+	month: number,
+	accounts: Awaited<ReturnType<typeof tradingAccountService.list>>,
+	activeAccount: NonNullable<(typeof accounts)[number]>,
+	closedRows: TradeCalendarSummary[],
+): CalendarData {
+	const days = buildEmptyDays(year, month);
+	const dayIndexByDate = new Map(days.map((day, index) => [day.date, index]));
+	const trades: CalendarTradeSummary[] = [];
+
+	for (const row of closedRows) {
+		if (!row.closedAt) {
+			continue;
+		}
+		const closedAt = row.closedAt;
+		const dayIndex = dayIndexByDate.get(toUtcDateKey(closedAt));
+		const day = dayIndex !== undefined ? days[dayIndex] : undefined;
+		const profitLoss = toFiniteNumber(row.profitLoss);
+
+		if (day) {
+			day.profitLoss = round(day.profitLoss + profitLoss, PRICE_DECIMALS);
+			day.tradeCount += 1;
+			day.tradeIds.push(row.id);
+		}
+
+		trades.push(toTradeSummaryDto(row, profitLoss, closedAt));
+	}
+
+	return {
+		year,
+		month,
+		days,
+		accounts: accounts.map(toAccountOption),
+		activeAccountId: activeAccount.id,
+		currency: activeAccount.currency,
+		monthTotals: buildMonthTotals(days),
+		trades,
+	};
+}
+
 export class CalendarService {
 	async getCalendarData(userId: string, year: number, month: number, requestedAccountId?: string | null): Promise<CalendarData> {
+		const monthStart = new Date(Date.UTC(year, month - 1, 1));
+		const monthEnd = new Date(Date.UTC(year, month, 1));
+
+		if (requestedAccountId) {
+			const cacheKey = calendarCacheKey(userId, requestedAccountId, year, month);
+			const cached = pageDataCache.get(cacheKey) as CalendarData | undefined;
+			if (cached) {
+				return cached;
+			}
+
+			const [accounts, closedRows] = await Promise.all([
+				tradingAccountService.list(userId),
+				tradeService.listClosedSummariesInRange(userId, requestedAccountId, monthStart, monthEnd),
+			]);
+
+			if (accounts.length === 0) {
+				return emptyCalendar(year, month);
+			}
+
+			const activeAccount = accounts.find((account) => account.id === requestedAccountId);
+			if (activeAccount) {
+				const data = assembleCalendar(year, month, accounts, activeAccount, closedRows);
+				pageDataCache.set(cacheKey, data);
+				return data;
+			}
+
+			const fallback = accounts.find((account) => account.isDefault) ?? accounts[0];
+			if (!fallback) {
+				return emptyCalendar(year, month);
+			}
+
+			const fallbackRows = await tradeService.listClosedSummariesInRange(
+				userId,
+				fallback.id,
+				monthStart,
+				monthEnd,
+			);
+			const data = assembleCalendar(year, month, accounts, fallback, fallbackRows);
+			pageDataCache.set(calendarCacheKey(userId, fallback.id, year, month), data);
+			return data;
+		}
+
 		const accounts = await tradingAccountService.list(userId);
 
 		if (accounts.length === 0) {
 			return emptyCalendar(year, month);
 		}
 
-		const activeAccount =
-			(requestedAccountId ? accounts.find((account) => account.id === requestedAccountId) : undefined) ??
-			accounts.find((account) => account.isDefault) ??
-			accounts[0];
-
+		const activeAccount = accounts.find((account) => account.isDefault) ?? accounts[0];
 		if (!activeAccount) {
 			return emptyCalendar(year, month);
 		}
 
-		const monthStart = new Date(Date.UTC(year, month - 1, 1));
-		const monthEnd = new Date(Date.UTC(year, month, 1));
+		const cacheKey = calendarCacheKey(userId, activeAccount.id, year, month);
+		const cached = pageDataCache.get(cacheKey) as CalendarData | undefined;
+		if (cached) {
+			return {
+				...cached,
+				accounts: accounts.map(toAccountOption),
+				activeAccountId: activeAccount.id,
+			};
+		}
+
 		const closedRows = await tradeService.listClosedSummariesInRange(
 			userId,
 			activeAccount.id,
 			monthStart,
 			monthEnd,
 		);
-
-		const days = buildEmptyDays(year, month);
-		const dayIndexByDate = new Map(days.map((day, index) => [day.date, index]));
-		const trades: CalendarTradeSummary[] = [];
-
-		for (const row of closedRows) {
-			if (!row.closedAt) {
-				continue;
-			}
-			const closedAt = row.closedAt;
-			const dayIndex = dayIndexByDate.get(toUtcDateKey(closedAt));
-			const day = dayIndex !== undefined ? days[dayIndex] : undefined;
-			const profitLoss = toFiniteNumber(row.profitLoss);
-
-			if (day) {
-				day.profitLoss = round(day.profitLoss + profitLoss, PRICE_DECIMALS);
-				day.tradeCount += 1;
-				day.tradeIds.push(row.id);
-			}
-
-			trades.push(toTradeSummaryDto(row, profitLoss, closedAt));
-		}
-
-		return {
-			year,
-			month,
-			days,
-			accounts: accounts.map(toAccountOption),
-			activeAccountId: activeAccount.id,
-			currency: activeAccount.currency,
-			monthTotals: buildMonthTotals(days),
-			trades,
-		};
+		const data = assembleCalendar(year, month, accounts, activeAccount, closedRows);
+		pageDataCache.set(cacheKey, data);
+		return data;
 	}
 }
 

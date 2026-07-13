@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@shared/utils/cn';
 import { softNavigate } from '@shared/utils/soft-navigate';
+import { persistActiveAccountCookie } from '@shared/utils/active-account-cookie';
 import { NAV_ITEMS } from '@shared/constants/nav.constants';
 import { Sidebar } from '@shared/components/app-shell/Sidebar';
 import { Navbar } from '@shared/components/app-shell/Navbar';
@@ -12,6 +13,7 @@ import {
 import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { APP_CHROME_STATE_ID, parseAppChromeState, type AppChromeState } from '../types/chrome.types';
 import { resolveActiveHref } from '../utils/resolve-active-href';
+import { scheduleAppNavPrefetch } from '../utils/prefetch-app-nav';
 
 interface AppChromeProps {
 	initialState: AppChromeState;
@@ -42,6 +44,14 @@ export function AppChrome({ initialState }: AppChromeProps) {
 	}, []);
 
 	useEffect(() => {
+		if (state.activeAccountId) {
+			persistActiveAccountCookie(state.activeAccountId);
+		}
+	}, [state.activeAccountId]);
+
+	useEffect(() => scheduleAppNavPrefetch(window.location.pathname), [activeHref]);
+
+	useEffect(() => {
 		function syncFromPage() {
 			setState((prev) => {
 				const next = readStateFromDom(prev);
@@ -65,6 +75,7 @@ export function AppChrome({ initialState }: AppChromeProps) {
 
 	async function handleAccountChange(accountId: string) {
 		setIsNavigatingAccount(true);
+		persistActiveAccountCookie(accountId);
 		try {
 			if (state.accountChangePath) {
 				const url = new URL(state.accountChangePath, window.location.origin);

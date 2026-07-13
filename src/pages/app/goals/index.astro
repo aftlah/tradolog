@@ -4,6 +4,8 @@ import { GoalsShell } from '@features/goals/components/GoalsShell';
 import { goalsService } from '@features/goals/services/goals.service';
 import { tradingAccountService } from '@shared/services';
 import { toAccountOption } from '@shared/utils/account-option';
+import { ACTIVE_ACCOUNT_COOKIE } from '@shared/constants/account.constants';
+import { readActiveAccountCookieValue } from '@shared/utils/active-account-cookie';
 
 const session = Astro.locals.session;
 
@@ -12,17 +14,35 @@ if (!session) {
 }
 
 const userId = session.user.id;
-const rawAccounts = await tradingAccountService.list(userId);
+const accountHint =
+	Astro.url.searchParams.get('accountId') ??
+	readActiveAccountCookieValue(Astro.cookies.get(ACTIVE_ACCOUNT_COOKIE)?.value);
+
+const [rawAccounts, goalsForHint] = await Promise.all([
+	tradingAccountService.list(userId),
+	accountHint ? goalsService.listWithProgress(userId, accountHint) : Promise.resolve(null),
+]);
 const accounts = rawAccounts.map(toAccountOption);
 
-const requestedAccountId = Astro.url.searchParams.get('accountId');
 const activeAccountId =
-	(requestedAccountId && accounts.some((account) => account.id === requestedAccountId) ? requestedAccountId : null) ??
+	(accountHint && accounts.some((account) => account.id === accountHint) ? accountHint : null) ??
 	accounts.find((account) => account.isDefault)?.id ??
 	accounts[0]?.id ??
 	null;
 
-const initialGoals = await goalsService.listWithProgress(userId, activeAccountId ?? undefined);
+const initialGoals =
+	goalsForHint && activeAccountId === accountHint
+		? goalsForHint
+		: await goalsService.listWithProgress(userId, activeAccountId ?? undefined);
+
+if (activeAccountId) {
+	Astro.cookies.set(ACTIVE_ACCOUNT_COOKIE, activeAccountId, {
+		path: '/',
+		maxAge: 60 * 60 * 24 * 365,
+		sameSite: 'lax',
+		httpOnly: false,
+	});
+}
 
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';

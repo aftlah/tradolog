@@ -10,7 +10,7 @@ export default defineConfig({
 	output: 'server',
 	prefetch: {
 		prefetchAll: false,
-		defaultStrategy: 'viewport',
+		defaultStrategy: 'hover',
 	},
 	integrations: [react()],
 	adapter: vercel(),

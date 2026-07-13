@@ -36,6 +36,13 @@
       "when": 1783850000000,
       "tag": "0004_account_fx_rate",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783956000000,
+      "tag": "0005_trades_closed_metrics_idx",
+      "breakpoints": true
     }
   ]
 }

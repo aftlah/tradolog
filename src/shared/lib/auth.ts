@@ -76,7 +76,7 @@ function createAuth() {
 			updateAge: 60 * 60 * 24,
 			cookieCache: {
 				enabled: true,
-				maxAge: 60 * 5,
+				maxAge: 60 * 15,
 			},
 		},
 		trustedOrigins: buildTrustedOrigins(baseURL),

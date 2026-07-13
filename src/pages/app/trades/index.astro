@@ -3,6 +3,8 @@ import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { TradeJournalShell } from '@features/trade/components/TradeJournalShell';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { parseTradeListQuery } from '@features/trade/utils/query';
+import { ACTIVE_ACCOUNT_COOKIE } from '@shared/constants/account.constants';
+import { readActiveAccountCookieValue } from '@shared/utils/active-account-cookie';
 
 const session = Astro.locals.session;
 
@@ -12,16 +14,44 @@ if (!session) {
 
 const userId = session.user.id;
 const query = parseTradeListQuery(Astro.url.searchParams);
-const options = await tradeJournalService.getFormOptions(userId);
-
 if (!query.accountId) {
+	query.accountId = readActiveAccountCookieValue(Astro.cookies.get(ACTIVE_ACCOUNT_COOKIE)?.value) ?? undefined;
+}
+
+let options;
+let initialData;
+
+if (query.accountId) {
+	[options, initialData] = await Promise.all([
+		tradeJournalService.getFormOptions(userId),
+		tradeJournalService.listPaginated(userId, query),
+	]);
+
+	const ownsAccount = options.accounts.some((account) => account.id === query.accountId);
+	if (!ownsAccount) {
+		const defaultAccount = options.accounts.find((account) => account.isDefault) ?? options.accounts[0];
+		query.accountId = defaultAccount?.id;
+		initialData = query.accountId
+			? await tradeJournalService.listPaginated(userId, query)
+			: await tradeJournalService.listPaginated(userId, { ...query, accountId: undefined });
+	}
+} else {
+	options = await tradeJournalService.getFormOptions(userId);
 	const defaultAccount = options.accounts.find((account) => account.isDefault) ?? options.accounts[0];
 	if (defaultAccount) {
 		query.accountId = defaultAccount.id;
 	}
+	initialData = await tradeJournalService.listPaginated(userId, query);
 }
 
-const initialData = await tradeJournalService.listPaginated(userId, query);
+if (query.accountId) {
+	Astro.cookies.set(ACTIVE_ACCOUNT_COOKIE, query.accountId, {
+		path: '/',
+		maxAge: 60 * 60 * 24 * 365,
+		sameSite: 'lax',
+		httpOnly: false,
+	});
+}
 
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';

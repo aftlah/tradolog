@@ -3,6 +3,8 @@ import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { CalendarShell } from '@features/calendar/components/CalendarShell';
 import { calendarService } from '@features/calendar/services/calendar.service';
 import { parseCalendarQuery } from '@features/calendar/utils/query';
+import { ACTIVE_ACCOUNT_COOKIE } from '@shared/constants/account.constants';
+import { readActiveAccountCookieValue } from '@shared/utils/active-account-cookie';
 
 const session = Astro.locals.session;
 
@@ -11,7 +13,26 @@ if (!session) {
 }
 
 const query = parseCalendarQuery(Astro.url.searchParams);
-const calendarData = await calendarService.getCalendarData(session.user.id, query.year, query.month, query.accountId);
+if (!query.accountId) {
+	query.accountId =
+		readActiveAccountCookieValue(Astro.cookies.get(ACTIVE_ACCOUNT_COOKIE)?.value) ?? undefined;
+}
+
+const calendarData = await calendarService.getCalendarData(
+	session.user.id,
+	query.year,
+	query.month,
+	query.accountId,
+);
+
+if (calendarData.activeAccountId) {
+	Astro.cookies.set(ACTIVE_ACCOUNT_COOKIE, calendarData.activeAccountId, {
+		path: '/',
+		maxAge: 60 * 60 * 24 * 365,
+		sameSite: 'lax',
+		httpOnly: false,
+	});
+}
 
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';

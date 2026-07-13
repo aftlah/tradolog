@@ -4,6 +4,8 @@ import { NotesShell } from '@features/notes/components/NotesShell';
 import { notesService } from '@features/notes/services/notes.service';
 import { tradingAccountService } from '@shared/services';
 import { toAccountOption } from '@shared/utils/account-option';
+import { ACTIVE_ACCOUNT_COOKIE } from '@shared/constants/account.constants';
+import { readActiveAccountCookieValue } from '@shared/utils/active-account-cookie';
 
 const session = Astro.locals.session;
 
@@ -12,17 +14,31 @@ if (!session) {
 }
 
 const userId = session.user.id;
-const rawAccounts = await tradingAccountService.list(userId);
+const [rawAccounts, initialNotes] = await Promise.all([
+	tradingAccountService.list(userId),
+	notesService.list(userId),
+]);
 const accounts = rawAccounts.map(toAccountOption);
 
-const requestedAccountId = Astro.url.searchParams.get('accountId');
+const requestedAccountId =
+	Astro.url.searchParams.get('accountId') ??
+	readActiveAccountCookieValue(Astro.cookies.get(ACTIVE_ACCOUNT_COOKIE)?.value);
 const activeAccountId =
-	(requestedAccountId && accounts.some((account) => account.id === requestedAccountId) ? requestedAccountId : null) ??
+	(requestedAccountId && accounts.some((account) => account.id === requestedAccountId)
+		? requestedAccountId
+		: null) ??
 	accounts.find((account) => account.isDefault)?.id ??
 	accounts[0]?.id ??
 	null;
 
-const initialNotes = await notesService.list(userId);
+if (activeAccountId) {
+	Astro.cookies.set(ACTIVE_ACCOUNT_COOKIE, activeAccountId, {
+		path: '/',
+		maxAge: 60 * 60 * 24 * 365,
+		sameSite: 'lax',
+		httpOnly: false,
+	});
+}
 
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';

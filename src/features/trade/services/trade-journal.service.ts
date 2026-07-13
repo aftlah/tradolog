@@ -12,6 +12,7 @@
 import { randomUUID } from 'node:crypto';
 import { NotFoundError, ValidationError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
+import { invalidateUserPageCaches } from '@shared/lib/cache/page-data-cache';
 import { deleteTradeScreenshot, uploadTradeScreenshot } from '@shared/lib/r2';
 import {
 	strategyRepository,
@@ -332,6 +333,7 @@ export class TradeJournalService {
 		});
 
 		await tradingAccountService.syncCurrentBalance(userId, data.accountId);
+		invalidateUserPageCaches(userId);
 		return this.getDetail(trade.id, userId);
 	}
 
@@ -403,6 +405,7 @@ export class TradeJournalService {
 			await tradingAccountService.syncCurrentBalance(userId, existing.accountId);
 		}
 
+		invalidateUserPageCaches(userId);
 		return this.getDetail(id, userId);
 	}
 
@@ -418,6 +421,7 @@ export class TradeJournalService {
 		}
 
 		await tradingAccountService.syncCurrentBalance(userId, existing.accountId);
+		invalidateUserPageCaches(userId);
 	}
 
 	async addImages(tradeId: string, userId: string, files: File[]): Promise<TradeImageDto[]> {

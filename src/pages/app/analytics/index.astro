@@ -2,6 +2,8 @@
 import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { AnalyticsShell } from '@features/analytics/components/AnalyticsShell';
 import { analyticsService } from '@features/analytics/services/analytics.service';
+import { ACTIVE_ACCOUNT_COOKIE } from '@shared/constants/account.constants';
+import { readActiveAccountCookieValue } from '@shared/utils/active-account-cookie';
 
 const session = Astro.locals.session;
 
@@ -9,8 +11,19 @@ if (!session) {
 	return Astro.redirect('/login');
 }
 
-const requestedAccountId = Astro.url.searchParams.get('accountId');
+const requestedAccountId =
+	Astro.url.searchParams.get('accountId') ??
+	readActiveAccountCookieValue(Astro.cookies.get(ACTIVE_ACCOUNT_COOKIE)?.value);
 const analyticsData = await analyticsService.getAnalyticsData(session.user.id, requestedAccountId);
+
+if (analyticsData.activeAccountId) {
+	Astro.cookies.set(ACTIVE_ACCOUNT_COOKIE, analyticsData.activeAccountId, {
+		path: '/',
+		maxAge: 60 * 60 * 24 * 365,
+		sameSite: 'lax',
+		httpOnly: false,
+	});
+}
 
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';

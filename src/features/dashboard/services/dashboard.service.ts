@@ -8,6 +8,7 @@ import {
 } from '@shared/services';
 import type { TradeClosedMetrics, TradeRecentSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
+import { dashboardCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
 import { EQUITY_CURVE_LOOKBACK_DAYS, RECENT_TRADES_LIMIT } from '../constants/dashboard.constants';
 import type {
 	DashboardData,
@@ -81,21 +82,106 @@ function emptyDashboard(): DashboardData {
 	};
 }
 
+function buildDashboardData(
+	accounts: Awaited<ReturnType<typeof tradingAccountService.list>>,
+	activeAccount: NonNullable<(typeof accounts)[number]>,
+	closedMetrics: TradeClosedMetrics[],
+	recentRows: TradeRecentSummary[],
+): DashboardData {
+	const closedResults = closedMetrics
+		.map(toClosedTradeResult)
+		.filter((result): result is ClosedTradeResult => result !== null);
+
+	const startingBalance = toFiniteNumber(activeAccount.startingBalance);
+	const currentBalance = toFiniteNumber(activeAccount.currentBalance);
+	const lookbackCutoff = new Date(Date.now() - EQUITY_CURVE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+	const recentClosedResults = closedResults.filter((result) => {
+		const closedAt = result.closedAt instanceof Date ? result.closedAt : new Date(result.closedAt ?? 0);
+		return closedAt >= lookbackCutoff;
+	});
+
+	const performance = tradingCalculatorService.performanceSummary(closedResults);
+	const streaks = tradingCalculatorService.streaks(closedResults);
+	const drawdown = tradingCalculatorService.drawdown(startingBalance, closedResults);
+	const equityCurve = tradingCalculatorService.equityCurve(startingBalance, recentClosedResults);
+
+	return {
+		hasAccounts: true,
+		accounts: accounts.map(toAccountOption),
+		activeAccountId: activeAccount.id,
+		currency: activeAccount.currency,
+		startingBalance,
+		currentBalance,
+		performance,
+		streaks,
+		drawdown: {
+			...drawdown,
+			points: [],
+		} satisfies DashboardDrawdownSummary,
+		equityCurve: equityCurve.map(serializeEquityPoint),
+		recentTrades: recentRows.map(toRecentTradeDto),
+	};
+}
+
 export class DashboardService {
 	async getDashboardData(userId: string, requestedAccountId?: string | null): Promise<DashboardData> {
+		if (requestedAccountId) {
+			const cached = pageDataCache.get(dashboardCacheKey(userId, requestedAccountId)) as
+				| DashboardData
+				| undefined;
+			if (cached) {
+				return cached;
+			}
+
+			const [accounts, closedMetrics, recentRows] = await Promise.all([
+				tradingAccountService.list(userId),
+				tradeService.listClosedMetricsByAccount(userId, requestedAccountId),
+				tradeService.listRecentSummariesByAccount(userId, requestedAccountId, RECENT_TRADES_LIMIT),
+			]);
+
+			if (accounts.length === 0) {
+				return emptyDashboard();
+			}
+
+			const activeAccount = accounts.find((account) => account.id === requestedAccountId);
+			if (activeAccount) {
+				const data = buildDashboardData(accounts, activeAccount, closedMetrics, recentRows);
+				pageDataCache.set(dashboardCacheKey(userId, activeAccount.id), data);
+				return data;
+			}
+
+			const fallback = accounts.find((account) => account.isDefault) ?? accounts[0];
+			if (!fallback) {
+				return emptyDashboard();
+			}
+
+			const [fallbackMetrics, fallbackRecent] = await Promise.all([
+				tradeService.listClosedMetricsByAccount(userId, fallback.id),
+				tradeService.listRecentSummariesByAccount(userId, fallback.id, RECENT_TRADES_LIMIT),
+			]);
+			const data = buildDashboardData(accounts, fallback, fallbackMetrics, fallbackRecent);
+			pageDataCache.set(dashboardCacheKey(userId, fallback.id), data);
+			return data;
+		}
+
 		const accounts = await tradingAccountService.list(userId);
 
 		if (accounts.length === 0) {
 			return emptyDashboard();
 		}
 
-		const activeAccount =
-			(requestedAccountId ? accounts.find((account) => account.id === requestedAccountId) : undefined) ??
-			accounts.find((account) => account.isDefault) ??
-			accounts[0];
-
+		const activeAccount = accounts.find((account) => account.isDefault) ?? accounts[0];
 		if (!activeAccount) {
 			return emptyDashboard();
+		}
+
+		const cached = pageDataCache.get(dashboardCacheKey(userId, activeAccount.id)) as DashboardData | undefined;
+		if (cached) {
+			return {
+				...cached,
+				accounts: accounts.map(toAccountOption),
+				activeAccountId: activeAccount.id,
+			};
 		}
 
 		const [closedMetrics, recentRows] = await Promise.all([
@@ -103,39 +189,9 @@ export class DashboardService {
 			tradeService.listRecentSummariesByAccount(userId, activeAccount.id, RECENT_TRADES_LIMIT),
 		]);
 
-		const closedResults = closedMetrics
-			.map(toClosedTradeResult)
-			.filter((result): result is ClosedTradeResult => result !== null);
-
-		const startingBalance = toFiniteNumber(activeAccount.startingBalance);
-		const currentBalance = toFiniteNumber(activeAccount.currentBalance);
-		const lookbackCutoff = new Date(Date.now() - EQUITY_CURVE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
-		const recentClosedResults = closedResults.filter((result) => {
-			const closedAt = result.closedAt instanceof Date ? result.closedAt : new Date(result.closedAt ?? 0);
-			return closedAt >= lookbackCutoff;
-		});
-
-		const performance = tradingCalculatorService.performanceSummary(closedResults);
-		const streaks = tradingCalculatorService.streaks(closedResults);
-		const drawdown = tradingCalculatorService.drawdown(startingBalance, closedResults);
-		const equityCurve = tradingCalculatorService.equityCurve(startingBalance, recentClosedResults);
-
-		return {
-			hasAccounts: true,
-			accounts: accounts.map(toAccountOption),
-			activeAccountId: activeAccount.id,
-			currency: activeAccount.currency,
-			startingBalance,
-			currentBalance,
-			performance,
-			streaks,
-			drawdown: {
-				...drawdown,
-				points: [],
-			} satisfies DashboardDrawdownSummary,
-			equityCurve: equityCurve.map(serializeEquityPoint),
-			recentTrades: recentRows.map(toRecentTradeDto),
-		};
+		const data = buildDashboardData(accounts, activeAccount, closedMetrics, recentRows);
+		pageDataCache.set(dashboardCacheKey(userId, activeAccount.id), data);
+		return data;
 	}
 }
 

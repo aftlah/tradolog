@@ -64,5 +64,12 @@ export const trades = pgTable(
 		index('trades_opened_at_idx').on(table.openedAt),
 		index('trades_user_opened_idx').on(table.userId, table.openedAt),
 		index('trades_user_deleted_idx').on(table.userId, table.deletedAt),
+		index('trades_account_closed_metrics_idx').on(
+			table.userId,
+			table.accountId,
+			table.status,
+			table.deletedAt,
+			table.closedAt,
+		),
 	],
 );
