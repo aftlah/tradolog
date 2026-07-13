@@ -15,8 +15,10 @@ interface LazyEquityCurveCardProps {
 /** Defers Recharts until after the dashboard shell paints. */
 export function LazyEquityCurveCard(props: LazyEquityCurveCardProps) {
 	return (
-		<Suspense fallback={<Skeleton className="h-72 w-full rounded-3xl" />}>
-			<EquityCurveCard {...props} />
-		</Suspense>
+		<div className="h-full min-h-72">
+			<Suspense fallback={<Skeleton className="h-full min-h-72 w-full rounded-3xl" />}>
+				<EquityCurveCard {...props} />
+			</Suspense>
+		</div>
 	);
 }

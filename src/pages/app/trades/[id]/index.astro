@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { TradeDetailShell } from '@features/trade/components/TradeDetailShell';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { NotFoundError } from '@shared/lib/errors';
@@ -32,6 +32,15 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title={`${trade.symbol} — Tradolog`}>
-	<TradeDetailShell client:load trade={trade} accounts={options.accounts} userName={userName} userEmail={userEmail} />
-</RootLayout>
+<AppLayout
+	title={`${trade.symbol} — Tradolog`}
+	pageTitle="Trade Detail"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={options.accounts}
+	activeAccountId={trade.accountId}
+	showQuickAdd={false}
+	accountChangePath="/app/trades"
+>
+	<TradeDetailShell client:idle trade={trade} />
+</AppLayout>

@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { NotesShell } from '@features/notes/components/NotesShell';
 import { notesService } from '@features/notes/services/notes.service';
 import { tradingAccountService } from '@shared/services';
@@ -28,13 +28,13 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Notes — Tradolog">
-	<NotesShell
-		client:load
-		initialNotes={initialNotes}
-		accounts={accounts}
-		activeAccountId={activeAccountId}
-		userName={userName}
-		userEmail={userEmail}
-	/>
-</RootLayout>
+<AppLayout
+	title="Notes — Tradolog"
+	pageTitle="Notes"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={accounts}
+	activeAccountId={activeAccountId}
+>
+	<NotesShell client:idle initialNotes={initialNotes} />
+</AppLayout>

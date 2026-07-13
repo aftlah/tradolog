@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { GoalsShell } from '@features/goals/components/GoalsShell';
 import { goalsService } from '@features/goals/services/goals.service';
 import { tradingAccountService } from '@shared/services';
@@ -28,13 +28,13 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Goals — Tradolog">
-	<GoalsShell
-		client:load
-		initialGoals={initialGoals}
-		accounts={accounts}
-		activeAccountId={activeAccountId}
-		userName={userName}
-		userEmail={userEmail}
-	/>
-</RootLayout>
+<AppLayout
+	title="Goals — Tradolog"
+	pageTitle="Goals"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={accounts}
+	activeAccountId={activeAccountId}
+>
+	<GoalsShell client:idle initialGoals={initialGoals} activeAccountId={activeAccountId} />
+</AppLayout>

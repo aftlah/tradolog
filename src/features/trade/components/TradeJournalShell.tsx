@@ -1,5 +1,4 @@
-import { AppShell, NoAccountsEmptyState, Pagination } from '@shared/components';
-import { LogoutButton } from '@features/auth/components/LogoutButton';
+import { NoAccountsEmptyState, Pagination } from '@shared/components';
 import { useTradeTable } from '../hooks/useTradeTable';
 import type { PaginatedResult, TradeFormOptions, TradeListItem, TradeListQuery } from '../types/trade.types';
 import { TradeFiltersBar } from './TradeFiltersBar';
@@ -9,61 +8,37 @@ interface TradeJournalShellProps {
 	initialData: PaginatedResult<TradeListItem>;
 	initialQuery: TradeListQuery;
 	options: TradeFormOptions;
-	userName: string;
-	userEmail: string;
 }
 
-/**
- * Top-level Trade Journal orchestrator: owns filter/sort/pagination state via `useTradeTable`
- * and renders the shared `AppShell` chrome plus the filters bar, data table, and pagination —
- * every child stays presentational.
- */
-export function TradeJournalShell({ initialData, initialQuery, options, userName, userEmail }: TradeJournalShellProps) {
+/** Trade Journal page body — chrome lives in the persisted `AppLayout` shell. */
+export function TradeJournalShell({ initialData, initialQuery, options }: TradeJournalShellProps) {
 	const { data, query, isLoading, setPage, setSort, setFilters, resetFilters, refetch } = useTradeTable({
 		initialData,
 		initialQuery,
 	});
 
+	if (options.accounts.length === 0) {
+		return <NoAccountsEmptyState description="Add a trading account first, then come back here to start logging trades." />;
+	}
+
 	return (
-		<AppShell
-			title="Trade Journal"
-			activeHref="/app/trades"
-			userName={userName}
-			userEmail={userEmail}
-			accounts={options.accounts}
-			activeAccountId={query.accountId ?? null}
-			onAccountChange={(accountId) => setFilters({ accountId })}
-			isLoadingAccount={isLoading}
-			showQuickAdd={false}
-			userMenuFooter={<LogoutButton className="w-full" />}
-		>
-			{options.accounts.length === 0 ? (
-				<NoAccountsEmptyState description="Add a trading account first, then come back here to start logging trades." />
-			) : (
-				<>
-					<TradeFiltersBar
-						query={query}
-						options={options}
-						onFiltersChange={setFilters}
-						onReset={resetFilters}
-					/>
+		<>
+			<TradeFiltersBar query={query} options={options} onFiltersChange={setFilters} onReset={resetFilters} />
 
-					<TradesDataTable
-						trades={data.items}
-						query={query}
-						isLoading={isLoading}
-						onSort={setSort}
-						onTradeDeleted={refetch}
-					/>
+			<TradesDataTable
+				trades={data.items}
+				query={query}
+				isLoading={isLoading}
+				onSort={setSort}
+				onTradeDeleted={refetch}
+			/>
 
-					<div className="flex items-center justify-between gap-3">
-						<p className="text-sm text-muted">
-							{data.total === 0 ? 'No trades' : `${data.total} trade${data.total === 1 ? '' : 's'} found`}
-						</p>
-						<Pagination page={data.page} pageCount={data.pageCount} onPageChange={setPage} disabled={isLoading} />
-					</div>
-				</>
-			)}
-		</AppShell>
+			<div className="flex items-center justify-between gap-3">
+				<p className="text-sm text-muted">
+					{data.total === 0 ? 'No trades' : `${data.total} trade${data.total === 1 ? '' : 's'} found`}
+				</p>
+				<Pagination page={data.page} pageCount={data.pageCount} onPageChange={setPage} disabled={isLoading} />
+			</div>
+		</>
 	);
 }

@@ -8,6 +8,10 @@ import { fileURLToPath } from 'node:url';
 // https://astro.build/config
 export default defineConfig({
 	output: 'server',
+	prefetch: {
+		prefetchAll: false,
+		defaultStrategy: 'hover',
+	},
 	integrations: [react()],
 	adapter: vercel(),
 	vite: {

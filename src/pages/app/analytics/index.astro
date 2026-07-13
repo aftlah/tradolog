@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { AnalyticsShell } from '@features/analytics/components/AnalyticsShell';
 import { analyticsService } from '@features/analytics/services/analytics.service';
 
@@ -16,6 +16,13 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Analytics — Tradolog">
-	<AnalyticsShell client:load initialData={analyticsData} userName={userName} userEmail={userEmail} />
-</RootLayout>
+<AppLayout
+	title="Analytics — Tradolog"
+	pageTitle="Analytics"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={analyticsData.accounts}
+	activeAccountId={analyticsData.activeAccountId}
+>
+	<AnalyticsShell client:idle initialData={analyticsData} />
+</AppLayout>

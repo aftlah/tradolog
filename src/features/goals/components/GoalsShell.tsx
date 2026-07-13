@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { Button, FeaturePageShell } from '@shared/components';
-import { LogoutButton } from '@features/auth/components/LogoutButton';
-import type { AccountOption } from '@shared/types';
+import { Button } from '@shared/components';
 import { useGoals } from '../hooks/useGoals';
 import type { GoalDto } from '../types/goals.types';
 import { GoalFormDialog } from './GoalFormDialog';
@@ -10,14 +8,11 @@ import { GoalsList } from './GoalsList';
 
 interface GoalsShellProps {
 	initialGoals: GoalDto[];
-	accounts: AccountOption[];
 	activeAccountId: string | null;
-	userName: string;
-	userEmail: string;
 }
 
-/** Top-level Goals orchestrator: owns the goal list + Create/Edit dialog, renders `FeaturePageShell` chrome. */
-export function GoalsShell({ initialGoals, accounts, activeAccountId, userName, userEmail }: GoalsShellProps) {
+/** Goals page body — chrome lives in the persisted `AppLayout` shell. */
+export function GoalsShell({ initialGoals, activeAccountId }: GoalsShellProps) {
 	const { goals, isLoading, refetch } = useGoals({ initialGoals, accountId: activeAccountId });
 	const [formOpen, setFormOpen] = useState(false);
 	const [editingGoal, setEditingGoal] = useState<GoalDto | null>(null);
@@ -33,15 +28,7 @@ export function GoalsShell({ initialGoals, accounts, activeAccountId, userName, 
 	}
 
 	return (
-		<FeaturePageShell
-			title="Goals"
-			activeHref="/app/goals"
-			accounts={accounts}
-			activeAccountId={activeAccountId}
-			userName={userName}
-			userEmail={userEmail}
-			userMenuFooter={<LogoutButton className="w-full" />}
-		>
+		<>
 			<div className="flex items-center justify-between gap-3">
 				<p className="text-sm text-muted">
 					{goals.length === 0 ? 'No monthly goals yet' : `${goals.length} monthly goal${goals.length === 1 ? '' : 's'}`}
@@ -63,6 +50,6 @@ export function GoalsShell({ initialGoals, accounts, activeAccountId, userName, 
 					void refetch();
 				}}
 			/>
-		</FeaturePageShell>
+		</>
 	);
 }

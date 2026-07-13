@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { TradeCreateShell } from '@features/trade/components/TradeCreateShell';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 
@@ -23,13 +23,15 @@ const userEmail = session.user.email ?? '';
 const nowIso = new Date().toISOString();
 ---
 
-<RootLayout title="New Trade — Tradolog">
-	<TradeCreateShell
-		client:load
-		options={options}
-		defaultAccountId={defaultAccount?.id ?? null}
-		nowIso={nowIso}
-		userName={userName}
-		userEmail={userEmail}
-	/>
-</RootLayout>
+<AppLayout
+	title="New Trade — Tradolog"
+	pageTitle="New Trade"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={options.accounts}
+	activeAccountId={defaultAccount?.id ?? null}
+	showQuickAdd={false}
+	accountChangePath="/app/trades"
+>
+	<TradeCreateShell client:idle options={options} defaultAccountId={defaultAccount?.id ?? null} nowIso={nowIso} />
+</AppLayout>

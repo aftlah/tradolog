@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { FeaturePageShell } from '@shared/components/app-shell/FeaturePageShell';
 import { cn } from '@shared/utils/cn';
-import { LogoutButton } from '@features/auth/components/LogoutButton';
 import {
 	SETTINGS_PAGE_ROUTE,
 	SETTINGS_TAB_OPTIONS,
@@ -17,8 +15,6 @@ interface SettingsShellProps {
 	data: SettingsPageData;
 	activeTab: SettingsTab;
 	activeAccountId: string | null;
-	userName: string;
-	userEmail: string;
 }
 
 function settingsTabHref(tab: SettingsTab, activeAccountId: string | null): string {
@@ -32,27 +28,14 @@ function settingsTabHref(tab: SettingsTab, activeAccountId: string | null): stri
 	return `${url.pathname}${url.search}`;
 }
 
-/**
- * Page-level orchestrator for `/app/settings`.
- * Tabs are real links (`?tab=`) so the correct panel is chosen on the server —
- * switching works even if the React island fails to hydrate.
- */
-export function SettingsShell({ data, activeTab, activeAccountId, userName, userEmail }: SettingsShellProps) {
+/** Settings page body — chrome lives in the persisted `AppLayout` shell. */
+export function SettingsShell({ data, activeTab, activeAccountId }: SettingsShellProps) {
 	const [accounts, setAccounts] = useState(data.accounts);
 	const [strategies, setStrategies] = useState(data.strategies);
 	const [symbols, setSymbols] = useState(data.symbols);
 
 	return (
-		<FeaturePageShell
-			title="Settings"
-			activeHref={SETTINGS_PAGE_ROUTE}
-			accounts={accounts}
-			activeAccountId={activeAccountId}
-			userName={userName}
-			userEmail={userEmail}
-			userMenuFooter={<LogoutButton className="w-full" />}
-			showQuickAdd={accounts.length > 0}
-		>
+		<>
 			<div>
 				<h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
 				<p className="mt-1 text-sm text-muted">Manage your profile, trading accounts, strategies, and symbols.</p>
@@ -72,6 +55,7 @@ export function SettingsShell({ data, activeTab, activeAccountId, userName, user
 								role="tab"
 								id={`settings-tab-${tab.id}`}
 								href={settingsTabHref(tab.id, activeAccountId)}
+								data-astro-prefetch="hover"
 								aria-selected={isActive}
 								aria-controls={`settings-panel-${tab.id}`}
 								className={cn(
@@ -112,6 +96,6 @@ export function SettingsShell({ data, activeTab, activeAccountId, userName, user
 					) : null}
 				</div>
 			</div>
-		</FeaturePageShell>
+		</>
 	);
 }

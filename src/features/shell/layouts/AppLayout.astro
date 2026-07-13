@@ -1,0 +1,55 @@
+---
+import RootLayout from '@shared/layouts/RootLayout.astro';
+import { AppChrome } from '@features/shell/components/AppChrome';
+import { APP_CHROME_STATE_ID, type AppChromeState } from '@features/shell/types/chrome.types';
+import type { AccountOption } from '@shared/types';
+
+interface Props {
+	title: string;
+	pageTitle: string;
+	userName: string;
+	userEmail: string;
+	accounts: AccountOption[];
+	activeAccountId: string | null;
+	showQuickAdd?: boolean;
+	accountChangePath?: string | null;
+}
+
+const {
+	title,
+	pageTitle,
+	userName,
+	userEmail,
+	accounts,
+	activeAccountId,
+	showQuickAdd = true,
+	accountChangePath = null,
+} = Astro.props;
+
+const chromeState: AppChromeState = {
+	title: pageTitle,
+	userName,
+	userEmail,
+	accounts,
+	activeAccountId,
+	showQuickAdd,
+	accountChangePath,
+};
+---
+
+<RootLayout title={title}>
+	{/* Fresh on every navigation — AppChrome (persisted) re-reads this on astro:page-load. */}
+	<script is:inline type="application/json" id={APP_CHROME_STATE_ID} set:html={JSON.stringify(chromeState)} />
+
+	<div class="relative min-h-dvh">
+		<div transition:persist="tradolog-app-chrome">
+			<AppChrome client:load initialState={chromeState} />
+		</div>
+
+		<div class="relative z-10 app-shell-offset">
+			<main class="flex flex-col gap-6 px-4 pb-8 lg:px-4">
+				<slot />
+			</main>
+		</div>
+	</div>
+</RootLayout>

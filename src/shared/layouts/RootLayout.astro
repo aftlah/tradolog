@@ -36,6 +36,8 @@ const {
 	</head>
 	<body>
 		<slot />
-		<Toaster client:load />
+		<div transition:persist="tradolog-toaster">
+			<Toaster client:load />
+		</div>
 	</body>
 </html>

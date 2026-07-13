@@ -2,19 +2,16 @@ import { ArrowLeft } from 'lucide-react';
 import { getTradeFormDefaults } from '../utils/form-defaults';
 import type { TradeDetail, TradeFormOptions } from '../types/trade.types';
 import { TradeForm } from './TradeForm';
-import { TradePageShell } from './TradePageShell';
 
 interface TradeEditShellProps {
 	trade: TradeDetail;
 	options: TradeFormOptions;
-	userName: string;
-	userEmail: string;
 }
 
-/** Page-level orchestrator for `/app/trades/[id]/edit`. */
-export function TradeEditShell({ trade, options, userName, userEmail }: TradeEditShellProps) {
+/** Page body for `/app/trades/[id]/edit`. */
+export function TradeEditShell({ trade, options }: TradeEditShellProps) {
 	return (
-		<TradePageShell title="Edit Trade" accounts={options.accounts} activeAccountId={trade.accountId} userName={userName} userEmail={userEmail}>
+		<>
 			<a
 				href={`/app/trades/${trade.id}`}
 				className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground"
@@ -31,6 +28,6 @@ export function TradeEditShell({ trade, options, userName, userEmail }: TradeEdi
 			</div>
 
 			<TradeForm mode="edit" tradeId={trade.id} options={options} defaultValues={getTradeFormDefaults(trade)} />
-		</TradePageShell>
+		</>
 	);
 }

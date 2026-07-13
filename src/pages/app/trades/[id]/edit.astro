@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { TradeEditShell } from '@features/trade/components/TradeEditShell';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { NotFoundError } from '@shared/lib/errors';
@@ -32,6 +32,15 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title={`Edit ${trade.symbol} — Tradolog`}>
-	<TradeEditShell client:load trade={trade} options={options} userName={userName} userEmail={userEmail} />
-</RootLayout>
+<AppLayout
+	title={`Edit ${trade.symbol} — Tradolog`}
+	pageTitle="Edit Trade"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={options.accounts}
+	activeAccountId={trade.accountId}
+	showQuickAdd={false}
+	accountChangePath="/app/trades"
+>
+	<TradeEditShell client:idle trade={trade} options={options} />
+</AppLayout>

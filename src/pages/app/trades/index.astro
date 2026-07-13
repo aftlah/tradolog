@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { TradeJournalShell } from '@features/trade/components/TradeJournalShell';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { parseTradeListQuery } from '@features/trade/utils/query';
@@ -27,6 +27,14 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Trade Journal — Tradolog">
-	<TradeJournalShell client:load initialData={initialData} initialQuery={query} options={options} userName={userName} userEmail={userEmail} />
-</RootLayout>
+<AppLayout
+	title="Trade Journal — Tradolog"
+	pageTitle="Trade Journal"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={options.accounts}
+	activeAccountId={query.accountId ?? null}
+	showQuickAdd={false}
+>
+	<TradeJournalShell client:idle initialData={initialData} initialQuery={query} options={options} />
+</AppLayout>

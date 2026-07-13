@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { DashboardShell } from '@features/dashboard/components/DashboardShell';
 import { dashboardService } from '@features/dashboard/services/dashboard.service';
 
@@ -16,6 +16,13 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Dashboard — Tradolog">
-	<DashboardShell client:load initialData={dashboardData} userName={userName} userEmail={userEmail} />
-</RootLayout>
+<AppLayout
+	title="Dashboard — Tradolog"
+	pageTitle="Dashboard"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={dashboardData.accounts}
+	activeAccountId={dashboardData.activeAccountId}
+>
+	<DashboardShell client:idle initialData={dashboardData} />
+</AppLayout>

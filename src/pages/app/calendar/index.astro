@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { CalendarShell } from '@features/calendar/components/CalendarShell';
 import { calendarService } from '@features/calendar/services/calendar.service';
 import { parseCalendarQuery } from '@features/calendar/utils/query';
@@ -17,6 +17,13 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Calendar — Tradolog">
-	<CalendarShell client:load initialData={calendarData} userName={userName} userEmail={userEmail} />
-</RootLayout>
+<AppLayout
+	title="Calendar — Tradolog"
+	pageTitle="Calendar"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={calendarData.accounts}
+	activeAccountId={calendarData.activeAccountId}
+>
+	<CalendarShell client:idle initialData={calendarData} />
+</AppLayout>

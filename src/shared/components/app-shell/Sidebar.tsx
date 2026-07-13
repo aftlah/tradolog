@@ -30,7 +30,7 @@ export function Sidebar({
 				aria-expanded={!collapsed}
 				data-collapsed={collapsed ? 'true' : undefined}
 				className={cn(
-					'glass-panel app-shell-sidebar fixed inset-y-4 left-4 z-40 hidden flex-col overflow-hidden py-4 lg:flex',
+					'glass-panel app-shell-sidebar fixed inset-y-3 left-3 z-40 hidden flex-col overflow-hidden py-4 lg:flex',
 					animateLayout && 'app-shell-sidebar--animated',
 				)}
 			>

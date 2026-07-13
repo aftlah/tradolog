@@ -1,5 +1,5 @@
 ---
-import RootLayout from '@shared/layouts/RootLayout.astro';
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { SettingsShell } from '@features/settings/components/SettingsShell';
 import { parseSettingsTab } from '@features/settings/constants/settings.constants';
 import { settingsService } from '@features/settings/services/settings.service';
@@ -24,13 +24,14 @@ const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
 
-<RootLayout title="Settings — Tradolog">
-	<SettingsShell
-		client:load
-		data={data}
-		activeTab={activeTab}
-		activeAccountId={activeAccount?.id ?? null}
-		userName={userName}
-		userEmail={userEmail}
-	/>
-</RootLayout>
+<AppLayout
+	title="Settings — Tradolog"
+	pageTitle="Settings"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={data.accounts}
+	activeAccountId={activeAccount?.id ?? null}
+	showQuickAdd={data.accounts.length > 0}
+>
+	<SettingsShell client:idle data={data} activeTab={activeTab} activeAccountId={activeAccount?.id ?? null} />
+</AppLayout>

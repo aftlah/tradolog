@@ -21,7 +21,7 @@ function trendFor(value: number): MetricTrend {
 /** Headline performance metrics for the Analytics page — every value is pre-computed by `TradingCalculatorService`. */
 export function AnalyticsStatGrid({ performance, currency }: AnalyticsStatGridProps) {
 	return (
-		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 			<AnalyticsMetricCard
 				index={0}
 				icon={Percent}
