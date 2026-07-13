@@ -94,14 +94,12 @@ function toGoalDto(goal: MonthlyGoal, trades: readonly Trade[]): GoalDto {
 export class GoalsService {
 	/** Every one of `userId`'s goals, each with its actuals computed from that month's closed trades, optionally scoped to a single account. */
 	async listWithProgress(userId: string, accountId?: string): Promise<GoalDto[]> {
-		const [goals, allTrades] = await Promise.all([
+		const [goals, trades] = await Promise.all([
 			monthlyGoalRepository.listByUserId(userId),
-			tradeService.list(userId),
+			accountId ? tradeService.listByAccount(userId, accountId) : tradeService.list(userId),
 		]);
 
-		const scopedTrades = accountId ? allTrades.filter((trade) => trade.accountId === accountId) : allTrades;
-
-		return goals.map((goal) => toGoalDto(goal, scopedTrades));
+		return goals.map((goal) => toGoalDto(goal, trades));
 	}
 
 	async create(userId: string, input: unknown): Promise<GoalDto> {
@@ -121,8 +119,8 @@ export class GoalsService {
 		});
 
 		const goal = await monthlyGoalRepository.insert(data);
-		const allTrades = await tradeService.list(userId);
-		return toGoalDto(goal, allTrades);
+		const trades = await tradeService.list(userId);
+		return toGoalDto(goal, trades);
 	}
 
 	async update(id: string, userId: string, input: unknown): Promise<GoalDto> {
@@ -145,8 +143,8 @@ export class GoalsService {
 			throw new NotFoundError('Goal not found.');
 		}
 
-		const allTrades = await tradeService.list(userId);
-		return toGoalDto(updated, allTrades);
+		const trades = await tradeService.list(userId);
+		return toGoalDto(updated, trades);
 	}
 
 	async remove(id: string, userId: string): Promise<void> {

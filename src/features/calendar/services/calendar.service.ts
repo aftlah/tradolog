@@ -87,7 +87,10 @@ export class CalendarService {
 			return emptyCalendar(year, month);
 		}
 
-		const [allTrades, symbols] = await Promise.all([tradeService.list(userId), symbolService.listForUser(userId)]);
+		const [accountTrades, symbols] = await Promise.all([
+			tradeService.listByAccount(userId, activeAccount.id),
+			symbolService.listForUser(userId),
+		]);
 		const symbolMap = new Map(symbols.map((symbol) => [symbol.id, symbol]));
 
 		const monthStart = new Date(Date.UTC(year, month - 1, 1));
@@ -97,8 +100,8 @@ export class CalendarService {
 		const dayIndexByDate = new Map(days.map((day, index) => [day.date, index]));
 		const trades: CalendarTradeSummary[] = [];
 
-		for (const trade of allTrades) {
-			if (trade.accountId !== activeAccount.id || trade.status !== 'closed' || !trade.closedAt) {
+		for (const trade of accountTrades) {
+			if (trade.status !== 'closed' || !trade.closedAt) {
 				continue;
 			}
 			const closedAt = trade.closedAt;

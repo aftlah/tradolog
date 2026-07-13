@@ -87,8 +87,7 @@ export function AnalyticsEquityChart({ equityCurve, startingBalance, currency }:
 							stroke="#2563EB"
 							strokeWidth={2.5}
 							fill="url(#analyticsEquityFill)"
-							isAnimationActive
-							animationDuration={600}
+							isAnimationActive={false}
 						/>
 					</AreaChart>
 				</ResponsiveContainer>

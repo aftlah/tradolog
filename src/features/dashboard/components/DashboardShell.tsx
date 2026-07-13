@@ -3,7 +3,7 @@ import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { useDashboardData } from '../hooks/useDashboardData';
 import type { DashboardData } from '../types/dashboard.types';
 import { StatCardsGrid } from './StatCardsGrid';
-import { EquityCurveCard } from './EquityCurveCard';
+import { LazyEquityCurveCard } from './LazyEquityCurveCard';
 import { PerformanceSummaryCard } from './PerformanceSummaryCard';
 import { RecentTradesTable } from './RecentTradesTable';
 
@@ -41,7 +41,7 @@ export function DashboardShell({ initialData, userName, userEmail }: DashboardSh
 
 					<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 						<div className="lg:col-span-2">
-							<EquityCurveCard
+							<LazyEquityCurveCard
 								equityCurve={data.equityCurve}
 								startingBalance={data.startingBalance}
 								currency={data.currency}

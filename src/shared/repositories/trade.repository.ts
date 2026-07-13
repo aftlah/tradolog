@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, ilike, isNull, lte, or, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, isNull, lte, or, sum, type SQL } from 'drizzle-orm';
 import { getDb } from '@shared/lib/db';
 import { accounts, strategies, symbols, trades } from '@shared/lib/db/schema';
 import type { NewTrade, Trade, TradeResult, TradeSession, TradeSide, TradeStatus } from '@shared/types';
@@ -77,6 +77,60 @@ export class TradeRepository {
 			.from(trades)
 			.where(and(eq(trades.userId, userId), isNull(trades.deletedAt)))
 			.orderBy(desc(trades.openedAt), desc(trades.createdAt));
+	}
+
+	/** Trades for one account only — prefer this over `listByUserId` + filter. */
+	async listByAccountId(userId: string, accountId: string): Promise<Trade[]> {
+		const db = getDb();
+		return db
+			.select()
+			.from(trades)
+			.where(
+				and(
+					eq(trades.userId, userId),
+					eq(trades.accountId, accountId),
+					isNull(trades.deletedAt),
+				),
+			)
+			.orderBy(desc(trades.openedAt), desc(trades.createdAt));
+	}
+
+	/** SQL SUM of closed P&L for one account (no row materialization). */
+	async sumClosedProfitLoss(userId: string, accountId: string): Promise<number> {
+		const db = getDb();
+		const rows = await db
+			.select({ total: sum(trades.profitLoss) })
+			.from(trades)
+			.where(
+				and(
+					eq(trades.userId, userId),
+					eq(trades.accountId, accountId),
+					eq(trades.status, 'closed'),
+					isNull(trades.deletedAt),
+				),
+			);
+		const total = Number(rows[0]?.total ?? 0);
+		return Number.isFinite(total) ? total : 0;
+	}
+
+	/** Closed P&L totals grouped by account — one query for all accounts. */
+	async sumClosedProfitLossByAccount(userId: string): Promise<Map<string, number>> {
+		const db = getDb();
+		const rows = await db
+			.select({
+				accountId: trades.accountId,
+				total: sum(trades.profitLoss),
+			})
+			.from(trades)
+			.where(and(eq(trades.userId, userId), eq(trades.status, 'closed'), isNull(trades.deletedAt)))
+			.groupBy(trades.accountId);
+
+		const map = new Map<string, number>();
+		for (const row of rows) {
+			const total = Number(row.total ?? 0);
+			map.set(row.accountId, Number.isFinite(total) ? total : 0);
+		}
+		return map;
 	}
 
 	/** Paginated, filtered, sorted, searchable trade list — powers the Trade Journal table. */

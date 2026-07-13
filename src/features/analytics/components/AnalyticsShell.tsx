@@ -3,10 +3,12 @@ import { LogoutButton } from '@features/auth/components/LogoutButton';
 import { useAnalyticsData } from '../hooks/useAnalyticsData';
 import type { AnalyticsData } from '../types/analytics.types';
 import { AnalyticsStatGrid } from './AnalyticsStatGrid';
-import { AnalyticsEquityChart } from './AnalyticsEquityChart';
-import { AnalyticsPeriodReturnsCard } from './AnalyticsPeriodReturnsCard';
+import {
+	LazyAnalyticsDrawdownCard,
+	LazyAnalyticsEquityChart,
+	LazyAnalyticsPeriodReturnsCard,
+} from './LazyAnalyticsCharts';
 import { AnalyticsStreaksCard } from './AnalyticsStreaksCard';
-import { AnalyticsDrawdownCard } from './AnalyticsDrawdownCard';
 
 interface AnalyticsShellProps {
 	initialData: AnalyticsData;
@@ -41,7 +43,7 @@ export function AnalyticsShell({ initialData, userName, userEmail }: AnalyticsSh
 
 					<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 						<div className="lg:col-span-2">
-							<AnalyticsEquityChart
+							<LazyAnalyticsEquityChart
 								equityCurve={data.equityCurve}
 								startingBalance={data.startingBalance}
 								currency={data.currency}
@@ -52,9 +54,9 @@ export function AnalyticsShell({ initialData, userName, userEmail }: AnalyticsSh
 
 					<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 						<div className="lg:col-span-2">
-							<AnalyticsPeriodReturnsCard periodReturns={data.periodReturns} currency={data.currency} />
+							<LazyAnalyticsPeriodReturnsCard periodReturns={data.periodReturns} currency={data.currency} />
 						</div>
-						<AnalyticsDrawdownCard drawdown={data.drawdown} currency={data.currency} />
+						<LazyAnalyticsDrawdownCard drawdown={data.drawdown} currency={data.currency} />
 					</div>
 
 					{isLoading ? <p className="text-center text-xs text-muted">Refreshing analytics…</p> : null}

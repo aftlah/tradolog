@@ -113,8 +113,7 @@ export function AnalyticsDrawdownCard({ drawdown, currency }: AnalyticsDrawdownC
 								stroke="#EF4444"
 								strokeWidth={2.5}
 								fill="url(#analyticsDrawdownFill)"
-								isAnimationActive
-								animationDuration={600}
+								isAnimationActive={false}
 							/>
 						</AreaChart>
 					</ResponsiveContainer>

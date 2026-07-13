@@ -37,8 +37,7 @@ export function EquityCurveChart() {
 						stroke="#2563EB"
 						strokeWidth={2.5}
 						fill="url(#equityFill)"
-						isAnimationActive
-						animationDuration={700}
+						isAnimationActive={false}
 					/>
 				</AreaChart>
 			</ResponsiveContainer>

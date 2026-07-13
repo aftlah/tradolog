@@ -5,7 +5,6 @@ import {
 	tradeService,
 	tradingAccountService,
 	tradingCalculatorService,
-	computeCurrentBalance,
 	toFiniteNumber,
 	type ClosedTradeResult,
 	type EquityPoint,
@@ -100,8 +99,8 @@ export class DashboardService {
 			return emptyDashboard();
 		}
 
-		const [allTrades, symbols, strategies] = await Promise.all([
-			tradeService.list(userId),
+		const [accountTrades, symbols, strategies] = await Promise.all([
+			tradeService.listByAccount(userId, activeAccount.id),
 			symbolService.listForUser(userId),
 			strategyService.list(userId),
 		]);
@@ -109,17 +108,13 @@ export class DashboardService {
 		const symbolMap = new Map(symbols.map((symbol) => [symbol.id, symbol]));
 		const strategyMap = new Map(strategies.map((strategy) => [strategy.id, strategy.name]));
 
-		const accountTrades = allTrades.filter((trade) => trade.accountId === activeAccount.id);
 		const closedTrades = accountTrades.filter(
 			(trade) => trade.status === 'closed' && trade.profitLoss !== null && trade.closedAt !== null,
 		);
 		const closedResults = closedTrades.map(toClosedTradeResult);
 
 		const startingBalance = toFiniteNumber(activeAccount.startingBalance);
-		const currentBalance = computeCurrentBalance(
-			startingBalance,
-			closedResults.map((result) => result.profitLoss),
-		);
+		const currentBalance = toFiniteNumber(activeAccount.currentBalance);
 		const lookbackCutoff = new Date(Date.now() - EQUITY_CURVE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
 		const recentClosedResults = closedResults.filter((result) => {
 			const closedAt = result.closedAt instanceof Date ? result.closedAt : new Date(result.closedAt ?? 0);
@@ -140,24 +135,9 @@ export class DashboardService {
 			.slice(0, RECENT_TRADES_LIMIT)
 			.map((trade) => toRecentTradeDto(trade, symbolMap, strategyMap));
 
-		const accountsWithLiveBalance = accounts.map((account) => {
-			const option = toAccountOption(account);
-			const accountClosed = allTrades.filter(
-				(trade) =>
-					trade.accountId === account.id && trade.status === 'closed' && trade.profitLoss !== null,
-			);
-			return {
-				...option,
-				currentBalance: computeCurrentBalance(
-					account.startingBalance,
-					accountClosed.map((trade) => trade.profitLoss),
-				),
-			};
-		});
-
 		return {
 			hasAccounts: true,
-			accounts: accountsWithLiveBalance,
+			accounts: accounts.map(toAccountOption),
 			activeAccountId: activeAccount.id,
 			currency: activeAccount.currency,
 			startingBalance,
@@ -173,5 +153,4 @@ export class DashboardService {
 		};
 	}
 }
-
 export const dashboardService = new DashboardService();

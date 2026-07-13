@@ -11,7 +11,6 @@ import {
 	tradeService,
 	tradingAccountService,
 	tradingCalculatorService,
-	computeCurrentBalance,
 	toFiniteNumber,
 	type ClosedTradeResult,
 	type DrawdownPoint,
@@ -114,18 +113,14 @@ export class AnalyticsService {
 			return emptyAnalytics();
 		}
 
-		const allTrades = await tradeService.list(userId);
-		const accountTrades = allTrades.filter((trade) => trade.accountId === activeAccount.id);
+		const accountTrades = await tradeService.listByAccount(userId, activeAccount.id);
 		const closedTrades = accountTrades.filter(
 			(trade) => trade.status === 'closed' && trade.profitLoss !== null && trade.closedAt !== null,
 		);
 		const closedResults = closedTrades.map(toClosedTradeResult);
 
 		const startingBalance = toFiniteNumber(activeAccount.startingBalance);
-		const currentBalance = computeCurrentBalance(
-			startingBalance,
-			closedResults.map((result) => result.profitLoss),
-		);
+		const currentBalance = toFiniteNumber(activeAccount.currentBalance);
 
 		const performance = tradingCalculatorService.performanceSummary(closedResults);
 		const streaks = tradingCalculatorService.streaks(closedResults);
@@ -136,24 +131,9 @@ export class AnalyticsService {
 		const weeklyReturns = tradingCalculatorService.weeklyReturns(closedResults, startingBalance);
 		const monthlyReturns = tradingCalculatorService.monthlyReturns(closedResults, startingBalance);
 
-		const accountsWithLiveBalance = accounts.map((account) => {
-			const option = toAccountOption(account);
-			const accountClosed = allTrades.filter(
-				(trade) =>
-					trade.accountId === account.id && trade.status === 'closed' && trade.profitLoss !== null,
-			);
-			return {
-				...option,
-				currentBalance: computeCurrentBalance(
-					account.startingBalance,
-					accountClosed.map((trade) => trade.profitLoss),
-				),
-			};
-		});
-
 		return {
 			hasAccounts: true,
-			accounts: accountsWithLiveBalance,
+			accounts: accounts.map(toAccountOption),
 			activeAccountId: activeAccount.id,
 			currency: activeAccount.currency,
 			startingBalance,
@@ -174,5 +154,4 @@ export class AnalyticsService {
 		};
 	}
 }
-
 export const analyticsService = new AnalyticsService();

@@ -73,7 +73,7 @@ function ReturnsBarChart({ data, currency, tickFormat, emptyLabel }: ReturnsBarC
 					/>
 					<YAxis hide />
 					<Tooltip content={(props) => <ReturnsTooltip {...props} currency={currency} />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-					<Bar dataKey="profitLoss" radius={[6, 6, 6, 6]} maxBarSize={28} isAnimationActive animationDuration={500}>
+					<Bar dataKey="profitLoss" radius={[6, 6, 6, 6]} maxBarSize={28} isAnimationActive={false}>
 						{data.map((entry) => (
 							<Cell key={entry.periodKey} fill={entry.profitLoss >= 0 ? '#22C55E' : '#EF4444'} />
 						))}

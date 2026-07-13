@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, Pencil, Trash2 } from 'lucide-react';
 import { Badge, Button, ConfirmDialog } from '@shared/components';
 import { formatDateTime } from '@shared/utils/format';
+import { softNavigate } from '@shared/utils/soft-navigate';
 import { RESULT_BADGE, SESSION_LABEL, TRADES_API_ROUTE } from '../constants/trade.constants';
 import type { TradeDetail } from '../types/trade.types';
 
@@ -24,7 +25,7 @@ export function TradeDetailHeader({ trade }: TradeDetailHeaderProps) {
 			return;
 		}
 		toast.success('Trade deleted.');
-		window.location.assign('/app/trades');
+		await softNavigate('/app/trades');
 	}
 
 	return (

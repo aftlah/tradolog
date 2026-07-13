@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { AppShell } from '@shared/components/app-shell/AppShell';
 import { LogoutButton } from '@features/auth/components/LogoutButton';
+import { softNavigate } from '@shared/utils/soft-navigate';
 import type { AccountOption } from '@shared/types';
 
 interface TradePageShellProps {
@@ -26,7 +27,9 @@ export function TradePageShell({ title, accounts, activeAccountId, userName, use
 			userEmail={userEmail}
 			accounts={accounts}
 			activeAccountId={activeAccountId}
-			onAccountChange={(accountId) => window.location.assign(`/app/trades?accountId=${accountId}`)}
+			onAccountChange={(accountId) => {
+				void softNavigate(`/app/trades?accountId=${accountId}`);
+			}}
 			showQuickAdd={false}
 			userMenuFooter={<LogoutButton className="w-full" />}
 		>

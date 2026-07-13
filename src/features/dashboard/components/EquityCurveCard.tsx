@@ -90,8 +90,7 @@ export function EquityCurveCard({ equityCurve, startingBalance, currency }: Equi
 							stroke="#2563EB"
 							strokeWidth={2.5}
 							fill="url(#dashboardEquityFill)"
-							isAnimationActive
-							animationDuration={600}
+							isAnimationActive={false}
 						/>
 					</AreaChart>
 				</ResponsiveContainer>

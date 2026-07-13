@@ -66,23 +66,9 @@ export class ProfileService {
 }
 
 export class TradingAccountService {
+	/** Returns accounts as stored. `currentBalance` is kept in sync on trade mutations. */
 	async list(userId: string) {
-		const accounts = await tradingAccountRepository.listByUserId(userId);
-		const trades = await tradeRepository.listByUserId(userId);
-
-		return accounts.map((account) => {
-			const closedProfitLosses = trades
-				.filter(
-					(trade) =>
-						trade.accountId === account.id && trade.status === 'closed' && trade.profitLoss !== null,
-				)
-				.map((trade) => trade.profitLoss);
-
-			return {
-				...account,
-				currentBalance: String(computeCurrentBalance(account.startingBalance, closedProfitLosses)),
-			};
-		});
+		return tradingAccountRepository.listByUserId(userId);
 	}
 
 	async requireForUser(id: string, userId: string) {
@@ -104,29 +90,38 @@ export class TradingAccountService {
 	}
 
 	/**
-	 * Sets `currentBalance` = starting balance + sum of closed-trade P&L for this account.
+	 * Sets `currentBalance` = starting balance + SUM(closed P&L) via SQL (no full trade scan).
 	 * Call after trade create/update/delete and when starting balance changes.
 	 */
 	async syncCurrentBalance(userId: string, accountId: string) {
 		const account = await this.requireForUser(accountId, userId);
-		const trades = await tradeRepository.listByUserId(userId);
-		const closedProfitLosses = trades
-			.filter(
-				(trade) =>
-					trade.accountId === accountId && trade.status === 'closed' && trade.profitLoss !== null,
-			)
-			.map((trade) => trade.profitLoss);
-
-		const currentBalance = computeCurrentBalance(account.startingBalance, closedProfitLosses);
+		const closedPnl = await tradeRepository.sumClosedProfitLoss(userId, accountId);
+		const currentBalance = computeCurrentBalance(account.startingBalance, [closedPnl]);
 		const updated = await tradingAccountRepository.updateForUser(accountId, userId, {
 			currentBalance: String(currentBalance),
 		});
 		return updated ?? account;
 	}
 
+	/** Refresh every account balance with one grouped SUM query. */
 	async syncAllCurrentBalances(userId: string) {
 		const accounts = await tradingAccountRepository.listByUserId(userId);
-		await Promise.all(accounts.map((account) => this.syncCurrentBalance(userId, account.id)));
+		if (accounts.length === 0) {
+			return accounts;
+		}
+
+		const pnlByAccount = await tradeRepository.sumClosedProfitLossByAccount(userId);
+		await Promise.all(
+			accounts.map((account) => {
+				const currentBalance = computeCurrentBalance(account.startingBalance, [
+					pnlByAccount.get(account.id) ?? 0,
+				]);
+				return tradingAccountRepository.updateForUser(account.id, userId, {
+					currentBalance: String(currentBalance),
+				});
+			}),
+		);
+
 		return tradingAccountRepository.listByUserId(userId);
 	}
 }
@@ -156,6 +151,10 @@ export class StrategyService {
 export class TradeService {
 	async list(userId: string) {
 		return tradeRepository.listByUserId(userId);
+	}
+
+	async listByAccount(userId: string, accountId: string) {
+		return tradeRepository.listByAccountId(userId, accountId);
 	}
 
 	async requireForUser(id: string, userId: string) {

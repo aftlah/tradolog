@@ -105,7 +105,7 @@ export class SettingsService {
 	async getSettingsPageData(userId: string): Promise<SettingsPageData> {
 		const [profile, accounts, strategies, symbols] = await Promise.all([
 			this.getOrCreateProfile(userId),
-			tradingAccountService.syncAllCurrentBalances(userId),
+			tradingAccountService.list(userId),
 			strategyRepository.listByUserId(userId),
 			symbolRepository.listForUser(userId),
 		]);

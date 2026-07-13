@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@shared/components';
+import { softNavigate } from '@shared/utils/soft-navigate';
 import { TRADES_API_ROUTE } from '../constants/trade.constants';
 import { inferTradeSide } from '../utils/infer-trade-side';
 import { tradeFormSchema, type TradeFormInput, type TradeFormValues } from '../validators/trade-schemas';
@@ -72,7 +73,7 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 
 			const trade = (await response.json()) as { id: string };
 			toast.success(mode === 'create' ? 'Trade created.' : 'Trade updated.');
-			window.location.assign(`/app/trades/${trade.id}`);
+			await softNavigate(`/app/trades/${trade.id}`);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Could not save this trade.';
 			setSubmitError(message);

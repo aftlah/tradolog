@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AppShell } from '../app-shell/AppShell';
+import { softNavigate } from '@shared/utils/soft-navigate';
 import type { AccountOption } from '@shared/types';
 
 interface FeaturePageShellProps {
@@ -43,7 +44,7 @@ export function FeaturePageShell({
 				((accountId) => {
 					const url = new URL(window.location.href);
 					url.searchParams.set('accountId', accountId);
-					window.location.assign(url.toString());
+					void softNavigate(`${url.pathname}${url.search}`);
 				})
 			}
 			isLoadingAccount={isLoadingAccount}
