@@ -1,6 +1,7 @@
 import type { TradeResult, TradeSession, TradeSide, TradeStatus } from '@shared/types';
 
 export const TRADES_API_ROUTE = '/api/trades';
+export const PARSE_SETUP_API_ROUTE = '/api/trades/parse-setup';
 
 /** Standard XAUUSD lot = 100 oz. Used when the symbol row has no `contractSize` yet. */
 export const XAUUSD_TICKER = 'XAUUSD';

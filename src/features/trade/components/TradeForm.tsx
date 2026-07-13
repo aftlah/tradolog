@@ -12,6 +12,7 @@ import { TradeFormDetailsSection } from './TradeFormDetailsSection';
 import { TradeFormPricingSection } from './TradeFormPricingSection';
 import { TradeFormJournalSection } from './TradeFormJournalSection';
 import { TradePlanPreview } from './TradePlanPreview';
+import { TradeSetupImageFill } from './TradeSetupImageFill';
 
 interface TradeFormProps {
 	mode: 'create' | 'edit';
@@ -90,6 +91,7 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 
 	return (
 		<form className="space-y-6" onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
+			<TradeSetupImageFill setValue={setValue} />
 			<TradeFormDetailsSection
 				register={register}
 				errors={errors}

@@ -12,6 +12,8 @@ const envSchema = z.object({
 	R2_SECRET_ACCESS_KEY: z.string().optional(),
 	R2_BUCKET_NAME: z.string().optional(),
 	R2_PUBLIC_URL: z.url().optional(),
+	GEMINI_API_KEY: z.string().optional(),
+	GEMINI_MODEL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -33,12 +35,13 @@ let dotenvLoaded = false;
  *
  * Never import `vite` here — it pulls Rolldown native bindings and crashes serverless.
  */
-function ensureDotenvLoaded(): void {
-	if (dotenvLoaded) {
+function ensureDotenvLoaded(forceReload = false): void {
+	if (dotenvLoaded && !forceReload) {
 		return;
 	}
 	dotenvLoaded = true;
-	loadDotenv({ quiet: true });
+	// `override: true` so edited `.env` values win over a stale process.env from an earlier load.
+	loadDotenv({ quiet: true, override: forceReload });
 }
 
 /**
@@ -46,7 +49,8 @@ function ensureDotenvLoaded(): void {
  * Bracket access `process.env[name]` avoids Vite build-time env inlining.
  */
 function readRawEnv(): Record<keyof Env, string | undefined> {
-	ensureDotenvLoaded();
+	const isDev = process.env.NODE_ENV !== 'production';
+	ensureDotenvLoaded(isDev);
 
 	const fromRuntime = (name: keyof Env): string | undefined => {
 		return pick(process.env[name]);
@@ -63,13 +67,16 @@ function readRawEnv(): Record<keyof Env, string | undefined> {
 		R2_SECRET_ACCESS_KEY: fromRuntime('R2_SECRET_ACCESS_KEY'),
 		R2_BUCKET_NAME: fromRuntime('R2_BUCKET_NAME'),
 		R2_PUBLIC_URL: fromRuntime('R2_PUBLIC_URL'),
+		GEMINI_API_KEY: fromRuntime('GEMINI_API_KEY'),
+		GEMINI_MODEL: fromRuntime('GEMINI_MODEL'),
 	};
 }
 
 let cachedEnv: Env | undefined;
 
 export function getEnv(): Env {
-	if (cachedEnv) {
+	const isDev = process.env.NODE_ENV !== 'production';
+	if (cachedEnv && !isDev) {
 		return cachedEnv;
 	}
 
@@ -86,6 +93,7 @@ export function getEnv(): Env {
 /** Clear cache (useful in tests / long-running scripts). */
 export function resetEnvCache(): void {
 	cachedEnv = undefined;
+	dotenvLoaded = false;
 }
 
 export function requireEnv<K extends keyof Env>(key: K): NonNullable<Env[K]> {
