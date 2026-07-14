@@ -286,7 +286,7 @@ export class TradeRepository {
 		const [rows, totalRows] = await Promise.all([
 			joinedFrom
 				.where(where)
-				.orderBy(orderFn(sortColumn), desc(trades.id))
+				.orderBy(orderFn(sortColumn), orderFn(trades.createdAt), desc(trades.id))
 				.limit(query.pageSize)
 				.offset(offset),
 			db

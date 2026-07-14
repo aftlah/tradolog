@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { TRADES_API_ROUTE } from '../constants/trade.constants';
+import { DEFAULT_PAGE_SIZE, DEFAULT_TRADE_LIST_SORT, TRADES_API_ROUTE } from '../constants/trade.constants';
 import { buildTradeQueryParams } from '../utils/query';
 import type { PaginatedResult, TradeListItem, TradeListQuery } from '../types/trade.types';
 
@@ -23,9 +23,9 @@ interface UseTradeTableResult {
 
 const BASE_QUERY: TradeListQuery = {
 	page: 1,
-	pageSize: 20,
-	sortBy: 'openedAt',
-	sortDir: 'desc',
+	pageSize: DEFAULT_PAGE_SIZE,
+	sortBy: DEFAULT_TRADE_LIST_SORT.sortBy,
+	sortDir: DEFAULT_TRADE_LIST_SORT.sortDir,
 };
 
 /**

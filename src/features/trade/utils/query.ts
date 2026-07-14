@@ -3,7 +3,7 @@
  * back again. Used by the API route, the SSR Astro page, and the client-side table hook so the
  * three never drift out of sync on param names or defaults.
  */
-import { DEFAULT_PAGE_SIZE } from '../constants/trade.constants';
+import { DEFAULT_PAGE_SIZE, DEFAULT_TRADE_LIST_SORT } from '../constants/trade.constants';
 import type { TradeListQuery, TradeSortColumn } from '../types/trade.types';
 
 const SORT_COLUMNS: readonly TradeSortColumn[] = [
@@ -16,7 +16,9 @@ const SORT_COLUMNS: readonly TradeSortColumn[] = [
 ];
 
 function toSortColumn(value: string | null): TradeSortColumn {
-	return SORT_COLUMNS.includes(value as TradeSortColumn) ? (value as TradeSortColumn) : 'openedAt';
+	return SORT_COLUMNS.includes(value as TradeSortColumn)
+		? (value as TradeSortColumn)
+		: DEFAULT_TRADE_LIST_SORT.sortBy;
 }
 
 function toPositiveInt(value: string | null, fallback: number, max?: number): number {
@@ -32,7 +34,7 @@ export function parseTradeListQuery(params: URLSearchParams): TradeListQuery {
 		page: toPositiveInt(params.get('page'), 1),
 		pageSize: toPositiveInt(params.get('pageSize'), DEFAULT_PAGE_SIZE, 100),
 		sortBy: toSortColumn(params.get('sortBy')),
-		sortDir: params.get('sortDir') === 'asc' ? 'asc' : 'desc',
+		sortDir: params.get('sortDir') === 'asc' ? 'asc' : DEFAULT_TRADE_LIST_SORT.sortDir,
 		search: params.get('search') ?? undefined,
 		accountId: params.get('accountId') ?? undefined,
 		symbolId: params.get('symbolId') ?? undefined,

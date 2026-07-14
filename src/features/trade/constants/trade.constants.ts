@@ -1,4 +1,5 @@
 import type { TradeResult, TradeSession, TradeSide, TradeStatus } from '@shared/types';
+import type { TradeSortColumn } from '../types/trade.types';
 
 export const TRADES_API_ROUTE = '/api/trades';
 export const PARSE_SETUP_API_ROUTE = '/api/trades/parse-setup';
@@ -9,6 +10,12 @@ export const XAUUSD_CONTRACT_SIZE = 100;
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
+
+/** Default journal order — newest logged trades first. */
+export const DEFAULT_TRADE_LIST_SORT: { sortBy: TradeSortColumn; sortDir: 'asc' | 'desc' } = {
+	sortBy: 'createdAt',
+	sortDir: 'desc',
+};
 
 export const MAX_IMAGES_PER_TRADE = 8;
 export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -63,10 +70,10 @@ export const SESSION_LABEL: Record<TradeSession, string> = {
 };
 
 export const SORT_OPTIONS: Array<{ value: string; label: string }> = [
+	{ value: 'createdAt', label: 'Date Logged' },
 	{ value: 'openedAt', label: 'Date Opened' },
 	{ value: 'closedAt', label: 'Date Closed' },
 	{ value: 'profitLoss', label: 'P&L' },
 	{ value: 'profitLossPercent', label: 'P&L %' },
 	{ value: 'actualRr', label: 'RR' },
-	{ value: 'createdAt', label: 'Date Logged' },
 ];
