@@ -7,6 +7,7 @@ export interface JournalShareDto {
 	mentorEmail: string;
 	message: string | null;
 	inviteToken: string;
+	/** Relative path `/app/shared/accept?token=…` — UI prefixes current origin when copying. */
 	inviteUrl: string;
 	ownerName: string | null;
 	ownerEmail: string | null;

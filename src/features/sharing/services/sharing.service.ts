@@ -5,7 +5,6 @@
 import { randomBytes } from 'node:crypto';
 import { ForbiddenError, NotFoundError, ValidationError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
-import { getEnv } from '@shared/lib/env';
 import { journalShareInsertSchema } from '@shared/validators';
 import { journalShareRepository, type TradeClosedMetrics, type TradeRecentSummary } from '@shared/repositories';
 import {
@@ -18,7 +17,8 @@ import {
 import { toAccountOption } from '@shared/utils/account-option';
 import type { JournalShare } from '@shared/types';
 import { inviteMentorFormSchema } from '../validators/sharing-schemas';
-import { RECENT_SHARED_TRADES_LIMIT, SHARING_PAGE_ROUTE } from '../constants/sharing.constants';
+import { RECENT_SHARED_TRADES_LIMIT } from '../constants/sharing.constants';
+import { inviteAcceptPath } from '../utils/invite-url';
 import type {
 	JournalShareDto,
 	SharedJournalTradeDto,
@@ -28,18 +28,6 @@ import type {
 
 function createInviteToken(): string {
 	return randomBytes(24).toString('hex');
-}
-
-function appBaseUrl(): string {
-	try {
-		return getEnv().BETTER_AUTH_URL?.replace(/\/$/, '') ?? 'http://localhost:4321';
-	} catch {
-		return 'http://localhost:4321';
-	}
-}
-
-function inviteUrlFor(token: string): string {
-	return `${appBaseUrl()}${SHARING_PAGE_ROUTE}/accept?token=${encodeURIComponent(token)}`;
 }
 
 function toClosedTradeResult(row: TradeClosedMetrics): ClosedTradeResult | null {
@@ -103,7 +91,8 @@ export class SharingService {
 			mentorEmail: share.mentorEmail,
 			message: share.message,
 			inviteToken: share.inviteToken,
-			inviteUrl: inviteUrlFor(share.inviteToken),
+			/** Path-only; UI prefixes `window.location.origin` when copying. */
+			inviteUrl: inviteAcceptPath(share.inviteToken),
 			ownerName: resolvedOwner?.name ?? null,
 			ownerEmail: resolvedOwner?.email ?? null,
 			mentorName: resolvedMentor?.name ?? null,

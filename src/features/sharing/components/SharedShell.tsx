@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Badge, Button } from '@shared/components';
 import { SETTINGS_PAGE_ROUTE } from '@features/settings/constants/settings.constants';
 import { SHARING_API_ROUTE, SHARING_PAGE_ROUTE } from '../constants/sharing.constants';
+import { inviteUrlFromToken } from '../utils/invite-url';
 import type { JournalShareDto, SharedJournalViewDto, SharingPageData } from '../types/sharing.types';
 import { SharedJournalPanel } from './SharedJournalPanel';
 
@@ -115,11 +116,12 @@ export function SharedShell({ initialData, initialView, acceptToken }: SharedShe
 	}
 
 	async function copyLink(share: JournalShareDto) {
+		const link = inviteUrlFromToken(share.inviteToken);
 		try {
-			await navigator.clipboard.writeText(share.inviteUrl);
+			await navigator.clipboard.writeText(link);
 			toast.success('Invite link copied.');
 		} catch {
-			toast.message(share.inviteUrl);
+			toast.message(link);
 		}
 	}
 

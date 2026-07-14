@@ -3,6 +3,7 @@ import { Check, Copy, Link2, Loader2, Shield, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge, Button } from '@shared/components';
 import { SETTINGS_SHARING_HINT, SHARING_API_ROUTE } from '../constants/sharing.constants';
+import { inviteUrlFromToken } from '../utils/invite-url';
 import type { JournalShareDto } from '../types/sharing.types';
 import { SharingInviteForm } from './SharingInviteForm';
 
@@ -26,11 +27,12 @@ export function SharingSettingsPanel({ initialOutgoing }: SharingSettingsPanelPr
 	const [revokingId, setRevokingId] = useState<string | null>(null);
 
 	async function copyLink(share: JournalShareDto) {
+		const link = inviteUrlFromToken(share.inviteToken);
 		try {
-			await navigator.clipboard.writeText(share.inviteUrl);
+			await navigator.clipboard.writeText(link);
 			toast.success('Invite link copied.');
 		} catch {
-			toast.message(share.inviteUrl);
+			toast.message(link);
 		}
 	}
 

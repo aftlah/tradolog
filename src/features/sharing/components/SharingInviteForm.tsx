@@ -5,6 +5,7 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, FormField, Input, Textarea } from '@shared/components';
 import { SHARING_API_ROUTE } from '../constants/sharing.constants';
+import { inviteUrlFromToken } from '../utils/invite-url';
 import {
 	inviteMentorFormSchema,
 	type InviteMentorFormInput,
@@ -44,8 +45,9 @@ export function SharingInviteForm({ onInvited }: SharingInviteFormProps) {
 			const share = (await response.json()) as JournalShareDto;
 			onInvited(share);
 			reset({ mentorEmail: '', message: '' });
+			const link = inviteUrlFromToken(share.inviteToken);
 			toast.success('Mentor invite created. Copy the link to share it.');
-			await navigator.clipboard.writeText(share.inviteUrl).catch(() => undefined);
+			await navigator.clipboard.writeText(link).catch(() => undefined);
 			setCopiedId(share.id);
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Could not send invite.');
