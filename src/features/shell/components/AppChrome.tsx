@@ -11,26 +11,18 @@ import {
 	syncSidebarCollapsedDocument,
 } from '@shared/components/app-shell/sidebar.motion';
 import { LogoutButton } from '@features/auth/components/LogoutButton';
-import { APP_CHROME_STATE_ID, parseAppChromeState, type AppChromeState } from '../types/chrome.types';
-import { resolveActiveHref } from '../utils/resolve-active-href';
-import { scheduleAppNavPrefetch } from '../utils/prefetch-app-nav';
+import type { AppChromeState } from '../types/chrome.types';
 
 interface AppChromeProps {
 	initialState: AppChromeState;
 }
 
-function readStateFromDom(fallback: AppChromeState): AppChromeState {
-	const el = document.getElementById(APP_CHROME_STATE_ID);
-	return parseAppChromeState(el?.textContent) ?? fallback;
-}
-
 /**
- * Persisted across ClientRouter navigations. Reads fresh title/accounts from the page's
- * JSON state script on every `astro:page-load` so the shell never remounts.
+ * App chrome for authenticated pages. Remounts on each full page load (ClientRouter removed).
  */
 export function AppChrome({ initialState }: AppChromeProps) {
-	const [state, setState] = useState(initialState);
-	const [activeHref, setActiveHref] = useState(initialState.activeHref);
+	const [state] = useState(initialState);
+	const [activeHref] = useState(initialState.activeHref);
 	const [mobileNavOpen, setMobileNavOpen] = useState(false);
 	// Always start expanded on SSR; sync localStorage after mount to avoid hydration mismatch.
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -48,23 +40,6 @@ export function AppChrome({ initialState }: AppChromeProps) {
 			persistActiveAccountCookie(state.activeAccountId);
 		}
 	}, [state.activeAccountId]);
-
-	useEffect(() => scheduleAppNavPrefetch(window.location.pathname), [activeHref]);
-
-	useEffect(() => {
-		function syncFromPage() {
-			setState((prev) => {
-				const next = readStateFromDom(prev);
-				setActiveHref(next.activeHref || resolveActiveHref(window.location.pathname));
-				return next;
-			});
-			setMobileNavOpen(false);
-			setIsNavigatingAccount(false);
-		}
-
-		document.addEventListener('astro:page-load', syncFromPage);
-		return () => document.removeEventListener('astro:page-load', syncFromPage);
-	}, []);
 
 	function handleCollapsedChange(collapsed: boolean) {
 		setAnimateLayout(true);

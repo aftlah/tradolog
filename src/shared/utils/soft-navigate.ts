@@ -1,15 +1,9 @@
 /**
- * Prefer Astro ClientRouter soft navigation when available; fall back to a full load.
- * Keeps post-mutation redirects from wiping the whole JS bundle on every save.
+ * Full page navigation.
  *
- * Aborted view transitions (often after a hydration error) throw InvalidStateError —
- * always degrade to a hard navigation so the user is never stuck.
+ * Soft ClientRouter transitions were removed — they repeatedly aborted in production
+ * (`InvalidStateError`) when React islands hydrated, leaving users on a half-swapped page.
  */
 export async function softNavigate(href: string): Promise<void> {
-	try {
-		const { navigate } = await import('astro:transitions/client');
-		await navigate(href);
-	} catch {
-		window.location.assign(href);
-	}
+	window.location.assign(href);
 }
