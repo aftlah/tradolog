@@ -41,10 +41,11 @@ const CHART_HEIGHT = 288;
 
 /** Full-history realized equity curve, built by `TradingCalculatorService.equityCurve()`. */
 export function AnalyticsEquityChart({ equityCurve, startingBalance, currency }: AnalyticsEquityChartProps) {
+	// Stable placeholder — never use `new Date()` here (SSR vs client → hydration #418).
 	const chartData =
 		equityCurve.length > 0
 			? equityCurve
-			: [{ closedAt: new Date().toISOString(), equity: startingBalance, profitLoss: 0 }];
+			: [{ closedAt: '1970-01-01T00:00:00.000Z', equity: startingBalance, profitLoss: 0 }];
 
 	return (
 		<div className="glass-card flex h-full min-w-0 flex-col gap-4 p-6">

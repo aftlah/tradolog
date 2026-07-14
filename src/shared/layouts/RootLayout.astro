@@ -65,7 +65,8 @@ const {
 		<div id="tradolog-nav-progress" transition:persist="tradolog-nav-progress" aria-hidden="true"></div>
 		<slot />
 		<div transition:persist="tradolog-toaster">
-			<Toaster client:load />
+			{/* Sonner has no meaningful SSR output — skip hydrate to avoid ClientRouter aborts. */}
+			<Toaster client:only="react" />
 		</div>
 		<script is:inline>
 			(function () {

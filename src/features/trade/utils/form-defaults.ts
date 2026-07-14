@@ -1,7 +1,13 @@
 import type { TradeFormInput } from '../validators/trade-schemas';
 import type { TradeDetail } from '../types/trade.types';
 
-/** Converts an ISO timestamp into the `yyyy-MM-ddTHH:mm` string `<input type="datetime-local">` expects. */
+/**
+ * Converts an ISO timestamp into the `yyyy-MM-ddTHH:mm` string `<input type="datetime-local">` expects.
+ *
+ * Uses the **runtime local timezone**. Never call this during SSR hydration of a `client:load`
+ * island — Vercel (UTC) and the browser (e.g. Asia/Jakarta) produce different strings and throw
+ * React error #418. Trade create/edit shells must use `client:only="react"`.
+ */
 export function toDatetimeLocalValue(iso: string | null | undefined): string {
 	if (!iso) {
 		return '';
@@ -21,9 +27,7 @@ function toInputValue(value: number | null): string {
 /**
  * Builds the initial React Hook Form state for the Trade form.
  *
- * `nowIso` must come from the Astro page (serialized prop) — never call `new Date()` here during
- * render. A fresh `new Date()` on the server vs. the client causes a hydration mismatch that
- * breaks every controlled Select/input in the form.
+ * Only safe to call in a client-only context (or after mount). See `toDatetimeLocalValue`.
  */
 export function getTradeFormDefaults(
 	detail?: TradeDetail | null,

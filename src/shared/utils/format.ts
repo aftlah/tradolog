@@ -78,15 +78,20 @@ export function formatProfitFactor(value: number | null, decimals = 2): string {
 	return value.toFixed(decimals);
 }
 
+/**
+ * Always format in UTC so Vercel SSR (UTC) matches the browser during hydration.
+ * Without an explicit timeZone, Node uses UTC and the client uses the local zone
+ * (e.g. Asia/Jakarta) — that text mismatch throws React error #418 in production.
+ */
 export function formatDate(value: string | Date, options?: Intl.DateTimeFormatOptions): string {
 	const date = typeof value === 'string' ? new Date(value) : value;
 	if (Number.isNaN(date.getTime())) {
 		return '—';
 	}
-	return new Intl.DateTimeFormat(
-		DEFAULT_LOCALE,
-		options ?? { month: 'short', day: 'numeric', year: 'numeric' },
-	).format(date);
+	return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+		timeZone: 'UTC',
+		...(options ?? { month: 'short', day: 'numeric', year: 'numeric' }),
+	}).format(date);
 }
 
 /** Formats a holding-time duration in seconds as e.g. `2d 4h`, `3h 15m`, or `42m`. `null` renders as `"—"`. */
@@ -114,5 +119,6 @@ export function formatDateTime(value: string | Date): string {
 		day: 'numeric',
 		hour: 'numeric',
 		minute: '2-digit',
+		timeZone: 'UTC',
 	});
 }
