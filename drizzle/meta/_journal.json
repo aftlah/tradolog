@@ -43,6 +43,13 @@
       "when": 1783956000000,
       "tag": "0005_trades_closed_metrics_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783960000000,
+      "tag": "0006_risk_rules",
+      "breakpoints": true
     }
   ]
 }

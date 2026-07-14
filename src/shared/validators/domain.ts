@@ -40,7 +40,19 @@ export const profileInsertSchema = z.object({
 	onboardingCompleted: z.boolean().default(false),
 });
 
-export const profileUpdateSchema = profileInsertSchema.omit({ userId: true }).partial();
+/** Update payload — no insert defaults (avoids overwriting fields like `onboardingCompleted` on every save). */
+export const profileUpdateSchema = z
+	.object({
+		displayName: z.string().trim().max(120).optional().nullable(),
+		timezone: z.string().trim().min(1).max(64).optional(),
+		baseCurrency: z.string().trim().length(3).optional(),
+		riskPerTradePercent: numericStringSchema,
+		defaultRiskReward: numericStringSchema,
+		bio: z.string().max(2000).optional().nullable(),
+		avatarUrl: z.union([z.url(), z.literal('')]).optional().nullable(),
+		onboardingCompleted: z.boolean().optional(),
+	})
+	.partial();
 
 export const tradingAccountInsertSchema = z.object({
 	userId: userIdSchema,
@@ -183,6 +195,19 @@ export const watchlistInsertSchema = z.object({
 	alertPrice: numericStringSchema,
 });
 
+export const riskRulesInsertSchema = z.object({
+	userId: userIdSchema,
+	enabled: z.boolean().default(true),
+	maxDailyLossAmount: numericStringSchema,
+	maxDailyLossPercent: numericStringSchema,
+	maxWeeklyLossAmount: numericStringSchema,
+	maxWeeklyLossPercent: numericStringSchema,
+	maxTradesPerDay: z.number().int().positive().optional().nullable(),
+	maxConsecutiveLosses: z.number().int().positive().optional().nullable(),
+});
+
+export const riskRulesUpdateSchema = riskRulesInsertSchema.omit({ userId: true }).partial();
+
 export type ProfileInsertInput = z.infer<typeof profileInsertSchema>;
 export type TradingAccountInsertInput = z.infer<typeof tradingAccountInsertSchema>;
 export type SymbolInsertInput = z.infer<typeof symbolInsertSchema>;
@@ -194,3 +219,5 @@ export type TradeReviewInsertInput = z.infer<typeof tradeReviewInsertSchema>;
 export type MonthlyGoalInsertInput = z.infer<typeof monthlyGoalInsertSchema>;
 export type WatchlistInsertInput = z.infer<typeof watchlistInsertSchema>;
 export type JournalNoteInsertInput = z.infer<typeof journalNoteInsertSchema>;
+export type RiskRulesInsertInput = z.infer<typeof riskRulesInsertSchema>;
+export type RiskRulesUpdateInput = z.infer<typeof riskRulesUpdateSchema>;

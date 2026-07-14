@@ -1,6 +1,6 @@
 import type { DrawdownSummary, PerformanceSummary, StreakSummary, TradeDirection } from '@shared/services';
 import type { AccountOption, TradeResult, TradeStatus } from '@shared/types';
-
+import type { RiskAlertDto } from '@features/risk/types/risk.types';
 
 export interface DashboardEquityPoint {
 	closedAt: string;
@@ -26,7 +26,6 @@ export interface DashboardRecentTrade {
 	closedAt: string | null;
 }
 
-
 export interface DashboardData {
 	hasAccounts: boolean;
 	accounts: AccountOption[];
@@ -39,4 +38,5 @@ export interface DashboardData {
 	drawdown: DashboardDrawdownSummary;
 	equityCurve: DashboardEquityPoint[];
 	recentTrades: DashboardRecentTrade[];
+	riskAlerts: RiskAlertDto[];
 }

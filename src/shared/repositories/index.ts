@@ -34,3 +34,4 @@ export {
 	journalNoteRepository,
 	JournalNoteRepository,
 } from './journal-note.repository';
+export { riskRulesRepository, RiskRulesRepository } from './risk-rules.repository';

@@ -28,6 +28,7 @@ import {
 } from '@shared/validators';
 import { toNullableNumber, tradingAccountService } from '@shared/services';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
+import { riskRulesService } from '@features/risk/services/risk-rules.service';
 import { toAccountOption } from '@shared/utils/account-option';
 import type { Profile, Strategy, TradeSymbol, TradingAccount } from '@shared/types';
 import type {
@@ -108,11 +109,12 @@ async function clearOtherDefaultAccounts(userId: string, keepAccountId: string):
 
 export class SettingsService {
 	async getSettingsPageData(userId: string): Promise<SettingsPageData> {
-		const [profile, accounts, strategies, symbols] = await Promise.all([
+		const [profile, accounts, strategies, symbols, riskRules] = await Promise.all([
 			this.getOrCreateProfile(userId),
 			tradingAccountService.list(userId),
 			strategyRepository.listByUserId(userId),
 			symbolRepository.listForUser(userId),
+			riskRulesService.getDto(userId),
 		]);
 
 		return {
@@ -120,6 +122,7 @@ export class SettingsService {
 			accounts: accounts.map(toAccountDto),
 			strategies: strategies.map(toStrategyDto),
 			symbols: symbols.map((symbol) => toSymbolDto(symbol, userId)),
+			riskRules,
 		};
 	}
 
@@ -139,6 +142,7 @@ export class SettingsService {
 		if (!updated) {
 			throw new NotFoundError('Profile not found.');
 		}
+		await invalidateUserPageCaches(userId);
 		return toProfileDto(updated);
 	}
 
@@ -205,6 +209,7 @@ export class SettingsService {
 	async createStrategy(userId: string, input: unknown): Promise<StrategySettingsDto> {
 		const data = parseOrThrow(strategyInsertSchema, withUserId(input, userId));
 		const strategy = await strategyRepository.insert(data);
+		await invalidateUserPageCaches(userId);
 		return toStrategyDto(strategy);
 	}
 
@@ -219,6 +224,7 @@ export class SettingsService {
 		if (!updated) {
 			throw new NotFoundError('Strategy not found.');
 		}
+		await invalidateUserPageCaches(userId);
 		return toStrategyDto(updated);
 	}
 
@@ -227,15 +233,17 @@ export class SettingsService {
 		if (!deleted) {
 			throw new NotFoundError('Strategy not found.');
 		}
+		await invalidateUserPageCaches(userId);
 	}
 
 	async createSymbol(userId: string, input: unknown): Promise<SymbolSettingsDto> {
 		const data = parseOrThrow(symbolInsertSchema, withUserId(input, userId));
 		const symbol = await symbolRepository.insert(data);
+		await invalidateUserPageCaches(userId);
 		return toSymbolDto(symbol, userId);
 	}
 
-	/** Only ever mutates symbols owned by `userId` â€” the shared/system catalog is read-only here. */
+	/** Only ever mutates symbols owned by `userId` — the shared/system catalog is read-only here. */
 	async updateSymbol(id: string, userId: string, input: unknown): Promise<SymbolSettingsDto> {
 		const existing = await symbolRepository.findById(id);
 		if (!existing || existing.userId !== userId) {
@@ -247,6 +255,7 @@ export class SettingsService {
 		if (!updated) {
 			throw new NotFoundError('Symbol not found.');
 		}
+		await invalidateUserPageCaches(userId);
 		return toSymbolDto(updated, userId);
 	}
 
@@ -260,6 +269,7 @@ export class SettingsService {
 		if (!deleted) {
 			throw new NotFoundError('Symbol not found.');
 		}
+		await invalidateUserPageCaches(userId);
 	}
 }
 

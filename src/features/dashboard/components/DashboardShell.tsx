@@ -6,6 +6,7 @@ import type { DashboardData } from '../types/dashboard.types';
 import { StatCardsGrid } from './StatCardsGrid';
 import { PerformanceSummaryCard } from './PerformanceSummaryCard';
 import { RecentTradesTable } from './RecentTradesTable';
+import { RiskAlertsCard } from './RiskAlertsCard';
 
 const EquityCurveCard = lazy(() =>
 	import('./EquityCurveCard').then((module) => ({ default: module.EquityCurveCard })),
@@ -43,6 +44,8 @@ export function DashboardShell({ initialData }: DashboardShellProps) {
 
 	return (
 		<div className="flex flex-col gap-6">
+			<RiskAlertsCard alerts={data.riskAlerts} currency={data.currency} />
+
 			<StatCardsGrid data={data} />
 
 			<div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">

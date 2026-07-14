@@ -41,5 +41,7 @@ export type {
 	NewWatchlistEntry,
 	JournalNote,
 	NewJournalNote,
+	RiskRules,
+	NewRiskRules,
 	UserScoped,
 } from './database';

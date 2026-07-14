@@ -9,6 +9,7 @@ import {
 import type { TradeClosedMetrics, TradeRecentSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
 import { dashboardCacheKey, cacheGet, cacheSet } from '@shared/lib/cache/page-data-cache';
+import { riskRulesService } from '@features/risk/services/risk-rules.service';
 import { EQUITY_CURVE_LOOKBACK_DAYS, RECENT_TRADES_LIMIT } from '../constants/dashboard.constants';
 import type {
 	DashboardData,
@@ -16,6 +17,8 @@ import type {
 	DashboardEquityPoint,
 	DashboardRecentTrade,
 } from '../types/dashboard.types';
+import type { RiskAlertDto } from '@features/risk/types/risk.types';
+import type { TradingAccount } from '@shared/types';
 
 function toClosedTradeResult(row: TradeClosedMetrics): ClosedTradeResult | null {
 	if (row.profitLoss === null || row.closedAt === null) {
@@ -79,14 +82,16 @@ function emptyDashboard(): DashboardData {
 		drawdown: { ...emptyDrawdown, points: [] },
 		equityCurve: [],
 		recentTrades: [],
+		riskAlerts: [],
 	};
 }
 
 function buildDashboardData(
 	accounts: Awaited<ReturnType<typeof tradingAccountService.list>>,
-	activeAccount: NonNullable<(typeof accounts)[number]>,
+	activeAccount: TradingAccount,
 	closedMetrics: TradeClosedMetrics[],
 	recentRows: TradeRecentSummary[],
+	riskAlerts: RiskAlertDto[],
 ): DashboardData {
 	const closedResults = closedMetrics
 		.map(toClosedTradeResult)
@@ -120,7 +125,24 @@ function buildDashboardData(
 		} satisfies DashboardDrawdownSummary,
 		equityCurve: equityCurve.map(serializeEquityPoint),
 		recentTrades: recentRows.map(toRecentTradeDto),
+		riskAlerts,
 	};
+}
+
+async function assembleDashboard(
+	userId: string,
+	accounts: Awaited<ReturnType<typeof tradingAccountService.list>>,
+	activeAccount: TradingAccount,
+	closedMetrics: TradeClosedMetrics[],
+	recentRows: TradeRecentSummary[],
+): Promise<DashboardData> {
+	const riskAlerts = await riskRulesService.evaluateForAccount(
+		userId,
+		activeAccount.id,
+		toFiniteNumber(activeAccount.startingBalance),
+		closedMetrics,
+	);
+	return buildDashboardData(accounts, activeAccount, closedMetrics, recentRows, riskAlerts);
 }
 
 export class DashboardService {
@@ -128,7 +150,10 @@ export class DashboardService {
 		if (requestedAccountId) {
 			const cached = await cacheGet<DashboardData>(dashboardCacheKey(userId, requestedAccountId));
 			if (cached) {
-				return cached;
+				return {
+					...cached,
+					riskAlerts: cached.riskAlerts ?? [],
+				};
 			}
 
 			const [accounts, closedMetrics, recentRows] = await Promise.all([
@@ -143,7 +168,7 @@ export class DashboardService {
 
 			const activeAccount = accounts.find((account) => account.id === requestedAccountId);
 			if (activeAccount) {
-				const data = buildDashboardData(accounts, activeAccount, closedMetrics, recentRows);
+				const data = await assembleDashboard(userId, accounts, activeAccount, closedMetrics, recentRows);
 				await cacheSet(dashboardCacheKey(userId, activeAccount.id), data);
 				return data;
 			}
@@ -157,7 +182,7 @@ export class DashboardService {
 				tradeService.listClosedMetricsByAccount(userId, fallback.id),
 				tradeService.listRecentSummariesByAccount(userId, fallback.id, RECENT_TRADES_LIMIT),
 			]);
-			const data = buildDashboardData(accounts, fallback, fallbackMetrics, fallbackRecent);
+			const data = await assembleDashboard(userId, accounts, fallback, fallbackMetrics, fallbackRecent);
 			await cacheSet(dashboardCacheKey(userId, fallback.id), data);
 			return data;
 		}
@@ -179,6 +204,7 @@ export class DashboardService {
 				...cached,
 				accounts: accounts.map(toAccountOption),
 				activeAccountId: activeAccount.id,
+				riskAlerts: cached.riskAlerts ?? [],
 			};
 		}
 
@@ -187,7 +213,7 @@ export class DashboardService {
 			tradeService.listRecentSummariesByAccount(userId, activeAccount.id, RECENT_TRADES_LIMIT),
 		]);
 
-		const data = buildDashboardData(accounts, activeAccount, closedMetrics, recentRows);
+		const data = await assembleDashboard(userId, accounts, activeAccount, closedMetrics, recentRows);
 		await cacheSet(dashboardCacheKey(userId, activeAccount.id), data);
 		return data;
 	}

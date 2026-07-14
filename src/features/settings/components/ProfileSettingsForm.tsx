@@ -55,7 +55,7 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
 		register,
 		handleSubmit,
 		reset,
-		formState: { errors, isSubmitting, isDirty },
+		formState: { errors, isSubmitting },
 	} = useForm<ProfileFormInput, unknown, ProfileFormValues>({
 		resolver: zodResolver(profileFormSchema),
 		defaultValues: toFormDefaults(profile),
@@ -71,15 +71,11 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
 	}, [savedProfile.timezone]);
 
 	async function onSubmit(values: ProfileFormValues) {
-		if (!isDirty) {
-			toast.message('No changes to save.');
-			return;
-		}
-
 		try {
 			const response = await fetch(SETTINGS_PROFILE_API_ROUTE, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
+				credentials: 'same-origin',
 				body: JSON.stringify(toApiPayload(values)),
 			});
 
@@ -102,7 +98,16 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
 	}
 
 	return (
-		<form className="glass-card space-y-6 p-6" onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
+		<form
+			className="glass-card space-y-6 p-6"
+			method="post"
+			action="#"
+			onSubmit={(event) => {
+				event.preventDefault();
+				void handleSubmit(onSubmit, onInvalid)(event);
+			}}
+			noValidate
+		>
 			<div>
 				<h2 className="text-sm font-medium text-muted">Trader Profile</h2>
 				<p className="mt-1 text-xs text-muted">Personal details and default risk preferences.</p>
@@ -162,8 +167,13 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
 			</FormField>
 
 			<div className="flex items-center justify-end">
-				{/* Always clickable — `!isDirty` used to disable the button and made Save feel broken. */}
-				<Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="gap-2">
+				<Button
+					type="button"
+					disabled={isSubmitting}
+					aria-busy={isSubmitting}
+					className="gap-2"
+					onClick={() => void handleSubmit(onSubmit, onInvalid)()}
+				>
 					{isSubmitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}
 					Save Profile
 				</Button>

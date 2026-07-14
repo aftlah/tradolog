@@ -1,4 +1,5 @@
 import type { AccountOption, AccountType, MarketType } from '@shared/types';
+import type { RiskRulesDto } from '@features/risk/types/risk.types';
 
 /** Serializable trader-preferences DTO rendered by `ProfileSettingsForm`. */
 export interface ProfileSettingsDto {
@@ -48,6 +49,7 @@ export interface SettingsPageData {
 	accounts: AccountSettingsDto[];
 	strategies: StrategySettingsDto[];
 	symbols: SymbolSettingsDto[];
+	riskRules: RiskRulesDto;
 }
 
 export type { AccountType, MarketType };

@@ -33,5 +33,6 @@ const userEmail = session.user.email ?? '';
 	activeAccountId={activeAccount?.id ?? null}
 	showQuickAdd={data.accounts.length > 0}
 >
-	<SettingsShell client:idle data={data} activeTab={activeTab} activeAccountId={activeAccount?.id ?? null} />
+	{/* client:load — settings forms must hydrate before Save; client:idle left native GET submits that looked like "didn’t save". */}
+	<SettingsShell client:load data={data} activeTab={activeTab} activeAccountId={activeAccount?.id ?? null} />
 </AppLayout>

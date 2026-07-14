@@ -3,6 +3,7 @@ import type {
 	journalNotes,
 	monthlyGoals,
 	profiles,
+	riskRules,
 	strategies,
 	symbols,
 	tradeImages,
@@ -53,6 +54,8 @@ export type WatchlistEntry = typeof watchlists.$inferSelect;
 export type NewWatchlistEntry = typeof watchlists.$inferInsert;
 export type JournalNote = typeof journalNotes.$inferSelect;
 export type NewJournalNote = typeof journalNotes.$inferInsert;
+export type RiskRules = typeof riskRules.$inferSelect;
+export type NewRiskRules = typeof riskRules.$inferInsert;
 
 export type SoftDeletable = {
 	deletedAt: Date | null;

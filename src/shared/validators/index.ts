@@ -25,6 +25,8 @@ export {
 	journalNoteInsertSchema,
 	journalNoteUpdateSchema,
 	watchlistInsertSchema,
+	riskRulesInsertSchema,
+	riskRulesUpdateSchema,
 	type ProfileInsertInput,
 	type TradingAccountInsertInput,
 	type SymbolInsertInput,
@@ -36,4 +38,6 @@ export {
 	type MonthlyGoalInsertInput,
 	type JournalNoteInsertInput,
 	type WatchlistInsertInput,
+	type RiskRulesInsertInput,
+	type RiskRulesUpdateInput,
 } from './domain';

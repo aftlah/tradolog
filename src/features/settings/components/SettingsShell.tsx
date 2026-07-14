@@ -10,6 +10,7 @@ import { ProfileSettingsForm } from './ProfileSettingsForm';
 import { AccountsSettingsPanel } from './AccountsSettingsPanel';
 import { StrategiesSettingsPanel } from './StrategiesSettingsPanel';
 import { SymbolsSettingsPanel } from './SymbolsSettingsPanel';
+import { RiskRulesSettingsForm } from './RiskRulesSettingsForm';
 
 interface SettingsShellProps {
 	data: SettingsPageData;
@@ -17,28 +18,34 @@ interface SettingsShellProps {
 	activeAccountId: string | null;
 }
 
-function settingsTabHref(tab: SettingsTab, activeAccountId: string | null): string {
-	const url = new URL(SETTINGS_PAGE_ROUTE, 'http://localhost');
+function syncSettingsTabUrl(tab: SettingsTab, activeAccountId: string | null): void {
+	const url = new URL(SETTINGS_PAGE_ROUTE, window.location.origin);
 	if (tab !== 'profile') {
 		url.searchParams.set('tab', tab);
 	}
 	if (activeAccountId) {
 		url.searchParams.set('accountId', activeAccountId);
 	}
-	return `${url.pathname}${url.search}`;
+	window.history.replaceState({}, '', `${url.pathname}${url.search}`);
 }
 
 /** Settings page body — chrome lives in the persisted `AppLayout` shell. */
-export function SettingsShell({ data, activeTab, activeAccountId }: SettingsShellProps) {
+export function SettingsShell({ data, activeTab: initialTab, activeAccountId }: SettingsShellProps) {
+	const [activeTab, setActiveTab] = useState(initialTab);
 	const [accounts, setAccounts] = useState(data.accounts);
 	const [strategies, setStrategies] = useState(data.strategies);
 	const [symbols, setSymbols] = useState(data.symbols);
+
+	function selectTab(tab: SettingsTab) {
+		setActiveTab(tab);
+		syncSettingsTabUrl(tab, activeAccountId);
+	}
 
 	return (
 		<>
 			<div>
 				<h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
-				<p className="mt-1 text-sm text-muted">Manage your profile, trading accounts, strategies, and symbols.</p>
+				<p className="mt-1 text-sm text-muted">Manage your profile, accounts, strategies, symbols, and risk rules.</p>
 			</div>
 
 			<div className="relative z-20 mt-6">
@@ -50,14 +57,14 @@ export function SettingsShell({ data, activeTab, activeAccountId }: SettingsShel
 					{SETTINGS_TAB_OPTIONS.map((tab) => {
 						const isActive = activeTab === tab.id;
 						return (
-							<a
+							<button
 								key={tab.id}
+								type="button"
 								role="tab"
 								id={`settings-tab-${tab.id}`}
-								href={settingsTabHref(tab.id, activeAccountId)}
-								data-astro-prefetch="hover"
 								aria-selected={isActive}
 								aria-controls={`settings-panel-${tab.id}`}
+								onClick={() => selectTab(tab.id)}
 								className={cn(
 									'inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200',
 									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -65,7 +72,7 @@ export function SettingsShell({ data, activeTab, activeAccountId }: SettingsShel
 								)}
 							>
 								{tab.label}
-							</a>
+							</button>
 						);
 					})}
 				</div>
@@ -92,6 +99,12 @@ export function SettingsShell({ data, activeTab, activeAccountId }: SettingsShel
 					{activeTab === 'symbols' ? (
 						<div role="tabpanel" id="settings-panel-symbols" aria-labelledby="settings-tab-symbols">
 							<SymbolsSettingsPanel symbols={symbols} onSymbolsChange={setSymbols} />
+						</div>
+					) : null}
+
+					{activeTab === 'risk' ? (
+						<div role="tabpanel" id="settings-panel-risk" aria-labelledby="settings-tab-risk">
+							<RiskRulesSettingsForm rules={data.riskRules} />
 						</div>
 					) : null}
 				</div>

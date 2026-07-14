@@ -26,6 +26,7 @@ export { trades } from './trades';
 export { tradeImages, tradeNotes, tradeReviews } from './trade-details';
 export { monthlyGoals, watchlists } from './goals-watchlists';
 export { journalNotes } from './journal-notes';
+export { riskRules } from './risk-rules';
 
 export {
 	userRelations,
@@ -42,4 +43,5 @@ export {
 	monthlyGoalRelations,
 	watchlistRelations,
 	journalNoteRelations,
+	riskRulesRelations,
 } from './relations';
