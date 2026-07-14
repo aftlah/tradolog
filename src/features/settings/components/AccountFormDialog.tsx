@@ -151,7 +151,7 @@ export function AccountFormDialog({ open, onOpenChange, account, onSaved }: Acco
 						<FormField
 							id="startingBalance"
 							label="Starting Balance"
-							hint="Current balance updates automatically from closed trade P&L."
+							hint="Saldo MT5 sebelum trade pertama yang kamu log di Tradolog. Balance = starting + P&L trade closed."
 							error={errors.startingBalance?.message}
 						>
 							<Input id="startingBalance" type="number" step="0.01" {...register('startingBalance')} />
@@ -177,7 +177,7 @@ export function AccountFormDialog({ open, onOpenChange, account, onSaved }: Acco
 							id="quoteToAccountRate"
 							label="USD → Account Rate"
 							optional
-							hint="For IDR accounts: e.g. 18050 means 1 USD = Rp 18.050. Leave empty for USD accounts."
+							hint="Wajib untuk akun IDR: kurs 1 USD ≈ Rp (lihat MT5 / broker). Contoh: 18050. Trade XAUUSD pakai rate ini agar P&L cocok MT5."
 							error={errors.quoteToAccountRate?.message}
 						>
 							<Input id="quoteToAccountRate" inputMode="decimal" placeholder="18050" {...register('quoteToAccountRate')} />

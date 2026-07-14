@@ -42,17 +42,28 @@ export const profileFormSchema = z.object({
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export type ProfileFormInput = z.input<typeof profileFormSchema>;
 
-export const accountFormSchema = z.object({
-	name: z.string().trim().min(1, 'Account name is required.').max(120),
-	broker: optionalText(120),
-	accountType: accountTypeSchema,
-	currency: currencyCodeSchema,
-	startingBalance: requiredDecimalString('Starting balance is required.'),
-	leverage: optionalPositiveInt,
-	quoteToAccountRate: optionalDecimalString,
-	isDefault: z.boolean().default(false),
-	notes: optionalText(5000),
-});
+export const accountFormSchema = z
+	.object({
+		name: z.string().trim().min(1, 'Account name is required.').max(120),
+		broker: optionalText(120),
+		accountType: accountTypeSchema,
+		currency: currencyCodeSchema,
+		startingBalance: requiredDecimalString('Starting balance is required.'),
+		leverage: optionalPositiveInt,
+		quoteToAccountRate: optionalDecimalString,
+		isDefault: z.boolean().default(false),
+		notes: optionalText(5000),
+	})
+	.superRefine((data, ctx) => {
+		const currency = data.currency.trim().toUpperCase();
+		if (currency !== 'USD' && !data.quoteToAccountRate) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['quoteToAccountRate'],
+				message: `Required for ${currency} accounts so P&L and balance match MT5 (e.g. 18050 for IDR).`,
+			});
+		}
+	});
 
 export type AccountFormValues = z.infer<typeof accountFormSchema>;
 export type AccountFormInput = z.input<typeof accountFormSchema>;

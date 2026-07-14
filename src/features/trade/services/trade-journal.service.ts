@@ -42,6 +42,7 @@ import {
 	XAUUSD_TICKER,
 } from '../constants/trade.constants';
 import { applyExitPriceCloseFields } from '../utils/apply-exit-price-close';
+import { assertAccountFxConfigured, resolveAccountFxRate } from '../utils/account-fx';
 import { tradeFormSchema, tradeNoteFormSchema, type TradeFormValues } from '../validators/trade-schemas';
 import type {
 	PaginatedResult,
@@ -191,12 +192,13 @@ async function assertOwnedReferences(
 		}
 	}
 
+	assertAccountFxConfigured(account, symbol);
+
 	return { symbol, account };
 }
 
 function resolveFxRate(account: TradingAccount): number {
-	const rate = toNumberOrNull(account.quoteToAccountRate);
-	return rate !== null && rate > 0 ? rate : 1;
+	return resolveAccountFxRate(account);
 }
 
 export class TradeJournalService {
@@ -302,6 +304,83 @@ export class TradeJournalService {
 		]);
 
 		return buildTradeDetail(trade, symbol, strategy, account, images, notes);
+	}
+
+	/**
+	 * Recomputes stored P&L / RR / pips for every trade on an account (e.g. after FX rate changes)
+	 * and refreshes `currentBalance` from the updated totals.
+	 */
+	async recalculateAccountTradeMetrics(userId: string, accountId: string): Promise<number> {
+		const account = await tradingAccountRepository.findByIdForUser(accountId, userId);
+		if (!account) {
+			throw new NotFoundError('Trading account not found.');
+		}
+
+		const rows = await tradeRepository.listByAccountId(userId, accountId);
+		if (rows.length === 0) {
+			await tradingAccountService.syncCurrentBalance(userId, accountId);
+			invalidateUserPageCaches(userId);
+			return 0;
+		}
+
+		const symbolIds = [...new Set(rows.map((trade) => trade.symbolId))];
+		const symbolRows = await Promise.all(symbolIds.map((symbolId) => symbolRepository.findById(symbolId)));
+		const symbolById = new Map(
+			symbolRows.filter((symbol): symbol is TradeSymbol => symbol !== null).map((symbol) => [symbol.id, symbol]),
+		);
+
+		const fxRate = resolveFxRate(account);
+		let updatedCount = 0;
+
+		for (const trade of rows) {
+			const symbol = symbolById.get(trade.symbolId);
+			if (!symbol) {
+				continue;
+			}
+
+			const entryPrice = toNumberOrNull(trade.entryPrice);
+			const quantity = toNumberOrNull(trade.quantity);
+			if (entryPrice === null || quantity === null) {
+				continue;
+			}
+
+			const metrics = tradingCalculatorService.tradeMetrics({
+				side: trade.side,
+				entryPrice,
+				exitPrice: toNumberOrNull(trade.exitPrice),
+				stopLoss: toNumberOrNull(trade.stopLoss),
+				takeProfit: toNumberOrNull(trade.takeProfit),
+				quantity,
+				fees: toNumberOrNull(trade.fees) ?? 0,
+				pipSize: symbol.pipSize,
+				contractSize: resolveContractSize(symbol),
+				fxRate,
+				openedAt: trade.openedAt,
+				closedAt: trade.closedAt,
+			});
+
+			const result =
+				trade.status === 'closed' && metrics.profitLoss !== null
+					? tradingCalculatorService.classifyOutcome(metrics.profitLoss)
+					: null;
+
+			await tradeRepository.updateForUser(trade.id, userId, {
+				riskAmount: metrics.riskAmount != null ? String(metrics.riskAmount) : null,
+				rewardAmount: metrics.rewardAmount != null ? String(metrics.rewardAmount) : null,
+				plannedRr: metrics.plannedRR != null ? String(metrics.plannedRR) : null,
+				actualRr: metrics.actualRR != null ? String(metrics.actualRR) : null,
+				profitLoss: metrics.profitLoss != null ? String(metrics.profitLoss) : null,
+				profitLossPercent: metrics.profitLossPercent != null ? String(metrics.profitLossPercent) : null,
+				pips: metrics.pips != null ? String(metrics.pips) : null,
+				holdingTimeSeconds: metrics.holdingTimeSeconds != null ? String(metrics.holdingTimeSeconds) : null,
+				result,
+			});
+			updatedCount += 1;
+		}
+
+		await tradingAccountService.syncCurrentBalance(userId, accountId);
+		invalidateUserPageCaches(userId);
+		return updatedCount;
 	}
 
 	async create(userId: string, input: unknown): Promise<TradeDetail> {

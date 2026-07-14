@@ -27,6 +27,7 @@ import {
 	tradingAccountUpdateSchema,
 } from '@shared/validators';
 import { toNullableNumber, tradingAccountService } from '@shared/services';
+import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { toAccountOption } from '@shared/utils/account-option';
 import type { Profile, Strategy, TradeSymbol, TradingAccount } from '@shared/types';
 import type {
@@ -176,7 +177,16 @@ export class SettingsService {
 			await clearOtherDefaultAccounts(userId, id);
 		}
 
-		const synced = await tradingAccountService.syncCurrentBalance(userId, id);
+		const fxSettingsChanged =
+			(data.quoteToAccountRate !== undefined && data.quoteToAccountRate !== existing.quoteToAccountRate) ||
+			(data.currency !== undefined && data.currency !== existing.currency);
+
+		const synced = fxSettingsChanged
+			? await tradeJournalService.recalculateAccountTradeMetrics(userId, id).then(() =>
+					tradingAccountService.requireForUser(id, userId),
+				)
+			: await tradingAccountService.syncCurrentBalance(userId, id);
+
 		invalidateUserPageCaches(userId);
 		return toAccountDto(synced);
 	}
