@@ -33,6 +33,56 @@ const {
 	</head>
 	<body>
 		<slot />
+		{/* Lightweight top bar while full-document navigations wait on Vercel SSR. */}
+		<div
+			id="nav-progress"
+			aria-hidden="true"
+			class="pointer-events-none fixed inset-x-0 top-0 z-[200] h-0.5 origin-left scale-x-0 bg-gradient-to-r from-primary via-indigo-300 to-primary opacity-0 transition-none"
+		></div>
+		<script is:inline>
+			(() => {
+				const bar = document.getElementById('nav-progress');
+				if (!bar) return;
+
+				let timer = 0;
+				function start() {
+					bar.style.transition = 'none';
+					bar.style.opacity = '1';
+					bar.style.transform = 'scaleX(0.12)';
+					requestAnimationFrame(() => {
+						bar.style.transition = 'transform 8s cubic-bezier(0.1, 0.4, 0.2, 1)';
+						bar.style.transform = 'scaleX(0.82)';
+					});
+					window.clearTimeout(timer);
+					timer = window.setTimeout(() => {
+						bar.style.transition = 'opacity 200ms ease, transform 200ms ease';
+						bar.style.opacity = '0';
+						bar.style.transform = 'scaleX(1)';
+					}, 12000);
+				}
+
+				document.addEventListener(
+					'click',
+					(event) => {
+						const target = event.target;
+						if (!(target instanceof Element)) return;
+						const anchor = target.closest('a[href]');
+						if (!(anchor instanceof HTMLAnchorElement)) return;
+						if (anchor.target && anchor.target !== '_self') return;
+						if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+						const href = anchor.getAttribute('href');
+						if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+						try {
+							const url = new URL(href, window.location.href);
+							if (url.origin !== window.location.origin) return;
+							if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+							start();
+						} catch (_) {}
+					},
+					true,
+				);
+			})();
+		</script>
 		<Toaster client:only="react" />
 	</body>
 </html>

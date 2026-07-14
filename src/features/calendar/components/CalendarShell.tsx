@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NoAccountsEmptyState } from '@shared/components';
+import { subscribeClientAccountSwitch } from '@shared/utils/account-switch-events';
 import { useCalendarData } from '../hooks/useCalendarData';
 import type { CalendarData, CalendarDay } from '../types/calendar.types';
 import { CalendarHeader } from './CalendarHeader';
@@ -12,8 +13,11 @@ interface CalendarShellProps {
 
 /** Calendar page body — chrome lives in the persisted `AppLayout` shell. */
 export function CalendarShell({ initialData }: CalendarShellProps) {
-	const { data, isLoading, goToPrevMonth, goToNextMonth, goToToday } = useCalendarData(initialData);
+	const { data, isLoading, goToPrevMonth, goToNextMonth, goToToday, switchAccount } =
+		useCalendarData(initialData);
 	const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+	useEffect(() => subscribeClientAccountSwitch(switchAccount), [switchAccount]);
 
 	const selectedDay = useMemo<CalendarDay | null>(
 		() => data.days.find((day) => day.date === selectedDate) ?? null,

@@ -19,7 +19,7 @@ import {
 } from '@shared/services';
 import type { TradeClosedMetrics } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
-import { analyticsCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
+import { analyticsCacheKey, cacheGet, cacheSet } from '@shared/lib/cache/page-data-cache';
 import {
 	DAILY_RETURNS_LOOKBACK,
 	DRAWDOWN_CHART_LOOKBACK_DAYS,
@@ -161,9 +161,7 @@ export class AnalyticsService {
 	 */
 	async getAnalyticsData(userId: string, requestedAccountId?: string | null): Promise<AnalyticsData> {
 		if (requestedAccountId) {
-			const cached = pageDataCache.get(analyticsCacheKey(userId, requestedAccountId)) as
-				| AnalyticsData
-				| undefined;
+			const cached = await cacheGet<AnalyticsData>(analyticsCacheKey(userId, requestedAccountId));
 			if (cached) {
 				return cached;
 			}
@@ -180,7 +178,7 @@ export class AnalyticsService {
 			const activeAccount = accounts.find((account) => account.id === requestedAccountId);
 			if (activeAccount) {
 				const data = buildAnalyticsData(accounts, activeAccount, closedMetrics);
-				pageDataCache.set(analyticsCacheKey(userId, activeAccount.id), data);
+				await cacheSet(analyticsCacheKey(userId, activeAccount.id), data);
 				return data;
 			}
 
@@ -191,7 +189,7 @@ export class AnalyticsService {
 
 			const fallbackMetrics = await tradeService.listClosedMetricsByAccount(userId, fallback.id);
 			const data = buildAnalyticsData(accounts, fallback, fallbackMetrics);
-			pageDataCache.set(analyticsCacheKey(userId, fallback.id), data);
+			await cacheSet(analyticsCacheKey(userId, fallback.id), data);
 			return data;
 		}
 
@@ -206,7 +204,7 @@ export class AnalyticsService {
 			return emptyAnalytics();
 		}
 
-		const cached = pageDataCache.get(analyticsCacheKey(userId, activeAccount.id)) as AnalyticsData | undefined;
+		const cached = await cacheGet<AnalyticsData>(analyticsCacheKey(userId, activeAccount.id));
 		if (cached) {
 			return {
 				...cached,
@@ -217,7 +215,7 @@ export class AnalyticsService {
 
 		const closedMetrics = await tradeService.listClosedMetricsByAccount(userId, activeAccount.id);
 		const data = buildAnalyticsData(accounts, activeAccount, closedMetrics);
-		pageDataCache.set(analyticsCacheKey(userId, activeAccount.id), data);
+		await cacheSet(analyticsCacheKey(userId, activeAccount.id), data);
 		return data;
 	}
 }

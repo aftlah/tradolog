@@ -1,7 +1,7 @@
 import { PRICE_DECIMALS, round, tradeService, tradingAccountService, toFiniteNumber } from '@shared/services';
 import type { TradeCalendarSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
-import { calendarCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
+import { calendarCacheKey, cacheGet, cacheSet } from '@shared/lib/cache/page-data-cache';
 import type { CalendarData, CalendarDay, CalendarMonthTotals, CalendarTradeSummary } from '../types/calendar.types';
 
 function toUtcDateKey(date: Date): string {
@@ -119,7 +119,7 @@ export class CalendarService {
 
 		if (requestedAccountId) {
 			const cacheKey = calendarCacheKey(userId, requestedAccountId, year, month);
-			const cached = pageDataCache.get(cacheKey) as CalendarData | undefined;
+			const cached = await cacheGet<CalendarData>(cacheKey);
 			if (cached) {
 				return cached;
 			}
@@ -136,7 +136,7 @@ export class CalendarService {
 			const activeAccount = accounts.find((account) => account.id === requestedAccountId);
 			if (activeAccount) {
 				const data = assembleCalendar(year, month, accounts, activeAccount, closedRows);
-				pageDataCache.set(cacheKey, data);
+				await cacheSet(cacheKey, data);
 				return data;
 			}
 
@@ -152,7 +152,7 @@ export class CalendarService {
 				monthEnd,
 			);
 			const data = assembleCalendar(year, month, accounts, fallback, fallbackRows);
-			pageDataCache.set(calendarCacheKey(userId, fallback.id, year, month), data);
+			await cacheSet(calendarCacheKey(userId, fallback.id, year, month), data);
 			return data;
 		}
 
@@ -168,7 +168,7 @@ export class CalendarService {
 		}
 
 		const cacheKey = calendarCacheKey(userId, activeAccount.id, year, month);
-		const cached = pageDataCache.get(cacheKey) as CalendarData | undefined;
+		const cached = await cacheGet<CalendarData>(cacheKey);
 		if (cached) {
 			return {
 				...cached,
@@ -184,7 +184,7 @@ export class CalendarService {
 			monthEnd,
 		);
 		const data = assembleCalendar(year, month, accounts, activeAccount, closedRows);
-		pageDataCache.set(cacheKey, data);
+		await cacheSet(cacheKey, data);
 		return data;
 	}
 }

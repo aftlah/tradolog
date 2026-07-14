@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { persistActiveAccountCookie } from '@shared/utils/active-account-cookie';
 import { CALENDAR_API_ROUTE } from '../constants/calendar.constants';
 import { buildCalendarQueryParams } from '../utils/query';
 import type { CalendarData } from '../types/calendar.types';
@@ -10,7 +11,7 @@ interface UseCalendarDataResult {
 	goToPrevMonth: () => void;
 	goToNextMonth: () => void;
 	goToToday: () => void;
-	switchAccount: (accountId: string) => void;
+	switchAccount: (accountId: string) => Promise<void>;
 }
 
 export function useCalendarData(initialData: CalendarData): UseCalendarDataResult {
@@ -60,11 +61,12 @@ export function useCalendarData(initialData: CalendarData): UseCalendarDataResul
 	}, [data.activeAccountId, fetchCalendar]);
 
 	const switchAccount = useCallback(
-		(accountId: string) => {
+		async (accountId: string) => {
 			if (accountId === data.activeAccountId) {
 				return;
 			}
-			void fetchCalendar(data.year, data.month, accountId);
+			persistActiveAccountCookie(accountId);
+			await fetchCalendar(data.year, data.month, accountId);
 		},
 		[data, fetchCalendar],
 	);

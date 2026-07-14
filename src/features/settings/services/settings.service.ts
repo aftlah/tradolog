@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SettingsService
  *
  * Composes the profile/trading-account/strategy/symbol repositories to power the Settings
@@ -156,7 +156,7 @@ export class SettingsService {
 			await clearOtherDefaultAccounts(userId, account.id);
 		}
 
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 		return toAccountDto(account);
 	}
 
@@ -187,7 +187,7 @@ export class SettingsService {
 				)
 			: await tradingAccountService.syncCurrentBalance(userId, id);
 
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 		return toAccountDto(synced);
 	}
 
@@ -196,7 +196,7 @@ export class SettingsService {
 		if (!deleted) {
 			throw new NotFoundError('Trading account not found.');
 		}
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 	}
 
 	async createStrategy(userId: string, input: unknown): Promise<StrategySettingsDto> {
@@ -232,7 +232,7 @@ export class SettingsService {
 		return toSymbolDto(symbol, userId);
 	}
 
-	/** Only ever mutates symbols owned by `userId` — the shared/system catalog is read-only here. */
+	/** Only ever mutates symbols owned by `userId` â€” the shared/system catalog is read-only here. */
 	async updateSymbol(id: string, userId: string, input: unknown): Promise<SymbolSettingsDto> {
 		const existing = await symbolRepository.findById(id);
 		if (!existing || existing.userId !== userId) {

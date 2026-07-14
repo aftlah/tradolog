@@ -14,6 +14,8 @@ const envSchema = z.object({
 	R2_PUBLIC_URL: z.url().optional(),
 	GEMINI_API_KEY: z.string().optional(),
 	GEMINI_MODEL: z.string().optional(),
+	UPSTASH_REDIS_REST_URL: z.url().optional(),
+	UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -69,6 +71,8 @@ function readRawEnv(): Record<keyof Env, string | undefined> {
 		R2_PUBLIC_URL: fromRuntime('R2_PUBLIC_URL'),
 		GEMINI_API_KEY: fromRuntime('GEMINI_API_KEY'),
 		GEMINI_MODEL: fromRuntime('GEMINI_MODEL'),
+		UPSTASH_REDIS_REST_URL: fromRuntime('UPSTASH_REDIS_REST_URL'),
+		UPSTASH_REDIS_REST_TOKEN: fromRuntime('UPSTASH_REDIS_REST_TOKEN'),
 	};
 }
 

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { persistActiveAccountCookie } from '@shared/utils/active-account-cookie';
 import { ANALYTICS_API_ROUTE } from '../constants/analytics.constants';
 import type { AnalyticsData } from '../types/analytics.types';
 
@@ -25,6 +26,7 @@ export function useAnalyticsData(initialData: AnalyticsData): UseAnalyticsDataRe
 			}
 
 			setIsLoading(true);
+			persistActiveAccountCookie(accountId);
 			try {
 				const response = await fetch(`${ANALYTICS_API_ROUTE}?accountId=${encodeURIComponent(accountId)}`);
 				if (!response.ok) {

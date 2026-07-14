@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 export function QuickAddTradeButton() {
 	return (
 		<Button asChild size="sm" className="gap-1.5">
-			<a href="/app/trades/new" data-astro-prefetch="hover">
+			<a href="/app/trades/new" data-astro-prefetch="tap">
 				<Plus className="size-4" aria-hidden="true" />
 				<span className="hidden sm:inline">Quick Add Trade</span>
 			</a>

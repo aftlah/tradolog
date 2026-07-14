@@ -3,14 +3,6 @@ import { getDb } from '@shared/lib/db';
 import { accounts, strategies, symbols, trades } from '@shared/lib/db/schema';
 import type { NewTrade, Trade, TradeResult, TradeSession, TradeSide, TradeStatus } from '@shared/types';
 
-export interface TradeListRow {
-	trade: Trade;
-	symbolTicker: string | null;
-	strategyName: string | null;
-	accountName: string | null;
-	accountCurrency: string | null;
-}
-
 /** Calculator-ready closed trade columns only. */
 export interface TradeClosedMetrics {
 	id: string;
@@ -19,6 +11,36 @@ export interface TradeClosedMetrics {
 	plannedRr: string | null;
 	actualRr: string | null;
 	holdingTimeSeconds: string | null;
+}
+
+/** Journal table row — excludes setup/mistakes/lessons/tags blobs. */
+export interface TradeListSelect {
+	id: string;
+	accountId: string;
+	symbolId: string;
+	strategyId: string | null;
+	side: TradeSide;
+	status: TradeStatus;
+	result: TradeResult | null;
+	session: TradeSession | null;
+	entryPrice: string | null;
+	exitPrice: string | null;
+	quantity: string | null;
+	profitLoss: string | null;
+	profitLossPercent: string | null;
+	actualRr: string | null;
+	plannedRr: string | null;
+	pips: string | null;
+	openedAt: Date | null;
+	closedAt: Date | null;
+}
+
+export interface TradeListRow {
+	trade: TradeListSelect;
+	symbolTicker: string | null;
+	strategyName: string | null;
+	accountName: string | null;
+	accountCurrency: string | null;
 }
 
 /** Dashboard recent-trades row. */
@@ -96,7 +118,6 @@ function buildWhereClause(userId: string, filters: TradeListFilters): SQL {
 			ilike(symbols.ticker, term),
 			ilike(strategies.name, term),
 			ilike(trades.tags, term),
-			ilike(trades.setup, term),
 		);
 		if (searchClause) conditions.push(searchClause);
 	}
@@ -132,11 +153,16 @@ export class TradeRepository {
 
 	/**
 	 * Slim closed-trade rows for calculators — skips notes/prices/setup text.
-	 * Ordered oldest→newest so equity/drawdown series stay chronological.
+	 * Newest-first with a hard cap so Neon payload stays bounded on serverless.
+	 * Callers should reverse for chronological equity/drawdown when needed.
 	 */
-	async listClosedMetricsByAccount(userId: string, accountId: string): Promise<TradeClosedMetrics[]> {
+	async listClosedMetricsByAccount(
+		userId: string,
+		accountId: string,
+		limit = 2_000,
+	): Promise<TradeClosedMetrics[]> {
 		const db = getDb();
-		return db
+		const rows = await db
 			.select({
 				id: trades.id,
 				profitLoss: trades.profitLoss,
@@ -154,7 +180,11 @@ export class TradeRepository {
 					isNull(trades.deletedAt),
 				),
 			)
-			.orderBy(asc(trades.closedAt), asc(trades.createdAt));
+			.orderBy(desc(trades.closedAt), desc(trades.createdAt))
+			.limit(limit);
+
+		// Chronological (oldest → newest) for calculator equity/drawdown.
+		return rows.reverse();
 	}
 
 	/** Recent trades for dashboard table — limited rows with symbol/strategy labels. */
@@ -272,7 +302,26 @@ export class TradeRepository {
 
 		const joinedFrom = db
 			.select({
-				trade: trades,
+				trade: {
+					id: trades.id,
+					accountId: trades.accountId,
+					symbolId: trades.symbolId,
+					strategyId: trades.strategyId,
+					side: trades.side,
+					status: trades.status,
+					result: trades.result,
+					session: trades.session,
+					entryPrice: trades.entryPrice,
+					exitPrice: trades.exitPrice,
+					quantity: trades.quantity,
+					profitLoss: trades.profitLoss,
+					profitLossPercent: trades.profitLossPercent,
+					actualRr: trades.actualRr,
+					plannedRr: trades.plannedRr,
+					pips: trades.pips,
+					openedAt: trades.openedAt,
+					closedAt: trades.closedAt,
+				},
 				symbolTicker: symbols.ticker,
 				strategyName: strategies.name,
 				accountName: accounts.name,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@shared/utils/cn';
 import { softNavigate } from '@shared/utils/soft-navigate';
 import { persistActiveAccountCookie } from '@shared/utils/active-account-cookie';
+import { requestClientAccountSwitch } from '@shared/utils/account-switch-events';
 import { NAV_ITEMS } from '@shared/constants/nav.constants';
 import { Sidebar } from '@shared/components/app-shell/Sidebar';
 import { Navbar } from '@shared/components/app-shell/Navbar';
@@ -21,7 +22,7 @@ interface AppChromeProps {
  * App chrome for authenticated pages. Remounts on each full page load (ClientRouter removed).
  */
 export function AppChrome({ initialState }: AppChromeProps) {
-	const [state] = useState(initialState);
+	const [state, setState] = useState(initialState);
 	const [activeHref] = useState(initialState.activeHref);
 	const [mobileNavOpen, setMobileNavOpen] = useState(false);
 	// Always start expanded on SSR; sync localStorage after mount to avoid hydration mismatch.
@@ -49,13 +50,28 @@ export function AppChrome({ initialState }: AppChromeProps) {
 	}
 
 	async function handleAccountChange(accountId: string) {
+		if (accountId === state.activeAccountId) {
+			return;
+		}
+
 		setIsNavigatingAccount(true);
 		persistActiveAccountCookie(accountId);
+		setState((current) => ({ ...current, activeAccountId: accountId }));
+
 		try {
 			if (state.accountChangePath) {
 				const url = new URL(state.accountChangePath, window.location.origin);
 				url.searchParams.set('accountId', accountId);
 				await softNavigate(`${url.pathname}${url.search}`);
+				return;
+			}
+
+			const handled = await requestClientAccountSwitch(accountId);
+			if (handled) {
+				const url = new URL(window.location.href);
+				url.searchParams.set('accountId', accountId);
+				window.history.replaceState(null, '', `${url.pathname}${url.search}`);
+				setIsNavigatingAccount(false);
 				return;
 			}
 

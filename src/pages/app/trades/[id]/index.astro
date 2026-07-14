@@ -3,6 +3,8 @@ import AppLayout from '@features/shell/layouts/AppLayout.astro';
 import { TradeDetailShell } from '@features/trade/components/TradeDetailShell';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { NotFoundError } from '@shared/lib/errors';
+import { tradingAccountService } from '@shared/services';
+import { toAccountOption } from '@shared/utils/account-option';
 
 const session = Astro.locals.session;
 
@@ -18,11 +20,11 @@ if (!id) {
 const userId = session.user.id;
 
 let trade;
-let options;
+let accounts;
 try {
-	[trade, options] = await Promise.all([
+	[trade, accounts] = await Promise.all([
 		tradeJournalService.getDetail(id, userId),
-		tradeJournalService.getFormOptions(userId),
+		tradingAccountService.list(userId),
 	]);
 } catch (error) {
 	if (error instanceof NotFoundError) {
@@ -40,7 +42,7 @@ const userEmail = session.user.email ?? '';
 	pageTitle="Trade Detail"
 	userName={userName}
 	userEmail={userEmail}
-	accounts={options.accounts}
+	accounts={accounts.map(toAccountOption)}
 	activeAccountId={trade.accountId}
 	showQuickAdd={false}
 	accountChangePath="/app/trades"

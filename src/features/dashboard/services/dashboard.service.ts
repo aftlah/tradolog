@@ -8,7 +8,7 @@ import {
 } from '@shared/services';
 import type { TradeClosedMetrics, TradeRecentSummary } from '@shared/repositories';
 import { toAccountOption } from '@shared/utils/account-option';
-import { dashboardCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
+import { dashboardCacheKey, cacheGet, cacheSet } from '@shared/lib/cache/page-data-cache';
 import { EQUITY_CURVE_LOOKBACK_DAYS, RECENT_TRADES_LIMIT } from '../constants/dashboard.constants';
 import type {
 	DashboardData,
@@ -126,9 +126,7 @@ function buildDashboardData(
 export class DashboardService {
 	async getDashboardData(userId: string, requestedAccountId?: string | null): Promise<DashboardData> {
 		if (requestedAccountId) {
-			const cached = pageDataCache.get(dashboardCacheKey(userId, requestedAccountId)) as
-				| DashboardData
-				| undefined;
+			const cached = await cacheGet<DashboardData>(dashboardCacheKey(userId, requestedAccountId));
 			if (cached) {
 				return cached;
 			}
@@ -146,7 +144,7 @@ export class DashboardService {
 			const activeAccount = accounts.find((account) => account.id === requestedAccountId);
 			if (activeAccount) {
 				const data = buildDashboardData(accounts, activeAccount, closedMetrics, recentRows);
-				pageDataCache.set(dashboardCacheKey(userId, activeAccount.id), data);
+				await cacheSet(dashboardCacheKey(userId, activeAccount.id), data);
 				return data;
 			}
 
@@ -160,7 +158,7 @@ export class DashboardService {
 				tradeService.listRecentSummariesByAccount(userId, fallback.id, RECENT_TRADES_LIMIT),
 			]);
 			const data = buildDashboardData(accounts, fallback, fallbackMetrics, fallbackRecent);
-			pageDataCache.set(dashboardCacheKey(userId, fallback.id), data);
+			await cacheSet(dashboardCacheKey(userId, fallback.id), data);
 			return data;
 		}
 
@@ -175,7 +173,7 @@ export class DashboardService {
 			return emptyDashboard();
 		}
 
-		const cached = pageDataCache.get(dashboardCacheKey(userId, activeAccount.id)) as DashboardData | undefined;
+		const cached = await cacheGet<DashboardData>(dashboardCacheKey(userId, activeAccount.id));
 		if (cached) {
 			return {
 				...cached,
@@ -190,7 +188,7 @@ export class DashboardService {
 		]);
 
 		const data = buildDashboardData(accounts, activeAccount, closedMetrics, recentRows);
-		pageDataCache.set(dashboardCacheKey(userId, activeAccount.id), data);
+		await cacheSet(dashboardCacheKey(userId, activeAccount.id), data);
 		return data;
 	}
 }

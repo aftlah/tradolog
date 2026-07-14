@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TradeJournalService
  *
  * Composes the trade/symbol/strategy/account repositories with `TradingCalculatorService` and
@@ -12,7 +12,7 @@
 import { randomUUID } from 'node:crypto';
 import { NotFoundError, ValidationError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
-import { invalidateUserPageCaches, pageDataCache } from '@shared/lib/cache/page-data-cache';
+import { invalidateUserPageCaches, cacheGet, cacheSet } from '@shared/lib/cache/page-data-cache';
 import { parseTradeDateTime } from '@shared/utils/datetime';
 import { deleteTradeScreenshot, uploadTradeScreenshot } from '@shared/lib/r2';
 import {
@@ -221,7 +221,7 @@ export class TradeJournalService {
 			query.dateFrom ?? '',
 			query.dateTo ?? '',
 		].join(':');
-		const cached = pageDataCache.get(cacheKey) as PaginatedResult<TradeListItem> | undefined;
+		const cached = await cacheGet<PaginatedResult<TradeListItem>>(cacheKey);
 		if (cached) {
 			return cached;
 		}
@@ -261,7 +261,7 @@ export class TradeJournalService {
 			total,
 			pageCount: Math.max(1, Math.ceil(total / repoQuery.pageSize)),
 		};
-		pageDataCache.set(cacheKey, result);
+		await cacheSet(cacheKey, result);
 		return result;
 	}
 
@@ -319,7 +319,7 @@ export class TradeJournalService {
 		const rows = await tradeRepository.listByAccountId(userId, accountId);
 		if (rows.length === 0) {
 			await tradingAccountService.syncCurrentBalance(userId, accountId);
-			invalidateUserPageCaches(userId);
+			await invalidateUserPageCaches(userId);
 			return 0;
 		}
 
@@ -379,7 +379,7 @@ export class TradeJournalService {
 		}
 
 		await tradingAccountService.syncCurrentBalance(userId, accountId);
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 		return updatedCount;
 	}
 
@@ -441,7 +441,7 @@ export class TradeJournalService {
 		});
 
 		await tradingAccountService.syncCurrentBalance(userId, data.accountId);
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 		return this.getDetail(trade.id, userId);
 	}
 
@@ -515,7 +515,7 @@ export class TradeJournalService {
 			await tradingAccountService.syncCurrentBalance(userId, existing.accountId);
 		}
 
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 		return this.getDetail(id, userId);
 	}
 
@@ -531,7 +531,7 @@ export class TradeJournalService {
 		}
 
 		await tradingAccountService.syncCurrentBalance(userId, existing.accountId);
-		invalidateUserPageCaches(userId);
+		await invalidateUserPageCaches(userId);
 	}
 
 	async addImages(tradeId: string, userId: string, files: File[]): Promise<TradeImageDto[]> {

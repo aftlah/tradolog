@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { persistActiveAccountCookie } from '@shared/utils/active-account-cookie';
 import { DASHBOARD_API_ROUTE } from '../constants/dashboard.constants';
 import type { DashboardData } from '../types/dashboard.types';
 
@@ -8,7 +9,6 @@ interface UseDashboardDataResult {
 	isLoading: boolean;
 	switchAccount: (accountId: string) => Promise<void>;
 }
-
 
 export function useDashboardData(initialData: DashboardData): UseDashboardDataResult {
 	const [data, setData] = useState(initialData);
@@ -21,6 +21,7 @@ export function useDashboardData(initialData: DashboardData): UseDashboardDataRe
 			}
 
 			setIsLoading(true);
+			persistActiveAccountCookie(accountId);
 			try {
 				const response = await fetch(`${DASHBOARD_API_ROUTE}?accountId=${encodeURIComponent(accountId)}`);
 				if (!response.ok) {
