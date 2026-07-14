@@ -12,7 +12,7 @@ import {
 	TableRow,
 } from '@shared/components';
 import { formatDate, formatNumber, formatRiskReward, formatSignedCurrency, formatSignedPercent } from '@shared/utils/format';
-import { RESULT_BADGE, SESSION_LABEL } from '../constants/trade.constants';
+import { RESULT_BADGE } from '../constants/trade.constants';
 import type { TradeListItem, TradeListQuery, TradeSortColumn } from '../types/trade.types';
 import { SortableHeader } from './SortableHeader';
 import { TradeRowActions } from './TradeRowActions';
@@ -26,6 +26,17 @@ interface TradesDataTableProps {
 }
 
 const columnHelper = createColumnHelper<TradeListItem>();
+
+function formatPriceCell(entryPrice: number | null, exitPrice: number | null): string {
+	if (entryPrice === null) {
+		return '—';
+	}
+	const entry = formatNumber(entryPrice, 2);
+	if (exitPrice === null) {
+		return entry;
+	}
+	return `${entry} → ${formatNumber(exitPrice, 2)}`;
+}
 
 export function TradesDataTable({ trades, query, isLoading, onSort, onTradeDeleted }: TradesDataTableProps) {
 	const columns = useMemo(
@@ -50,16 +61,13 @@ export function TradesDataTable({ trades, query, isLoading, onSort, onTradeDelet
 					</div>
 				),
 			}),
-			columnHelper.accessor('strategy', {
-				header: 'Strategy',
-				cell: (info) => <span className="text-muted">{info.getValue() ?? '—'}</span>,
-			}),
-			columnHelper.accessor('session', {
-				header: 'Session',
-				cell: (info) => {
-					const value = info.getValue();
-					return <span className="text-muted">{value ? SESSION_LABEL[value] : '—'}</span>;
-				},
+			columnHelper.accessor('entryPrice', {
+				header: 'Price',
+				cell: (info) => (
+					<span className="tabular-nums text-muted">
+						{formatPriceCell(info.getValue(), info.row.original.exitPrice)}
+					</span>
+				),
 			}),
 			columnHelper.accessor('quantity', {
 				header: 'Qty',

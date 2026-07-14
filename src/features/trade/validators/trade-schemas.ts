@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { tradeSessionSchema, tradeSideSchema, tradeStatusSchema } from '@shared/validators';
+import { parseTradeDateTime } from '@shared/utils/datetime';
 
 /**
  * The single Trade form schema, shared by the Create/Edit React Hook Form resolver AND
@@ -67,8 +68,8 @@ export const tradeFormSchema = z
 		}
 
 		if (data.openedAt && data.closedAt) {
-			const opened = new Date(data.openedAt).getTime();
-			const closed = new Date(data.closedAt).getTime();
+			const opened = parseTradeDateTime(data.openedAt).getTime();
+			const closed = parseTradeDateTime(data.closedAt).getTime();
 			if (Number.isFinite(opened) && Number.isFinite(closed) && closed < opened) {
 				ctx.addIssue({
 					code: 'custom',

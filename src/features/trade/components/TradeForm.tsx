@@ -5,6 +5,7 @@ import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@shared/components';
 import { softNavigate } from '@shared/utils/soft-navigate';
+import { datetimeLocalToIso } from '@shared/utils/datetime';
 import { TRADES_API_ROUTE } from '../constants/trade.constants';
 import { inferTradeSide } from '../utils/infer-trade-side';
 import { tradeFormSchema, type TradeFormInput, type TradeFormValues } from '../validators/trade-schemas';
@@ -56,7 +57,13 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 			return;
 		}
 
-		const payload = { ...values, side: sideFromPrices };
+		const payload = {
+			...values,
+			side: sideFromPrices,
+			// Convert wall-clock datetime-local → UTC ISO before the API (Vercel is UTC).
+			openedAt: datetimeLocalToIso(values.openedAt),
+			closedAt: values.closedAt ? datetimeLocalToIso(values.closedAt) : null,
+		};
 
 		try {
 			const url = mode === 'create' ? TRADES_API_ROUTE : `${TRADES_API_ROUTE}/${tradeId}`;

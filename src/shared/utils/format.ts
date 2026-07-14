@@ -6,6 +6,8 @@
  * `TradingCalculatorService` (`@shared/services`); this module is presentation-only.
  */
 
+import { APP_TIMEZONE } from './datetime';
+
 const DEFAULT_LOCALE = 'en-US';
 
 /** Currencies that never show fractional units — ICU defaults differ between Node and browsers. */
@@ -79,9 +81,8 @@ export function formatProfitFactor(value: number | null, decimals = 2): string {
 }
 
 /**
- * Always format in UTC so Vercel SSR (UTC) matches the browser during hydration.
- * Without an explicit timeZone, Node uses UTC and the client uses the local zone
- * (e.g. Asia/Jakarta) — that text mismatch throws React error #418 in production.
+ * Always format in Asia/Jakarta so Vercel SSR and the browser show the same wall clock.
+ * Trade forms also use this timezone for datetime-local fields.
  */
 export function formatDate(value: string | Date, options?: Intl.DateTimeFormatOptions): string {
 	const date = typeof value === 'string' ? new Date(value) : value;
@@ -89,7 +90,7 @@ export function formatDate(value: string | Date, options?: Intl.DateTimeFormatOp
 		return '—';
 	}
 	return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-		timeZone: 'UTC',
+		timeZone: APP_TIMEZONE,
 		...(options ?? { month: 'short', day: 'numeric', year: 'numeric' }),
 	}).format(date);
 }
@@ -119,6 +120,6 @@ export function formatDateTime(value: string | Date): string {
 		day: 'numeric',
 		hour: 'numeric',
 		minute: '2-digit',
-		timeZone: 'UTC',
+		timeZone: APP_TIMEZONE,
 	});
 }

@@ -177,13 +177,13 @@ export function TradeFormDetailsSection({
 					</NativeSelect>
 				</FormField>
 
-				<FormField id="openedAt" label="Opened At" error={errors.openedAt?.message}>
+				<FormField id="openedAt" label="Opened At (WIB)" error={errors.openedAt?.message}>
 					<Input id="openedAt" type="datetime-local" aria-invalid={Boolean(errors.openedAt)} {...register('openedAt')} />
 				</FormField>
 
 				<FormField
 					id="closedAt"
-					label="Closed At"
+					label="Closed At (WIB)"
 					optional={status !== 'closed'}
 					hint={status === 'closed' ? undefined : 'Required once the trade is closed.'}
 					error={errors.closedAt?.message as string | undefined}

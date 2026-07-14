@@ -1,24 +1,8 @@
 import type { TradeFormInput } from '../validators/trade-schemas';
 import type { TradeDetail } from '../types/trade.types';
+import { toDatetimeLocalValue } from '@shared/utils/datetime';
 
-/**
- * Converts an ISO timestamp into the `yyyy-MM-ddTHH:mm` string `<input type="datetime-local">` expects.
- *
- * Uses the **runtime local timezone**. Never call this during SSR hydration of a `client:load`
- * island — Vercel (UTC) and the browser (e.g. Asia/Jakarta) produce different strings and throw
- * React error #418. Trade create/edit shells must use `client:only="react"`.
- */
-export function toDatetimeLocalValue(iso: string | null | undefined): string {
-	if (!iso) {
-		return '';
-	}
-	const date = new Date(iso);
-	if (Number.isNaN(date.getTime())) {
-		return '';
-	}
-	const pad = (value: number) => String(value).padStart(2, '0');
-	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
+export { toDatetimeLocalValue } from '@shared/utils/datetime';
 
 function toInputValue(value: number | null): string {
 	return value === null ? '' : String(value);
@@ -26,8 +10,7 @@ function toInputValue(value: number | null): string {
 
 /**
  * Builds the initial React Hook Form state for the Trade form.
- *
- * Only safe to call in a client-only context (or after mount). See `toDatetimeLocalValue`.
+ * Datetimes use Asia/Jakarta wall clock for `<input type="datetime-local">`.
  */
 export function getTradeFormDefaults(
 	detail?: TradeDetail | null,

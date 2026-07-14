@@ -13,6 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { NotFoundError, ValidationError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
 import { invalidateUserPageCaches } from '@shared/lib/cache/page-data-cache';
+import { parseTradeDateTime } from '@shared/utils/datetime';
 import { deleteTradeScreenshot, uploadTradeScreenshot } from '@shared/lib/r2';
 import {
 	strategyRepository,
@@ -280,6 +281,8 @@ export class TradeJournalService {
 	async create(userId: string, input: unknown): Promise<TradeDetail> {
 		const data = parseOrThrow(tradeFormSchema, input);
 		const { symbol, account } = await assertOwnedReferences(userId, data);
+		const openedAt = parseTradeDateTime(data.openedAt);
+		const closedAt = data.closedAt ? parseTradeDateTime(data.closedAt) : null;
 
 		const metrics = tradingCalculatorService.tradeMetrics({
 			side: data.side,
@@ -292,8 +295,8 @@ export class TradeJournalService {
 			pipSize: symbol.pipSize,
 			contractSize: resolveContractSize(symbol),
 			fxRate: resolveFxRate(account),
-			openedAt: data.openedAt,
-			closedAt: data.closedAt,
+			openedAt,
+			closedAt,
 		});
 
 		const result =
@@ -323,8 +326,8 @@ export class TradeJournalService {
 			profitLossPercent: metrics.profitLossPercent != null ? String(metrics.profitLossPercent) : null,
 			pips: metrics.pips != null ? String(metrics.pips) : null,
 			fees: String(data.fees ?? 0),
-			openedAt: new Date(data.openedAt),
-			closedAt: data.closedAt ? new Date(data.closedAt) : null,
+			openedAt,
+			closedAt,
 			holdingTimeSeconds: metrics.holdingTimeSeconds != null ? String(metrics.holdingTimeSeconds) : null,
 			setup: data.setup ?? null,
 			mistakes: data.mistakes ?? null,
@@ -345,6 +348,8 @@ export class TradeJournalService {
 
 		const data = parseOrThrow(tradeFormSchema, input);
 		const { symbol, account } = await assertOwnedReferences(userId, data);
+		const openedAt = parseTradeDateTime(data.openedAt);
+		const closedAt = data.closedAt ? parseTradeDateTime(data.closedAt) : null;
 
 		const metrics = tradingCalculatorService.tradeMetrics({
 			side: data.side,
@@ -357,8 +362,8 @@ export class TradeJournalService {
 			pipSize: symbol.pipSize,
 			contractSize: resolveContractSize(symbol),
 			fxRate: resolveFxRate(account),
-			openedAt: data.openedAt,
-			closedAt: data.closedAt,
+			openedAt,
+			closedAt,
 		});
 
 		const result =
@@ -387,8 +392,8 @@ export class TradeJournalService {
 			profitLossPercent: metrics.profitLossPercent != null ? String(metrics.profitLossPercent) : null,
 			pips: metrics.pips != null ? String(metrics.pips) : null,
 			fees: String(data.fees ?? 0),
-			openedAt: new Date(data.openedAt),
-			closedAt: data.closedAt ? new Date(data.closedAt) : null,
+			openedAt,
+			closedAt,
 			holdingTimeSeconds: metrics.holdingTimeSeconds != null ? String(metrics.holdingTimeSeconds) : null,
 			setup: data.setup ?? null,
 			mistakes: data.mistakes ?? null,
