@@ -45,7 +45,7 @@ function SelectContent({
 				data-slot="select-content"
 				position={position}
 				className={cn(
-					'glass-panel relative z-[100] max-h-[min(18rem,var(--radix-select-content-available-height))] min-w-[10rem] overflow-y-auto overflow-x-hidden p-2 text-foreground shadow-glass',
+					'popover-surface relative z-[100] max-h-[min(18rem,var(--radix-select-content-available-height))] min-w-[10rem] overflow-y-auto overflow-x-hidden p-2 text-foreground',
 					position === 'popper' &&
 						'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
 					className,

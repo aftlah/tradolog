@@ -21,7 +21,7 @@ function DropdownMenuContent({
 				data-slot="dropdown-menu-content"
 				sideOffset={sideOffset}
 				className={cn(
-					'glass-panel z-50 min-w-[12rem] overflow-hidden p-2 text-foreground shadow-glass',
+					'popover-surface z-50 min-w-[12rem] overflow-hidden p-2 text-foreground',
 					className,
 				)}
 				{...props}
@@ -182,7 +182,7 @@ function DropdownMenuSubContent({
 		<DropdownMenuPrimitive.SubContent
 			data-slot="dropdown-menu-sub-content"
 			className={cn(
-				'glass-panel z-50 min-w-[10rem] overflow-hidden p-1.5 text-foreground shadow-glass',
+				'popover-surface z-50 min-w-[10rem] overflow-hidden p-1.5 text-foreground',
 				className,
 			)}
 			{...props}
