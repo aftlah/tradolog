@@ -1,8 +1,8 @@
 ---
 import RootLayout from '@shared/layouts/RootLayout.astro';
 import { AppChrome } from '@features/shell/components/AppChrome';
-import { APP_CHROME_STATE_ID, type AppChromeState } from '@features/shell/types/chrome.types';
 import { resolveActiveHref } from '@features/shell/utils/resolve-active-href';
+import type { AppChromeState } from '@features/shell/types/chrome.types';
 import type { AccountOption } from '@shared/types';
 
 interface Props {
@@ -40,11 +40,8 @@ const chromeState: AppChromeState = {
 ---
 
 <RootLayout title={title}>
-	{/* Kept for debugging / future soft-nav; AppChrome reads props directly on full page loads. */}
-	<script is:inline type="application/json" id={APP_CHROME_STATE_ID} set:html={JSON.stringify(chromeState)} />
-
 	<div class="relative min-h-dvh">
-		<AppChrome client:load initialState={chromeState} />
+		<AppChrome client:idle initialState={chromeState} />
 
 		<div class="relative z-10 app-shell-offset">
 			<main class="flex flex-col gap-6 px-4 pb-8 lg:px-4">

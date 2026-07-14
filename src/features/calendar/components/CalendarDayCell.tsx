@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@shared/utils/cn';
 import { formatSignedCurrency } from '@shared/utils/format';
 import type { CalendarDay } from '../types/calendar.types';
@@ -49,15 +48,14 @@ export function CalendarDayCell({ day, dayOfMonth, currency, isToday, maxAbsProf
 	const heatStyle = heatMapStyle(tone, intensity);
 
 	return (
-		<motion.button
+		<button
 			type="button"
 			disabled={!hasTrades}
 			onClick={onSelect}
-			whileHover={hasTrades ? { y: -2 } : undefined}
-			transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
 			className={cn(
 				'flex min-h-24 flex-col items-start gap-1.5 rounded-2xl border p-2.5 text-left transition-[border-color,box-shadow,transform] duration-200 sm:min-h-28',
-				hasTrades ? 'cursor-pointer hover:brightness-110' : 'cursor-default border-white/[0.06]',
+				hasTrades && 'cursor-pointer hover:-translate-y-0.5 hover:brightness-110',
+				!hasTrades && 'cursor-default border-white/[0.06]',
 				!heatStyle && hasTrades && 'border-white/10 hover:border-white/20',
 				!heatStyle && !hasTrades && 'border-white/[0.06]',
 				isToday && 'ring-1 ring-primary/60',
@@ -87,6 +85,6 @@ export function CalendarDayCell({ day, dayOfMonth, currency, isToday, maxAbsProf
 					</span>
 				</div>
 			) : null}
-		</motion.button>
+		</button>
 	);
 }

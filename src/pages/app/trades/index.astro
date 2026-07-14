@@ -66,5 +66,5 @@ const userEmail = session.user.email ?? '';
 	activeAccountId={query.accountId ?? null}
 	showQuickAdd={false}
 >
-	<TradeJournalShell client:load initialData={initialData} initialQuery={query} options={options} />
+	<TradeJournalShell client:idle initialData={initialData} initialQuery={query} options={options} />
 </AppLayout>

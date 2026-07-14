@@ -87,11 +87,24 @@ export function datetimeLocalToIso(localValue: string, timeZone: string = APP_TI
  * Used when a legacy client still posts datetime-local without an offset.
  */
 export function zonedNaiveToUtcDate(naive: string, timeZone: string = APP_TIMEZONE): Date {
-	const [datePart, timePart = '00:00:00'] = naive.trim().split('T');
-	const [year, month, day] = datePart.split('-').map((value) => Number.parseInt(value, 10));
-	const [hour, minute, second = 0] = timePart.split(':').map((value) => Number.parseInt(value, 10));
+	const [datePart = '', timePart = '00:00:00'] = naive.trim().split('T');
+	const dateParts = datePart.split('-').map((value) => Number.parseInt(value, 10));
+	const timeParts = timePart.split(':').map((value) => Number.parseInt(value, 10));
+	const year = dateParts[0];
+	const month = dateParts[1];
+	const day = dateParts[2];
+	const hour = timeParts[0];
+	const minute = timeParts[1];
+	const second = timeParts[2] ?? 0;
 
-	if (![year, month, day, hour, minute].every((value) => Number.isFinite(value))) {
+	if (
+		year === undefined ||
+		month === undefined ||
+		day === undefined ||
+		hour === undefined ||
+		minute === undefined ||
+		![year, month, day, hour, minute].every((value) => Number.isFinite(value))
+	) {
 		return new Date(Number.NaN);
 	}
 

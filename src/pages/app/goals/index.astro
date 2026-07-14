@@ -56,5 +56,5 @@ const userEmail = session.user.email ?? '';
 	accounts={accounts}
 	activeAccountId={activeAccountId}
 >
-	<GoalsShell client:load initialGoals={initialGoals} activeAccountId={activeAccountId} />
+	<GoalsShell client:idle initialGoals={initialGoals} activeAccountId={activeAccountId} />
 </AppLayout>

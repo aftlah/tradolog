@@ -18,8 +18,12 @@ if (!id) {
 const userId = session.user.id;
 
 let trade;
+let options;
 try {
-	trade = await tradeJournalService.getDetail(id, userId);
+	[trade, options] = await Promise.all([
+		tradeJournalService.getDetail(id, userId),
+		tradeJournalService.getFormOptions(userId),
+	]);
 } catch (error) {
 	if (error instanceof NotFoundError) {
 		return Astro.redirect('/app/trades');
@@ -27,7 +31,6 @@ try {
 	throw error;
 }
 
-const options = await tradeJournalService.getFormOptions(userId);
 const userName = session.user.name ?? 'Trader';
 const userEmail = session.user.email ?? '';
 ---
@@ -42,5 +45,5 @@ const userEmail = session.user.email ?? '';
 	showQuickAdd={false}
 	accountChangePath="/app/trades"
 >
-	<TradeDetailShell client:load trade={trade} />
+	<TradeDetailShell client:idle trade={trade} />
 </AppLayout>

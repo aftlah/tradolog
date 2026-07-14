@@ -1,5 +1,6 @@
 import { NotFoundError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
+import { accountsCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
 import {
 	monthlyGoalRepository,
 	profileRepository,
@@ -68,7 +69,14 @@ export class ProfileService {
 export class TradingAccountService {
 	/** Returns accounts as stored. `currentBalance` is kept in sync on trade mutations. */
 	async list(userId: string) {
-		return tradingAccountRepository.listByUserId(userId);
+		const cacheKey = accountsCacheKey(userId);
+		const cached = pageDataCache.get(cacheKey);
+		if (cached) {
+			return cached as Awaited<ReturnType<typeof tradingAccountRepository.listByUserId>>;
+		}
+		const accounts = await tradingAccountRepository.listByUserId(userId);
+		pageDataCache.set(cacheKey, accounts);
+		return accounts;
 	}
 
 	async requireForUser(id: string, userId: string) {

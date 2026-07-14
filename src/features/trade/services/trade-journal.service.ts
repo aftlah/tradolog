@@ -12,7 +12,7 @@
 import { randomUUID } from 'node:crypto';
 import { NotFoundError, ValidationError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
-import { invalidateUserPageCaches } from '@shared/lib/cache/page-data-cache';
+import { invalidateUserPageCaches, pageDataCache } from '@shared/lib/cache/page-data-cache';
 import { parseTradeDateTime } from '@shared/utils/datetime';
 import { deleteTradeScreenshot, uploadTradeScreenshot } from '@shared/lib/r2';
 import {
@@ -200,6 +200,29 @@ function resolveFxRate(account: TradingAccount): number {
 
 export class TradeJournalService {
 	async listPaginated(userId: string, query: TradeListQuery): Promise<PaginatedResult<TradeListItem>> {
+		const cacheKey = [
+			'trades',
+			userId,
+			query.page,
+			query.pageSize,
+			query.sortBy,
+			query.sortDir,
+			query.accountId ?? '',
+			query.symbolId ?? '',
+			query.strategyId ?? '',
+			query.side ?? '',
+			query.status ?? '',
+			query.result ?? '',
+			query.session ?? '',
+			query.search ?? '',
+			query.dateFrom ?? '',
+			query.dateTo ?? '',
+		].join(':');
+		const cached = pageDataCache.get(cacheKey) as PaginatedResult<TradeListItem> | undefined;
+		if (cached) {
+			return cached;
+		}
+
 		const { query: repoQuery } = toRepositoryQuery(userId, query);
 		const { rows, total } = await tradeRepository.listPaginated(userId, repoQuery);
 
@@ -228,13 +251,15 @@ export class TradeJournalService {
 			closedAt: toIsoOrNull(trade.closedAt),
 		}));
 
-		return {
+		const result = {
 			items,
 			page: repoQuery.page,
 			pageSize: repoQuery.pageSize,
 			total,
 			pageCount: Math.max(1, Math.ceil(total / repoQuery.pageSize)),
 		};
+		pageDataCache.set(cacheKey, result);
+		return result;
 	}
 
 	async getFormOptions(userId: string): Promise<TradeFormOptions> {

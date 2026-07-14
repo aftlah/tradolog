@@ -22,6 +22,8 @@ import { toAccountOption } from '@shared/utils/account-option';
 import { analyticsCacheKey, pageDataCache } from '@shared/lib/cache/page-data-cache';
 import {
 	DAILY_RETURNS_LOOKBACK,
+	DRAWDOWN_CHART_LOOKBACK_DAYS,
+	EQUITY_CURVE_LOOKBACK_DAYS,
 	MONTHLY_RETURNS_LOOKBACK,
 	WEEKLY_RETURNS_LOOKBACK,
 } from '../constants/analytics.constants';
@@ -96,6 +98,13 @@ function emptyAnalytics(): AnalyticsData {
 	};
 }
 
+function filterClosedSince(results: ClosedTradeResult[], since: Date): ClosedTradeResult[] {
+	return results.filter((result) => {
+		const closedAt = result.closedAt instanceof Date ? result.closedAt : new Date(result.closedAt ?? 0);
+		return closedAt >= since;
+	});
+}
+
 function buildAnalyticsData(
 	accounts: Awaited<ReturnType<typeof tradingAccountService.list>>,
 	activeAccount: NonNullable<(typeof accounts)[number]>,
@@ -107,11 +116,14 @@ function buildAnalyticsData(
 
 	const startingBalance = toFiniteNumber(activeAccount.startingBalance);
 	const currentBalance = toFiniteNumber(activeAccount.currentBalance);
+	const chartCutoff = new Date(Date.now() - EQUITY_CURVE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+	const drawdownCutoff = new Date(Date.now() - DRAWDOWN_CHART_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+	const recentForEquity = filterClosedSince(closedResults, chartCutoff);
 
 	const performance = tradingCalculatorService.performanceSummary(closedResults);
 	const streaks = tradingCalculatorService.streaks(closedResults);
 	const drawdown = tradingCalculatorService.drawdown(startingBalance, closedResults);
-	const equityCurve = tradingCalculatorService.equityCurve(startingBalance, closedResults);
+	const equityCurve = tradingCalculatorService.equityCurve(startingBalance, recentForEquity);
 
 	const dailyReturns = tradingCalculatorService.dailyReturns(closedResults, startingBalance);
 	const weeklyReturns = tradingCalculatorService.weeklyReturns(closedResults, startingBalance);
@@ -128,7 +140,9 @@ function buildAnalyticsData(
 		streaks,
 		drawdown: {
 			...drawdown,
-			points: drawdown.points.map(serializeDrawdownPoint),
+			points: drawdown.points
+				.filter((point) => point.closedAt >= drawdownCutoff)
+				.map(serializeDrawdownPoint),
 		} satisfies AnalyticsDrawdownSummary,
 		equityCurve: equityCurve.map(serializeEquityPoint),
 		periodReturns: {

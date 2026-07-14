@@ -19,6 +19,23 @@ export default defineConfig({
 		optimizeDeps: {
 			include: ['recharts', 'lucide-react', 'framer-motion', '@tanstack/react-table'],
 		},
+		build: {
+			rollupOptions: {
+				output: {
+					manualChunks(id) {
+						if (id.includes('node_modules/recharts')) {
+							return 'recharts';
+						}
+						if (id.includes('node_modules/@tanstack/react-table')) {
+							return 'tanstack-table';
+						}
+						if (id.includes('node_modules/framer-motion')) {
+							return 'framer-motion';
+						}
+					},
+				},
+			},
+		},
 		resolve: {
 			alias: {
 				'@': fileURLToPath(new URL('./src', import.meta.url)),

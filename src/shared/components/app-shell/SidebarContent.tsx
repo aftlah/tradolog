@@ -105,6 +105,7 @@ export function SidebarContent({
 						<a
 							key={item.id}
 							href={item.href}
+							data-astro-prefetch="hover"
 							onClick={onNavigate}
 							aria-current={isActive ? 'page' : undefined}
 							title={collapsed ? item.label : item.label}

@@ -9,6 +9,7 @@
  */
 import { NotFoundError, ValidationError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
+import { invalidateUserPageCaches } from '@shared/lib/cache/page-data-cache';
 import {
 	profileRepository,
 	strategyRepository,
@@ -154,6 +155,7 @@ export class SettingsService {
 			await clearOtherDefaultAccounts(userId, account.id);
 		}
 
+		invalidateUserPageCaches(userId);
 		return toAccountDto(account);
 	}
 
@@ -175,6 +177,7 @@ export class SettingsService {
 		}
 
 		const synced = await tradingAccountService.syncCurrentBalance(userId, id);
+		invalidateUserPageCaches(userId);
 		return toAccountDto(synced);
 	}
 
@@ -183,6 +186,7 @@ export class SettingsService {
 		if (!deleted) {
 			throw new NotFoundError('Trading account not found.');
 		}
+		invalidateUserPageCaches(userId);
 	}
 
 	async createStrategy(userId: string, input: unknown): Promise<StrategySettingsDto> {

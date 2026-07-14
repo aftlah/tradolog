@@ -46,5 +46,5 @@ const userEmail = session.user.email ?? '';
 	accounts={calendarData.accounts}
 	activeAccountId={calendarData.activeAccountId}
 >
-	<CalendarShell client:load initialData={calendarData} />
+	<CalendarShell client:idle initialData={calendarData} />
 </AppLayout>

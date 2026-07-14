@@ -8,5 +8,5 @@ const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 ---
 
 <RootLayout title="Register — Tradolog">
-	<RegisterPage client:load googleEnabled={googleEnabled} />
+	<RegisterPage client:idle googleEnabled={googleEnabled} />
 </RootLayout>
