@@ -6,6 +6,8 @@ export interface TradeSymbolOption {
 	ticker: string;
 	name: string;
 	pipSize: number | null;
+	/** Units per 1.0 lot — FX majors typically 100_000, XAUUSD 100. */
+	contractSize: number | null;
 	pricePrecision: number;
 }
 

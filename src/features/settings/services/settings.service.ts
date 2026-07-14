@@ -91,6 +91,7 @@ function toSymbolDto(symbol: TradeSymbol, userId: string): SymbolSettingsDto {
 		baseAsset: symbol.baseAsset,
 		quoteAsset: symbol.quoteAsset,
 		pipSize: toNullableNumber(symbol.pipSize),
+		contractSize: toNullableNumber(symbol.contractSize),
 		pricePrecision: symbol.pricePrecision,
 		isActive: symbol.isActive,
 		isOwnedByUser: symbol.userId === userId,

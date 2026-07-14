@@ -62,7 +62,7 @@ export function TradeFormPricingSection({ register, errors, watch, options }: Tr
 			<p className="text-xs text-muted">
 				{isXauusd
 					? 'XAUUSD P&L uses contract size 100: (exit − entry) × lots × 100 − fees. Profit / Lot is shown on the trade detail.'
-					: 'Risk, reward, RR, P&L, pips, and holding time are calculated automatically from these values once saved.'}
+					: 'FX majors (e.g. GBPUSD) use contract 100,000: (exit − entry) × lots × 100000, then × USD→account FX rate.'}
 			</p>
 		</div>
 	);

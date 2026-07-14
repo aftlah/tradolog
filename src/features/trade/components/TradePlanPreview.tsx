@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import type { UseFormWatch } from 'react-hook-form';
 import { calculateTradeMetrics } from '@shared/services/trading-calculator/trade-metrics';
 import { formatCurrency, formatNumber, formatRiskReward } from '@shared/utils/format';
-import { XAUUSD_CONTRACT_SIZE, XAUUSD_TICKER } from '../constants/trade.constants';
+import { XAUUSD_TICKER } from '../constants/trade.constants';
+import { resolveSymbolContractSize } from '../utils/resolve-contract-size';
 import type { TradeFormOptions } from '../types/trade.types';
 import type { TradeFormInput } from '../validators/trade-schemas';
 
@@ -40,7 +41,7 @@ export function TradePlanPreview({ watch, options }: TradePlanPreviewProps) {
 			return null;
 		}
 
-		const contractSize = symbol.ticker === XAUUSD_TICKER ? XAUUSD_CONTRACT_SIZE : 1;
+		const contractSize = resolveSymbolContractSize(symbol.ticker, symbol.contractSize);
 		const fxRate = account.quoteToAccountRate !== null && account.quoteToAccountRate > 0 ? account.quoteToAccountRate : 1;
 
 		return calculateTradeMetrics({
@@ -66,10 +67,12 @@ export function TradePlanPreview({ watch, options }: TradePlanPreviewProps) {
 	}
 
 	const currency = account.currency;
+	const contractSize = symbol ? resolveSymbolContractSize(symbol.ticker, symbol.contractSize) : 1;
 	const fxLabel =
 		account.quoteToAccountRate !== null && account.quoteToAccountRate > 1
 			? ` · FX ${formatNumber(account.quoteToAccountRate, 0)}`
 			: '';
+	const contractLabel = contractSize > 1 ? ` · contract ${formatNumber(contractSize, 0)}` : '';
 
 	return (
 		<div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
@@ -78,7 +81,7 @@ export function TradePlanPreview({ watch, options }: TradePlanPreviewProps) {
 				<p className="text-[11px] text-muted">
 					{currency}
 					{fxLabel}
-					{symbol?.ticker === XAUUSD_TICKER ? ' · contract 100' : ''}
+					{contractLabel}
 				</p>
 			</div>
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -101,10 +104,10 @@ export function TradePlanPreview({ watch, options }: TradePlanPreviewProps) {
 			</div>
 			{(preview.risk !== null || preview.reward !== null) && symbol?.pipSize ? (
 				<p className="mt-3 text-[11px] text-muted">
-					Risk distance {preview.risk !== null ? formatNumber(preview.risk, 2) : '—'}
+					Risk distance {preview.risk !== null ? formatNumber(preview.risk, symbol.ticker === XAUUSD_TICKER ? 2 : 5) : '—'}
 					{preview.risk !== null ? ` (${formatNumber(preview.risk / symbol.pipSize, 1)} pips)` : ''}
 					{' · '}
-					Reward distance {preview.reward !== null ? formatNumber(preview.reward, 2) : '—'}
+					Reward distance {preview.reward !== null ? formatNumber(preview.reward, symbol.ticker === XAUUSD_TICKER ? 2 : 5) : '—'}
 					{preview.reward !== null ? ` (${formatNumber(preview.reward / symbol.pipSize, 1)} pips)` : ''}
 				</p>
 			) : null}

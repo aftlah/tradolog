@@ -38,11 +38,10 @@ import {
 	ALLOWED_IMAGE_MIME_TYPES,
 	MAX_IMAGES_PER_TRADE,
 	MAX_IMAGE_SIZE_BYTES,
-	XAUUSD_CONTRACT_SIZE,
-	XAUUSD_TICKER,
 } from '../constants/trade.constants';
 import { applyExitPriceCloseFields } from '../utils/apply-exit-price-close';
 import { assertAccountFxConfigured, resolveAccountFxRate } from '../utils/account-fx';
+import { resolveSymbolContractSize } from '../utils/resolve-contract-size';
 import { tradeFormSchema, tradeNoteFormSchema, type TradeFormValues } from '../validators/trade-schemas';
 import type {
 	PaginatedResult,
@@ -62,13 +61,8 @@ function toNumberOrNull(value: string | null): number | null {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
-/** XAUUSD uses 100 oz per lot; other symbols stay at 1 until their contract size is configured. */
 function resolveContractSize(symbol: TradeSymbol): number {
-	const stored = toNumberOrNull(symbol.contractSize);
-	if (stored !== null && stored > 0) {
-		return stored;
-	}
-	return symbol.ticker === XAUUSD_TICKER ? XAUUSD_CONTRACT_SIZE : 1;
+	return resolveSymbolContractSize(symbol.ticker, toNumberOrNull(symbol.contractSize));
 }
 
 function toIsoOrNull(value: Date | null): string | null {
@@ -279,6 +273,7 @@ export class TradeJournalService {
 				ticker: symbol.ticker,
 				name: symbol.name,
 				pipSize: toNumberOrNull(symbol.pipSize),
+				contractSize: toNumberOrNull(symbol.contractSize),
 				pricePrecision: symbol.pricePrecision,
 			})),
 			strategies: strategies.map((strategy) => ({

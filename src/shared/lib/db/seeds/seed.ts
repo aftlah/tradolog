@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { getDb } from '../index';
 import {
 	accounts,
@@ -91,6 +91,7 @@ async function seed() {
 			baseAsset: 'EUR',
 			quoteAsset: 'USD',
 			pipSize: '0.0001',
+			contractSize: '100000',
 			pricePrecision: 5,
 		},
 		{
@@ -100,6 +101,7 @@ async function seed() {
 			baseAsset: 'GBP',
 			quoteAsset: 'USD',
 			pipSize: '0.0001',
+			contractSize: '100000',
 			pricePrecision: 5,
 		},
 		{
@@ -155,8 +157,25 @@ async function seed() {
 				...symbol,
 				isActive: true,
 			});
+		} else if ('contractSize' in symbol && symbol.contractSize) {
+			await db
+				.update(symbols)
+				.set({ contractSize: symbol.contractSize, updatedAt: new Date() })
+				.where(eq(symbols.id, found[0].id));
 		}
 	}
+
+	// Backfill standard FX contract size for any EURUSD/GBPUSD still missing it (all users).
+	await db
+		.update(symbols)
+		.set({ contractSize: '100000', updatedAt: new Date() })
+		.where(
+			and(
+				inArray(symbols.ticker, ['EURUSD', 'GBPUSD']),
+				isNull(symbols.contractSize),
+				isNull(symbols.deletedAt),
+			),
+		);
 
 	const existingAccounts = await db
 		.select()

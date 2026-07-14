@@ -39,6 +39,7 @@ const EMPTY_DEFAULTS: SymbolFormInput = {
 	baseAsset: '',
 	quoteAsset: '',
 	pipSize: '',
+	contractSize: '',
 	pricePrecision: 5,
 	isActive: true,
 };
@@ -54,6 +55,7 @@ function toFormDefaults(symbol: SymbolSettingsDto | null): SymbolFormInput {
 		baseAsset: symbol.baseAsset ?? '',
 		quoteAsset: symbol.quoteAsset ?? '',
 		pipSize: symbol.pipSize !== null ? String(symbol.pipSize) : '',
+		contractSize: symbol.contractSize !== null ? String(symbol.contractSize) : '',
 		pricePrecision: symbol.pricePrecision,
 		isActive: symbol.isActive,
 	};
@@ -153,8 +155,18 @@ export function SymbolFormDialog({ open, onOpenChange, symbol, onSaved }: Symbol
 							<Input id="quoteAsset" placeholder="USD" {...register('quoteAsset')} />
 						</FormField>
 
-						<FormField id="pipSize" label="Pip Size" optional hint="e.g. 0.0001" error={errors.pipSize?.message}>
+						<FormField id="pipSize" label="Pip Size" optional hint="e.g. 0.0001" error={errors.pipSize?.message as string | undefined}>
 							<Input id="pipSize" type="number" step="0.00001" placeholder="0.0001" {...register('pipSize')} />
+						</FormField>
+
+						<FormField
+							id="contractSize"
+							label="Contract Size"
+							optional
+							hint="Units per 1.0 lot — FX majors 100000, XAUUSD 100."
+							error={errors.contractSize?.message as string | undefined}
+						>
+							<Input id="contractSize" type="number" step="1" placeholder="100000" {...register('contractSize')} />
 						</FormField>
 
 						<div className="flex items-end pb-2">

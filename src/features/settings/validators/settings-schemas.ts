@@ -86,6 +86,7 @@ export const symbolFormSchema = z.object({
 	baseAsset: optionalText(32),
 	quoteAsset: optionalText(32),
 	pipSize: optionalDecimalString,
+	contractSize: optionalDecimalString,
 	pricePrecision: requiredNonNegativeInt(12),
 	isActive: z.boolean().default(true),
 });

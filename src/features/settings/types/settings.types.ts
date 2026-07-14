@@ -37,6 +37,7 @@ export interface SymbolSettingsDto {
 	baseAsset: string | null;
 	quoteAsset: string | null;
 	pipSize: number | null;
+	contractSize: number | null;
 	pricePrecision: number;
 	isActive: boolean;
 	/** True when `userId` matches the viewer — only user-owned symbols may be edited/deleted. */
