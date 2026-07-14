@@ -41,6 +41,7 @@ import {
 	XAUUSD_CONTRACT_SIZE,
 	XAUUSD_TICKER,
 } from '../constants/trade.constants';
+import { applyExitPriceCloseFields } from '../utils/apply-exit-price-close';
 import { tradeFormSchema, tradeNoteFormSchema, type TradeFormValues } from '../validators/trade-schemas';
 import type {
 	PaginatedResult,
@@ -304,7 +305,7 @@ export class TradeJournalService {
 	}
 
 	async create(userId: string, input: unknown): Promise<TradeDetail> {
-		const data = parseOrThrow(tradeFormSchema, input);
+		const data = applyExitPriceCloseFields(parseOrThrow(tradeFormSchema, input), new Date().toISOString());
 		const { symbol, account } = await assertOwnedReferences(userId, data);
 		const openedAt = parseTradeDateTime(data.openedAt);
 		const closedAt = data.closedAt ? parseTradeDateTime(data.closedAt) : null;
@@ -371,7 +372,7 @@ export class TradeJournalService {
 			throw new NotFoundError('Trade not found.');
 		}
 
-		const data = parseOrThrow(tradeFormSchema, input);
+		const data = applyExitPriceCloseFields(parseOrThrow(tradeFormSchema, input), new Date().toISOString());
 		const { symbol, account } = await assertOwnedReferences(userId, data);
 		const openedAt = parseTradeDateTime(data.openedAt);
 		const closedAt = data.closedAt ? parseTradeDateTime(data.closedAt) : null;

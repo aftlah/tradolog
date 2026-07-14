@@ -31,7 +31,7 @@ export function TradeFormPricingSection({ register, errors, watch, options }: Tr
 					id="exitPrice"
 					label="Exit Price"
 					optional={!exitRequired}
-					hint={exitRequired ? undefined : 'Required once the trade is closed.'}
+					hint={exitRequired ? undefined : 'Filling exit price closes the trade and sets Closed At automatically.'}
 					error={errors.exitPrice?.message as string | undefined}
 				>
 					<Input id="exitPrice" inputMode="decimal" placeholder={isXauusd ? '2365.00' : '1.0900'} {...register('exitPrice')} />

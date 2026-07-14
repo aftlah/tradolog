@@ -5,8 +5,9 @@ import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@shared/components';
 import { softNavigate } from '@shared/utils/soft-navigate';
-import { datetimeLocalToIso } from '@shared/utils/datetime';
+import { datetimeLocalToIso, toDatetimeLocalValue } from '@shared/utils/datetime';
 import { TRADES_API_ROUTE } from '../constants/trade.constants';
+import { applyExitPriceCloseFields } from '../utils/apply-exit-price-close';
 import { inferTradeSide } from '../utils/infer-trade-side';
 import { tradeFormSchema, type TradeFormInput, type TradeFormValues } from '../validators/trade-schemas';
 import type { TradeFormOptions } from '../types/trade.types';
@@ -37,6 +38,9 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 	});
 
 	const entryPrice = watch('entryPrice');
+	const exitPrice = watch('exitPrice');
+	const status = watch('status');
+	const closedAt = watch('closedAt');
 	const stopLoss = watch('stopLoss');
 	const takeProfit = watch('takeProfit');
 	const side = watch('side');
@@ -49,6 +53,22 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 		setValue('side', inferredSide, { shouldDirty: true, shouldValidate: true });
 	}, [inferredSide, side, setValue]);
 
+	useEffect(() => {
+		const next = applyExitPriceCloseFields(
+			{ exitPrice, status, closedAt },
+			toDatetimeLocalValue(new Date().toISOString()),
+		);
+		if (next.status !== status) {
+			setValue('status', next.status, { shouldDirty: true, shouldValidate: true });
+		}
+		if (next.closedAt !== closedAt) {
+			setValue('closedAt', typeof next.closedAt === 'string' ? next.closedAt : '', {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
+		}
+	}, [exitPrice, status, closedAt, setValue]);
+
 	async function onSubmit(values: TradeFormValues) {
 		setSubmitError(null);
 		const sideFromPrices = inferTradeSide(values.entryPrice, values.stopLoss, values.takeProfit);
@@ -57,12 +77,16 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 			return;
 		}
 
+		const normalized = applyExitPriceCloseFields(
+			{ ...values, side: sideFromPrices },
+			toDatetimeLocalValue(new Date().toISOString()),
+		);
+
 		const payload = {
-			...values,
-			side: sideFromPrices,
+			...normalized,
 			// Convert wall-clock datetime-local → UTC ISO before the API (Vercel is UTC).
-			openedAt: datetimeLocalToIso(values.openedAt),
-			closedAt: values.closedAt ? datetimeLocalToIso(values.closedAt) : null,
+			openedAt: datetimeLocalToIso(normalized.openedAt),
+			closedAt: normalized.closedAt ? datetimeLocalToIso(normalized.closedAt) : null,
 		};
 
 		try {
