@@ -1,6 +1,7 @@
 import { NotFoundError } from '@shared/lib/errors';
 import { parseOrThrow } from '@shared/lib/validation';
 import { accountsCacheKey, cacheGet, cacheSet } from '@shared/lib/cache/page-data-cache';
+import { reviveTradingAccounts } from '@shared/utils/revive-trading-account';
 import {
 	monthlyGoalRepository,
 	profileRepository,
@@ -72,7 +73,7 @@ export class TradingAccountService {
 		const cacheKey = accountsCacheKey(userId);
 		const cached = await cacheGet<Awaited<ReturnType<typeof tradingAccountRepository.listByUserId>>>(cacheKey);
 		if (cached) {
-			return cached;
+			return reviveTradingAccounts(cached);
 		}
 		const accounts = await tradingAccountRepository.listByUserId(userId);
 		await cacheSet(cacheKey, accounts);

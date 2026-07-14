@@ -57,11 +57,14 @@ function toProfileDto(profile: Profile): ProfileSettingsDto {
 }
 
 function toAccountDto(account: TradingAccount): AccountSettingsDto {
+	const createdAt =
+		account.createdAt instanceof Date ? account.createdAt.toISOString() : new Date(account.createdAt).toISOString();
+
 	return {
 		...toAccountOption(account),
 		leverage: account.leverage,
 		notes: account.notes,
-		createdAt: account.createdAt.toISOString(),
+		createdAt,
 	};
 }
 
