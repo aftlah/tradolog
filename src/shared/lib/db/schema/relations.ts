@@ -7,6 +7,7 @@ import { tradeImages, tradeNotes, tradeReviews } from './trade-details';
 import { monthlyGoals, watchlists } from './goals-watchlists';
 import { journalNotes } from './journal-notes';
 import { riskRules } from './risk-rules';
+import { journalShares } from './journal-shares';
 
 /** Better Auth: user → sessions / credential accounts / domain graph */
 export const userRelations = relations(user, ({ many, one }) => ({
@@ -30,6 +31,8 @@ export const userRelations = relations(user, ({ many, one }) => ({
 		fields: [user.id],
 		references: [riskRules.userId],
 	}),
+	ownedJournalShares: many(journalShares, { relationName: 'ownerShares' }),
+	mentorJournalShares: many(journalShares, { relationName: 'mentorShares' }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -165,6 +168,19 @@ export const riskRulesRelations = relations(riskRules, ({ one }) => ({
 	user: one(user, {
 		fields: [riskRules.userId],
 		references: [user.id],
+	}),
+}));
+
+export const journalShareRelations = relations(journalShares, ({ one }) => ({
+	owner: one(user, {
+		fields: [journalShares.ownerUserId],
+		references: [user.id],
+		relationName: 'ownerShares',
+	}),
+	mentor: one(user, {
+		fields: [journalShares.mentorUserId],
+		references: [user.id],
+		relationName: 'mentorShares',
 	}),
 }));
 

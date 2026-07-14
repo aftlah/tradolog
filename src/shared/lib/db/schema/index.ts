@@ -9,6 +9,7 @@ export {
 	tradeSessionEnum,
 	reviewGradeEnum,
 	goalStatusEnum,
+	shareStatusEnum,
 	ACCOUNT_TYPES,
 	MARKET_TYPES,
 	TRADE_SIDES,
@@ -17,6 +18,7 @@ export {
 	TRADE_SESSIONS,
 	REVIEW_GRADES,
 	GOAL_STATUSES,
+	SHARE_STATUSES,
 } from './enums';
 
 export { user, session, account, verification } from './auth';
@@ -27,6 +29,7 @@ export { tradeImages, tradeNotes, tradeReviews } from './trade-details';
 export { monthlyGoals, watchlists } from './goals-watchlists';
 export { journalNotes } from './journal-notes';
 export { riskRules } from './risk-rules';
+export { journalShares } from './journal-shares';
 
 export {
 	userRelations,
@@ -44,4 +47,5 @@ export {
 	watchlistRelations,
 	journalNoteRelations,
 	riskRulesRelations,
+	journalShareRelations,
 } from './relations';

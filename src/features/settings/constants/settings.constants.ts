@@ -9,7 +9,7 @@ export const SETTINGS_RISK_API_ROUTE = '/api/settings/risk';
 
 export const SETTINGS_PAGE_ROUTE = '/app/settings';
 
-export const SETTINGS_TABS = ['profile', 'accounts', 'strategies', 'symbols', 'risk'] as const;
+export const SETTINGS_TABS = ['profile', 'accounts', 'strategies', 'symbols', 'risk', 'sharing'] as const;
 
 export type SettingsTab = (typeof SETTINGS_TABS)[number];
 
@@ -19,6 +19,7 @@ export const SETTINGS_TAB_OPTIONS: ReadonlyArray<{ id: SettingsTab; label: strin
 	{ id: 'strategies', label: 'Strategies' },
 	{ id: 'symbols', label: 'Symbols' },
 	{ id: 'risk', label: 'Risk' },
+	{ id: 'sharing', label: 'Sharing' },
 ];
 
 /** Parses `?tab=` from the Settings URL; unknown values fall back to Profile. */

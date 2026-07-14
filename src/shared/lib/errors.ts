@@ -33,6 +33,13 @@ export class ValidationError extends AppError {
 	}
 }
 
+export class ForbiddenError extends AppError {
+	constructor(message = 'You do not have access to this resource.', code = 'FORBIDDEN') {
+		super(message, code, 403);
+		this.name = 'ForbiddenError';
+	}
+}
+
 export function toUserFacingAuthMessage(error: unknown): string {
 	if (error instanceof AuthError || error instanceof AppError) {
 		return error.message;

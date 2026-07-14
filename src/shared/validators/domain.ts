@@ -4,6 +4,7 @@ import {
 	GOAL_STATUSES,
 	MARKET_TYPES,
 	REVIEW_GRADES,
+	SHARE_STATUSES,
 	TRADE_RESULTS,
 	TRADE_SESSIONS,
 	TRADE_SIDES,
@@ -27,6 +28,7 @@ export const tradeSessionSchema = z.enum(TRADE_SESSIONS);
 export const reviewGradeSchema = z.enum(REVIEW_GRADES);
 
 export const goalStatusSchema = z.enum(GOAL_STATUSES);
+export const shareStatusSchema = z.enum(SHARE_STATUSES);
 
 export const profileInsertSchema = z.object({
 	userId: userIdSchema,
@@ -208,6 +210,21 @@ export const riskRulesInsertSchema = z.object({
 
 export const riskRulesUpdateSchema = riskRulesInsertSchema.omit({ userId: true }).partial();
 
+export const journalShareInsertSchema = z.object({
+	ownerUserId: userIdSchema,
+	mentorUserId: userIdSchema.optional().nullable(),
+	mentorEmail: z.string().trim().email('Enter a valid email.').max(255),
+	inviteToken: z.string().trim().min(16).max(128),
+	status: shareStatusSchema.default('pending'),
+	message: z.string().trim().max(1000).optional().nullable(),
+	acceptedAt: z.coerce.date().optional().nullable(),
+	revokedAt: z.coerce.date().optional().nullable(),
+});
+
+export const journalShareUpdateSchema = journalShareInsertSchema
+	.omit({ ownerUserId: true, inviteToken: true })
+	.partial();
+
 export type ProfileInsertInput = z.infer<typeof profileInsertSchema>;
 export type TradingAccountInsertInput = z.infer<typeof tradingAccountInsertSchema>;
 export type SymbolInsertInput = z.infer<typeof symbolInsertSchema>;
@@ -221,3 +238,5 @@ export type WatchlistInsertInput = z.infer<typeof watchlistInsertSchema>;
 export type JournalNoteInsertInput = z.infer<typeof journalNoteInsertSchema>;
 export type RiskRulesInsertInput = z.infer<typeof riskRulesInsertSchema>;
 export type RiskRulesUpdateInput = z.infer<typeof riskRulesUpdateSchema>;
+export type JournalShareInsertInput = z.infer<typeof journalShareInsertSchema>;
+export type JournalShareUpdateInput = z.infer<typeof journalShareUpdateSchema>;

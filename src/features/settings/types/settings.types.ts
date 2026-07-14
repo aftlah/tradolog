@@ -1,5 +1,6 @@
 import type { AccountOption, AccountType, MarketType } from '@shared/types';
 import type { RiskRulesDto } from '@features/risk/types/risk.types';
+import type { JournalShareDto } from '@features/sharing/types/sharing.types';
 
 /** Serializable trader-preferences DTO rendered by `ProfileSettingsForm`. */
 export interface ProfileSettingsDto {
@@ -50,6 +51,7 @@ export interface SettingsPageData {
 	strategies: StrategySettingsDto[];
 	symbols: SymbolSettingsDto[];
 	riskRules: RiskRulesDto;
+	outgoingShares: JournalShareDto[];
 }
 
 export type { AccountType, MarketType };

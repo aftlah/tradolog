@@ -1,0 +1,16 @@
+---
+/**
+ * Accept invite deep-link — normalizes to /app/shared?token=… so SharedShell can accept.
+ */
+const session = Astro.locals.session;
+if (!session) {
+	return Astro.redirect(`/login?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`);
+}
+
+const token = Astro.url.searchParams.get('token');
+if (!token) {
+	return Astro.redirect('/app/shared');
+}
+
+return Astro.redirect(`/app/shared?token=${encodeURIComponent(token)}`);
+---

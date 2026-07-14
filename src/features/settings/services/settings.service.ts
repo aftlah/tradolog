@@ -29,6 +29,7 @@ import {
 import { toNullableNumber, tradingAccountService } from '@shared/services';
 import { tradeJournalService } from '@features/trade/services/trade-journal.service';
 import { riskRulesService } from '@features/risk/services/risk-rules.service';
+import { sharingService } from '@features/sharing/services/sharing.service';
 import { toAccountOption } from '@shared/utils/account-option';
 import type { Profile, Strategy, TradeSymbol, TradingAccount } from '@shared/types';
 import type {
@@ -108,13 +109,14 @@ async function clearOtherDefaultAccounts(userId: string, keepAccountId: string):
 }
 
 export class SettingsService {
-	async getSettingsPageData(userId: string): Promise<SettingsPageData> {
-		const [profile, accounts, strategies, symbols, riskRules] = await Promise.all([
+	async getSettingsPageData(userId: string, userEmail = ''): Promise<SettingsPageData> {
+		const [profile, accounts, strategies, symbols, riskRules, sharing] = await Promise.all([
 			this.getOrCreateProfile(userId),
 			tradingAccountService.list(userId),
 			strategyRepository.listByUserId(userId),
 			symbolRepository.listForUser(userId),
 			riskRulesService.getDto(userId),
+			sharingService.getPageData(userId, userEmail),
 		]);
 
 		return {
@@ -123,6 +125,7 @@ export class SettingsService {
 			strategies: strategies.map(toStrategyDto),
 			symbols: symbols.map((symbol) => toSymbolDto(symbol, userId)),
 			riskRules,
+			outgoingShares: sharing.outgoing,
 		};
 	}
 

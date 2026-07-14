@@ -43,5 +43,8 @@ export type {
 	NewJournalNote,
 	RiskRules,
 	NewRiskRules,
+	JournalShare,
+	NewJournalShare,
+	ShareStatus,
 	UserScoped,
 } from './database';

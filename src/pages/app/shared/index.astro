@@ -1,0 +1,54 @@
+---
+import AppLayout from '@features/shell/layouts/AppLayout.astro';
+import { SharedShell } from '@features/sharing/components/SharedShell';
+import { sharingService } from '@features/sharing/services/sharing.service';
+import { tradingAccountService } from '@shared/services';
+import { toAccountOption } from '@shared/utils/account-option';
+
+const session = Astro.locals.session;
+
+if (!session) {
+	return Astro.redirect('/login');
+}
+
+const userId = session.user.id;
+const userEmail = session.user.email ?? '';
+const shareId = Astro.url.searchParams.get('shareId');
+const accountId = Astro.url.searchParams.get('accountId');
+const acceptToken = Astro.url.searchParams.get('token');
+
+const [pageData, mentorAccounts] = await Promise.all([
+	sharingService.getPageData(userId, userEmail),
+	tradingAccountService.list(userId),
+]);
+
+let initialView = null;
+if (shareId) {
+	try {
+		initialView = await sharingService.getSharedJournalView(shareId, userId, userEmail, accountId);
+	} catch {
+		initialView = null;
+	}
+}
+
+const accounts = mentorAccounts.map(toAccountOption);
+const activeAccountId = accounts.find((account) => account.isDefault)?.id ?? accounts[0]?.id ?? null;
+const userName = session.user.name ?? 'Trader';
+---
+
+<AppLayout
+	title="Shared Journals — Tradolog"
+	pageTitle="Shared"
+	userName={userName}
+	userEmail={userEmail}
+	accounts={accounts}
+	activeAccountId={activeAccountId}
+	showQuickAdd={false}
+>
+	<SharedShell
+		client:load
+		initialData={pageData}
+		initialView={initialView}
+		acceptToken={acceptToken}
+	/>
+</AppLayout>

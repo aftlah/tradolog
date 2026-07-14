@@ -8,5 +8,6 @@ export const NAV_ITEMS: NavItem[] = [
 	{ id: 'calendar', label: 'Calendar', href: '/app/calendar', icon: 'calendar', enabled: true },
 	{ id: 'goals', label: 'Goals', href: '/app/goals', icon: 'goals', enabled: true },
 	{ id: 'notes', label: 'Notes', href: '/app/notes', icon: 'notes', enabled: true },
+	{ id: 'shared', label: 'Shared', href: '/app/shared', icon: 'shared', enabled: true },
 	{ id: 'settings', label: 'Settings', href: '/app/settings', icon: 'settings', enabled: true },
 ];

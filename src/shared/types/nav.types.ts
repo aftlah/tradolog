@@ -3,6 +3,6 @@ export interface NavItem {
 	id: string;
 	label: string;
 	href: string;
-	icon: 'dashboard' | 'trades' | 'analytics' | 'calendar' | 'goals' | 'notes' | 'settings';
+	icon: 'dashboard' | 'trades' | 'analytics' | 'calendar' | 'goals' | 'notes' | 'shared' | 'settings';
 	enabled: boolean;
 }

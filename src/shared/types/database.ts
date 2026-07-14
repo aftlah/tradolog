@@ -1,6 +1,7 @@
 import type {
 	accounts,
 	journalNotes,
+	journalShares,
 	monthlyGoals,
 	profiles,
 	riskRules,
@@ -17,6 +18,7 @@ import type {
 	GOAL_STATUSES,
 	MARKET_TYPES,
 	REVIEW_GRADES,
+	SHARE_STATUSES,
 	TRADE_RESULTS,
 	TRADE_SESSIONS,
 	TRADE_SIDES,
@@ -31,6 +33,7 @@ export type TradeResult = (typeof TRADE_RESULTS)[number];
 export type TradeSession = (typeof TRADE_SESSIONS)[number];
 export type ReviewGrade = (typeof REVIEW_GRADES)[number];
 export type GoalStatus = (typeof GOAL_STATUSES)[number];
+export type ShareStatus = (typeof SHARE_STATUSES)[number];
 
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
@@ -56,6 +59,8 @@ export type JournalNote = typeof journalNotes.$inferSelect;
 export type NewJournalNote = typeof journalNotes.$inferInsert;
 export type RiskRules = typeof riskRules.$inferSelect;
 export type NewRiskRules = typeof riskRules.$inferInsert;
+export type JournalShare = typeof journalShares.$inferSelect;
+export type NewJournalShare = typeof journalShares.$inferInsert;
 
 export type SoftDeletable = {
 	deletedAt: Date | null;

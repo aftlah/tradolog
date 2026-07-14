@@ -30,6 +30,9 @@ export const reviewGradeEnum = pgEnum('review_grade', ['A', 'B', 'C', 'D', 'F'])
 
 export const goalStatusEnum = pgEnum('goal_status', ['active', 'completed', 'missed', 'cancelled']);
 
+/** Journal share lifecycle for mentor mode. */
+export const shareStatusEnum = pgEnum('share_status', ['pending', 'active', 'revoked']);
+
 export const ACCOUNT_TYPES = accountTypeEnum.enumValues;
 export const MARKET_TYPES = marketTypeEnum.enumValues;
 export const TRADE_SIDES = tradeSideEnum.enumValues;
@@ -38,3 +41,4 @@ export const TRADE_RESULTS = tradeResultEnum.enumValues;
 export const TRADE_SESSIONS = tradeSessionEnum.enumValues;
 export const REVIEW_GRADES = reviewGradeEnum.enumValues;
 export const GOAL_STATUSES = goalStatusEnum.enumValues;
+export const SHARE_STATUSES = shareStatusEnum.enumValues;

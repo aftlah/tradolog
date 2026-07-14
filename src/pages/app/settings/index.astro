@@ -11,7 +11,8 @@ if (!session) {
 }
 
 const userId = session.user.id;
-const data = await settingsService.getSettingsPageData(userId);
+const userEmail = session.user.email ?? '';
+const data = await settingsService.getSettingsPageData(userId, userEmail);
 const activeTab = parseSettingsTab(Astro.url.searchParams.get('tab'));
 
 const requestedAccountId = Astro.url.searchParams.get('accountId');
@@ -21,7 +22,6 @@ const activeAccount =
 	data.accounts[0];
 
 const userName = session.user.name ?? 'Trader';
-const userEmail = session.user.email ?? '';
 ---
 
 <AppLayout

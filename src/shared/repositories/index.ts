@@ -35,3 +35,8 @@ export {
 	JournalNoteRepository,
 } from './journal-note.repository';
 export { riskRulesRepository, RiskRulesRepository } from './risk-rules.repository';
+export {
+	journalShareRepository,
+	JournalShareRepository,
+	type AuthUserSummary,
+} from './journal-share.repository';

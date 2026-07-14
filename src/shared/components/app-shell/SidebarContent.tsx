@@ -6,6 +6,7 @@ import {
 	PanelLeftClose,
 	PanelLeftOpen,
 	Settings,
+	Share2,
 	Target,
 	TrendingUp,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ const ICONS: Record<NavItem['icon'], typeof LayoutDashboard> = {
 	calendar: CalendarDays,
 	goals: Target,
 	notes: NotebookPen,
+	shared: Share2,
 	settings: Settings,
 };
 

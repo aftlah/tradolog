@@ -11,6 +11,7 @@ import { AccountsSettingsPanel } from './AccountsSettingsPanel';
 import { StrategiesSettingsPanel } from './StrategiesSettingsPanel';
 import { SymbolsSettingsPanel } from './SymbolsSettingsPanel';
 import { RiskRulesSettingsForm } from './RiskRulesSettingsForm';
+import { SharingSettingsPanel } from '@features/sharing/components/SharingSettingsPanel';
 
 interface SettingsShellProps {
 	data: SettingsPageData;
@@ -45,7 +46,9 @@ export function SettingsShell({ data, activeTab: initialTab, activeAccountId }: 
 		<>
 			<div>
 				<h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
-				<p className="mt-1 text-sm text-muted">Manage your profile, accounts, strategies, symbols, and risk rules.</p>
+				<p className="mt-1 text-sm text-muted">
+					Manage your profile, accounts, strategies, symbols, risk rules, and mentor sharing.
+				</p>
 			</div>
 
 			<div className="relative z-20 mt-6">
@@ -105,6 +108,12 @@ export function SettingsShell({ data, activeTab: initialTab, activeAccountId }: 
 					{activeTab === 'risk' ? (
 						<div role="tabpanel" id="settings-panel-risk" aria-labelledby="settings-tab-risk">
 							<RiskRulesSettingsForm rules={data.riskRules} />
+						</div>
+					) : null}
+
+					{activeTab === 'sharing' ? (
+						<div role="tabpanel" id="settings-panel-sharing" aria-labelledby="settings-tab-sharing">
+							<SharingSettingsPanel initialOutgoing={data.outgoingShares} />
 						</div>
 					) : null}
 				</div>
