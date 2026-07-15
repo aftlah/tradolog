@@ -5,8 +5,9 @@ import { setupParseService } from '@features/trade/services/setup-parse.service'
 import { ALLOWED_IMAGE_MIME_TYPES, MAX_IMAGE_SIZE_BYTES } from '@features/trade/constants/trade.constants';
 
 /**
- * Transient setup-image parse. Image is read in memory only — never stored.
+ * Transient setup / MT5-history image parse. Image is read in memory only — never stored.
  * multipart field name: `image`
+ * Response: `{ patches: SetupFormPatch[], patch: SetupFormPatch }` (patch = first for compat)
  */
 export const POST: APIRoute = async ({ request }) => {
 	try {
@@ -32,13 +33,17 @@ export const POST: APIRoute = async ({ request }) => {
 		}
 
 		const bytes = new Uint8Array(await file.arrayBuffer());
-		const patch = await setupParseService.parseImage(session.user.id, {
+		const patches = await setupParseService.parseImage(session.user.id, {
 			bytes,
 			mimeType,
 			size: file.size,
 		});
 
-		return jsonResponse({ patch });
+		if (patches.length === 0) {
+			throw new ValidationError('No trades were detected in this image.');
+		}
+
+		return jsonResponse({ patches, patch: patches[0] });
 	} catch (error) {
 		return errorResponse(error);
 	}

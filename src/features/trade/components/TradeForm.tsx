@@ -16,6 +16,7 @@ import { TradeFormPricingSection } from './TradeFormPricingSection';
 import { TradeFormJournalSection } from './TradeFormJournalSection';
 import { TradePlanPreview } from './TradePlanPreview';
 import { TradeSetupImageFill } from './TradeSetupImageFill';
+import { TradeEntryPasteFill } from './TradeEntryPasteFill';
 
 interface TradeFormProps {
 	mode: 'create' | 'edit';
@@ -37,6 +38,7 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 		defaultValues,
 	});
 
+	const accountId = watch('accountId');
 	const entryPrice = watch('entryPrice');
 	const exitPrice = watch('exitPrice');
 	const status = watch('status');
@@ -123,7 +125,8 @@ export function TradeForm({ mode, tradeId, options, defaultValues }: TradeFormPr
 
 	return (
 		<form className="space-y-6" onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
-			<TradeSetupImageFill setValue={setValue} />
+			<TradeEntryPasteFill setValue={setValue} options={options} />
+			<TradeSetupImageFill setValue={setValue} accountId={accountId} />
 			<TradeFormDetailsSection
 				register={register}
 				errors={errors}
