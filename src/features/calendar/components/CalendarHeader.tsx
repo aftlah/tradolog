@@ -1,6 +1,6 @@
 import { CalendarDays, ChevronLeft, ChevronRight, ListChecks, TrendingDown, TrendingUp } from 'lucide-react';
 import { Button } from '@shared/components';
-import { formatSignedCurrency } from '@shared/utils/format';
+import { formatCompactSignedNumber, formatSignedCurrency } from '@shared/utils/format';
 import { MONTH_LABELS } from '../constants/calendar.constants';
 import type { CalendarMonthTotals } from '../types/calendar.types';
 import { CalendarSummaryStat } from './CalendarSummaryStat';
@@ -21,8 +21,8 @@ export function CalendarHeader({ year, month, monthTotals, currency, isLoading, 
 	const monthLabel = MONTH_LABELS[month - 1] ?? '—';
 
 	return (
-		<div className="glass-card flex flex-col gap-6 p-6">
-			<div className="flex flex-wrap items-center justify-between gap-4">
+		<div className="glass-card flex min-w-0 flex-col gap-4 p-4 sm:gap-6 sm:p-6">
+			<div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
 				<div className="flex items-center gap-3">
 					<div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
 						<CalendarDays className="size-5" aria-hidden="true" />
@@ -50,10 +50,11 @@ export function CalendarHeader({ year, month, monthTotals, currency, isLoading, 
 				</div>
 			</div>
 
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+			<div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
 				<CalendarSummaryStat
 					label="Net P&L"
 					value={formatSignedCurrency(monthTotals.profitLoss, currency)}
+					compactValue={formatCompactSignedNumber(monthTotals.profitLoss)}
 					tone={netTone}
 					icon={monthTotals.profitLoss < 0 ? TrendingDown : TrendingUp}
 				/>

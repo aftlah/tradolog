@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { cn } from '@shared/utils/cn';
-import { formatSignedCurrency } from '@shared/utils/format';
+import { formatCompactSignedNumber, formatSignedCurrency } from '@shared/utils/format';
 import type { CalendarDay } from '../types/calendar.types';
 
 interface CalendarDayCellProps {
@@ -46,18 +46,24 @@ export function CalendarDayCell({ day, dayOfMonth, currency, isToday, maxAbsProf
 	const tone = dayTone(day.profitLoss);
 	const intensity = maxAbsProfitLoss > 0 ? Math.min(Math.abs(day.profitLoss) / maxAbsProfitLoss, 1) : 0;
 	const heatStyle = heatMapStyle(tone, intensity);
+	const formattedProfitLoss = formatSignedCurrency(day.profitLoss, currency);
 
 	return (
 		<button
 			type="button"
 			disabled={!hasTrades}
 			onClick={onSelect}
+			aria-label={
+				hasTrades
+					? `${day.date}: ${formattedProfitLoss}, ${day.tradeCount} trade${day.tradeCount === 1 ? '' : 's'}`
+					: day.date
+			}
 			className={cn(
-				'flex min-h-24 flex-col items-start gap-1.5 rounded-2xl border p-2.5 text-left transition-[border-color,box-shadow,transform] duration-200 sm:min-h-28',
+				'flex min-h-20 min-w-0 overflow-hidden flex-col items-start gap-1 rounded-xl border p-1.5 text-left transition-[border-color,box-shadow,transform] duration-200 sm:min-h-24 sm:gap-1.5 sm:rounded-2xl sm:p-2.5 lg:min-h-28',
 				hasTrades && 'cursor-pointer hover:-translate-y-0.5 hover:brightness-110',
-				!hasTrades && 'cursor-default border-white/[0.06]',
+				!hasTrades && 'cursor-default border-white/6',
 				!heatStyle && hasTrades && 'border-white/10 hover:border-white/20',
-				!heatStyle && !hasTrades && 'border-white/[0.06]',
+				!heatStyle && !hasTrades && 'border-white/6',
 				isToday && 'ring-1 ring-primary/60',
 			)}
 			style={{
@@ -69,19 +75,24 @@ export function CalendarDayCell({ day, dayOfMonth, currency, isToday, maxAbsProf
 			<span className={cn('text-xs font-medium', isToday ? 'text-primary' : 'text-muted')}>{dayOfMonth}</span>
 
 			{hasTrades ? (
-				<div className="flex flex-1 flex-col justify-end gap-0.5">
+				<div className="flex min-w-0 max-w-full flex-1 flex-col justify-end gap-0.5">
 					<span
 						className={cn(
-							'text-sm font-semibold tracking-tight',
+							'max-w-full text-[10px] font-semibold tracking-tight sm:text-xs lg:text-sm',
 							tone === 'win' && 'text-emerald-300',
 							tone === 'loss' && 'text-rose-300',
 							tone === 'flat' && 'text-slate-300',
 						)}
+						title={formattedProfitLoss}
 					>
-						{formatSignedCurrency(day.profitLoss, currency)}
+						<span className="md:hidden">{formatCompactSignedNumber(day.profitLoss)}</span>
+						<span className="hidden md:inline">{formattedProfitLoss}</span>
 					</span>
-					<span className="text-[11px] text-muted">
-						{day.tradeCount} trade{day.tradeCount === 1 ? '' : 's'}
+					<span className="max-w-full truncate text-[9px] text-muted sm:text-[11px]">
+						<span className="sm:hidden">{day.tradeCount}</span>
+						<span className="hidden sm:inline">
+							{day.tradeCount} trade{day.tradeCount === 1 ? '' : 's'}
+						</span>
 					</span>
 				</div>
 			) : null}

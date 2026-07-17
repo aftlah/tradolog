@@ -61,6 +61,21 @@ export function formatNumber(value: number, decimals = 0): string {
 	}).format(value);
 }
 
+/** Compact signed amount without a currency label, for space-constrained visualizations. */
+export function formatCompactSignedNumber(value: number): string {
+	const formatted = new Intl.NumberFormat(DEFAULT_LOCALE, {
+		notation: 'compact',
+		maximumFractionDigits: 1,
+	}).format(Math.abs(value));
+	if (value > 0) {
+		return `+${formatted}`;
+	}
+	if (value < 0) {
+		return `-${formatted}`;
+	}
+	return formatted;
+}
+
 /** Formats a risk/reward ratio, e.g. `2.35R`. `null` renders as `"—"`. */
 export function formatRiskReward(value: number | null, decimals = 2): string {
 	if (value === null || !Number.isFinite(value)) {

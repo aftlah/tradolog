@@ -23,16 +23,16 @@ export function CalendarGrid({ year, month, days, currency, onSelectDay }: Calen
 	const maxAbsProfitLoss = useMemo(() => Math.max(0, ...days.map((day) => Math.abs(day.profitLoss))), [days]);
 
 	return (
-		<div className="glass-card p-4 sm:p-6">
-			<div className="mb-3 grid grid-cols-7 gap-2 px-0.5 text-center text-xs font-medium text-muted">
+		<div className="glass-card min-w-0 overflow-hidden p-2 sm:p-4 lg:p-6">
+			<div className="mb-2 grid grid-cols-7 gap-1 px-0.5 text-center text-[10px] font-medium text-muted sm:mb-3 sm:gap-2 sm:text-xs">
 				{WEEKDAY_LABELS.map((label) => (
 					<span key={label}>{label}</span>
 				))}
 			</div>
 
-			<div className="grid grid-cols-7 gap-2">
+			<div className="grid min-w-0 grid-cols-7 gap-1 sm:gap-2">
 				{Array.from({ length: leadingBlanks }, (_, index) => (
-					<div key={`lead-${index}`} aria-hidden="true" />
+					<div key={`lead-${index}`} className="min-w-0" aria-hidden="true" />
 				))}
 
 				{days.map((day, index) => (
@@ -48,7 +48,7 @@ export function CalendarGrid({ year, month, days, currency, onSelectDay }: Calen
 				))}
 
 				{Array.from({ length: trailingBlanks }, (_, index) => (
-					<div key={`trail-${index}`} aria-hidden="true" />
+					<div key={`trail-${index}`} className="min-w-0" aria-hidden="true" />
 				))}
 			</div>
 		</div>

@@ -6,6 +6,7 @@ type StatTone = 'success' | 'danger' | 'primary' | 'muted';
 interface CalendarSummaryStatProps {
 	label: string;
 	value: string;
+	compactValue?: string;
 	tone: StatTone;
 	icon: LucideIcon;
 }
@@ -31,15 +32,27 @@ const TONE_CARD_CLASS: Record<StatTone, string> = {
 	muted: 'border-white/8 bg-white/[0.03]',
 };
 
-export function CalendarSummaryStat({ label, value, tone, icon: Icon }: CalendarSummaryStatProps) {
+export function CalendarSummaryStat({ label, value, compactValue, tone, icon: Icon }: CalendarSummaryStatProps) {
 	return (
-		<div className={cn('flex items-center gap-3 rounded-2xl border p-4', TONE_CARD_CLASS[tone])}>
-			<div className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl', TONE_ICON_WRAP_CLASS[tone])}>
+		<div className={cn('flex min-w-0 items-center gap-2 rounded-2xl border p-3 sm:gap-3 sm:p-4', TONE_CARD_CLASS[tone])}>
+			<div className={cn('flex size-8 shrink-0 items-center justify-center rounded-xl sm:size-9', TONE_ICON_WRAP_CLASS[tone])}>
 				<Icon className="size-4.5" aria-hidden="true" />
 			</div>
 			<div className="min-w-0">
 				<p className="truncate text-xs font-medium text-muted">{label}</p>
-				<p className={cn('text-lg font-semibold tracking-tight', TONE_TEXT_CLASS[tone])}>{value}</p>
+				<p
+					className={cn('truncate text-base font-semibold tracking-tight sm:text-lg', TONE_TEXT_CLASS[tone])}
+					title={value}
+				>
+					{compactValue ? (
+						<>
+							<span className="sm:hidden">{compactValue}</span>
+							<span className="hidden sm:inline">{value}</span>
+						</>
+					) : (
+						value
+					)}
+				</p>
 			</div>
 		</div>
 	);
