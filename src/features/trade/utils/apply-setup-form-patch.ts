@@ -1,4 +1,5 @@
 import type { UseFormSetValue } from 'react-hook-form';
+import { DEFAULT_TRADE_QUANTITY } from '../constants/trade.constants';
 import type { TradeFormInput } from '../validators/trade-schemas';
 import type { SetupFormPatch } from '../validators/setup-parse-schemas';
 
@@ -24,9 +25,17 @@ export function applySetupFormPatch(
 	setValue: UseFormSetValue<TradeFormInput>,
 	patch: SetupFormPatch,
 ): number {
+	const patchWithDefaults: SetupFormPatch = {
+		...patch,
+		quantity:
+			patch.quantity !== undefined && patch.quantity !== null && patch.quantity.trim() !== ''
+				? patch.quantity
+				: String(DEFAULT_TRADE_QUANTITY),
+	};
+
 	let filled = 0;
 	for (const key of FILLABLE_KEYS) {
-		const value = patch[key];
+		const value = patchWithDefaults[key];
 		if (value === undefined || value === null || value === '') {
 			continue;
 		}

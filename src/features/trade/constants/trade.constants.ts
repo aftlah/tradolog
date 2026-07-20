@@ -4,6 +4,9 @@ import type { TradeSortColumn } from '../types/trade.types';
 export const TRADES_API_ROUTE = '/api/trades';
 export const PARSE_SETUP_API_ROUTE = '/api/trades/parse-setup';
 
+/** Default lot size when setup/image parse does not detect quantity. */
+export const DEFAULT_TRADE_QUANTITY = 0.01;
+
 /** Standard XAUUSD lot = 100 oz. Used when the symbol row has no `contractSize` yet. */
 export const XAUUSD_TICKER = 'XAUUSD';
 export const XAUUSD_CONTRACT_SIZE = 100;

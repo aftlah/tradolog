@@ -1,4 +1,5 @@
 import { datetimeLocalToIso, toDatetimeLocalValue } from '@shared/utils/datetime';
+import { DEFAULT_TRADE_QUANTITY } from '../constants/trade.constants';
 import { applyExitPriceCloseFields } from './apply-exit-price-close';
 import { inferTradeSide } from './infer-trade-side';
 import type { SetupFormPatch } from '../validators/setup-parse-schemas';
@@ -58,12 +59,9 @@ export function buildTradePayloadFromPatch(
 	}
 
 	const entryPrice = toPositiveNumber(patch.entryPrice);
-	const quantity = toPositiveNumber(patch.quantity);
+	const quantity = toPositiveNumber(patch.quantity) ?? DEFAULT_TRADE_QUANTITY;
 	if (entryPrice === null) {
 		return { ok: false, error: 'Entry price wajib.' };
-	}
-	if (quantity === null) {
-		return { ok: false, error: 'Lot/quantity wajib.' };
 	}
 
 	const stopLoss = toPositiveNumber(patch.stopLoss);

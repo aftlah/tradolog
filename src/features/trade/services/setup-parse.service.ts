@@ -18,6 +18,7 @@ import {
 } from '../validators/setup-parse-schemas';
 import {
 	ALLOWED_IMAGE_MIME_TYPES,
+	DEFAULT_TRADE_QUANTITY,
 	MAX_IMAGE_SIZE_BYTES,
 } from '../constants/trade.constants';
 
@@ -305,7 +306,7 @@ export class SetupParseService {
 		const take = toFormNumber(parsed.takeProfit);
 		if (take !== undefined) patch.takeProfit = take;
 		const qty = toFormNumber(parsed.quantity);
-		if (qty !== undefined) patch.quantity = qty;
+		patch.quantity = qty ?? String(DEFAULT_TRADE_QUANTITY);
 		const fees = toFormNumber(parsed.fees);
 		if (fees !== undefined) patch.fees = fees;
 
